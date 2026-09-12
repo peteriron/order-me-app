@@ -1,0 +1,3 @@
+# Placed Rounds snapshot Items instead of referencing the catalog live
+
+A placed Round could either store live references to catalog Items (so a later rename/delete shows through in history) or store a frozen snapshot of each Item's name/category as it was at the time. We chose the snapshot: history exists so the Operator can trust "what did we actually order," and a catalog edit made afterward — renaming "Coke" to "Cola," or deleting a discontinued Item — must not silently rewrite or break a Round that already happened. A future reader defaulting to normalizing Round data as Item-id references should know this was deliberate, not an oversight.
