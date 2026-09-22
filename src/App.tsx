@@ -12,7 +12,7 @@ const ROUND_PAGE = 1
 export function App() {
   const [locale] = useState(() => detectLocale(navigator.language))
   const [page, setPage] = useState(ROUND_PAGE)
-  const { state, addItem } = useAppState(locale)
+  const { state, addItem, removeItem, clearRound } = useAppState(locale)
   const sections = useMemo(() => gridSections(state.catalog, locale), [state.catalog, locale])
   const t = messages[locale]
 
@@ -25,10 +25,18 @@ export function App() {
   const pages = useMemo(
     () => [
       <PlaceholderPage key="history" title={t.history} text={t.historySoon} />,
-      <RoundPage key="round" sections={sections} round={state.round} t={t} onAdd={addItem} />,
+      <RoundPage
+        key="round"
+        sections={sections}
+        round={state.round}
+        t={t}
+        onAdd={addItem}
+        onRemove={removeItem}
+        onClear={clearRound}
+      />,
       <PlaceholderPage key="items" title={t.items} text={t.itemsSoon} />,
     ],
-    [t, sections, state.round, addItem],
+    [t, sections, state.round, addItem, removeItem, clearRound],
   )
 
   return (

@@ -237,6 +237,38 @@ button {
   overflow-wrap: anywhere;
 }
 
+/* 44×44 hit area in the corner; the visible part is a 28px circle. */
+.tile-remove {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  display: grid;
+  place-items: center;
+  touch-action: manipulation;
+}
+
+.tile-remove span {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: grid;
+  place-items: center;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.tile-remove:active span {
+  background: var(--border);
+}
+
 .badge {
   position: absolute;
   top: 6px;
@@ -266,6 +298,71 @@ button {
   100% {
     transform: scale(1);
   }
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  min-height: 44px;
+  padding: 0 1rem;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  touch-action: manipulation;
+}
+
+.btn:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.btn-primary {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+}
+
+.btn-quiet {
+  color: var(--text-muted);
+}
+
+.btn-icon {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- round bar: sticky at the bottom of the Round page's scroll area ---------- */
+.round-bar {
+  position: sticky;
+  bottom: 0;
+  min-height: 64px;
+  padding: 0.5rem 0.75rem 0.5rem 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+}
+
+.round-bar-status {
+  flex: 1;
+  margin: 0;
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.round-bar:not(:has(button)) .round-bar-status {
+  font-weight: 400;
+  color: var(--text-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {
