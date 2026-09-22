@@ -31,6 +31,77 @@ body,
   height: 100%;
 }
 
+/* ---------- shell: swipe pages + footer hint (ADR-0003) ---------- */
+.shell {
+  height: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.pager {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.pager-track {
+  display: flex;
+  height: 100%;
+  transition: transform 250ms var(--ease-out);
+}
+
+.pager-track.dragging {
+  transition: none;
+}
+
+.pager-page {
+  flex: 0 0 100%;
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  /* The browser keeps vertical scrolling and pinch-zoom; horizontal movement is ours. Set here, not on .pager:
+     touch-action only combines with ancestors up to the nearest scroll container, which is this element. */
+  touch-action: pan-y pinch-zoom;
+}
+
+.page-hint {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0 0.5rem env(safe-area-inset-bottom, 0px);
+  background: var(--bg);
+}
+
+.page-hint button {
+  min-height: 44px;
+  padding: 0 0.625rem;
+  border: 0;
+  background: none;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.page-hint button[aria-current='page'] {
+  color: var(--text);
+}
+
+.page-hint-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.page-hint button[aria-current='page'] .page-hint-dot {
+  background: var(--accent);
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -54,9 +125,7 @@ button {
 
 /* ---------- page ---------- */
 .page {
-  max-width: 440px;
-  margin: 0 auto;
-  padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 1rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 1rem 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -67,6 +136,13 @@ button {
   font-size: 1.375rem;
   font-weight: 700;
   text-wrap: balance;
+}
+
+.page-empty {
+  margin: 0;
+  max-width: 34ch;
+  color: var(--text-muted);
+  line-height: 1.5;
 }
 
 .section {
@@ -200,5 +276,8 @@ button {
   }
   .badge {
     animation: none;
+  }
+  .pager-track {
+    transition: none;
   }
 }
