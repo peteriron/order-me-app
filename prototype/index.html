@@ -1,0 +1,939 @@
+<title>OrderMe Prototype</title>
+<meta name="theme-color" content="#0E0E10">
+<!--
+  Throwaway clickable prototype for order-me-app v1.
+  Implements the decisions in docs/prd.md and docs/look-and-feel.md with mock data.
+  Not production code: no tests, minimal error handling. Rebuild properly in the real app.
+-->
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0E0E10;
+    --surface: #1A1A1F;
+    --surface-2: #26262D;
+    --border: #2E2E36;
+    --text: #F5F5F4;
+    --muted: #A1A1AA;
+    --accent: #F5A524;
+    --accent-fill: #F5A524;
+    --on-accent: #1A1204;
+    --accent-soft: rgb(245 165 36 / .14);
+    --accent-line: rgb(245 165 36 / .45);
+    --snack: #2DD4BF;
+    --danger: #F87171;
+    --scrim: rgb(0 0 0 / .6);
+    --tile-shadow: none;
+    --ease: cubic-bezier(.2, .8, .2, 1);
+    --font: -apple-system, "SF Pro Text", Roboto, "Segoe UI", system-ui, sans-serif;
+  }
+  :root[data-mode="light"] {
+    color-scheme: light;
+    --bg: #FAFAF9;
+    --surface: #FFFFFF;
+    --surface-2: #F0EFEC;
+    --border: #E2E0DB;
+    --text: #1C1917;
+    --muted: #57534E;
+    --accent: #B45309;
+    --accent-fill: #F59E0B;
+    --on-accent: #1A1204;
+    --accent-soft: rgb(245 158 11 / .14);
+    --accent-line: rgb(180 83 9 / .45);
+    --snack: #0F766E;
+    --danger: #B91C1C;
+    --scrim: rgb(28 25 23 / .4);
+    --tile-shadow: 0 1px 2px rgb(0 0 0 / .06);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 1rem;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .app {
+    position: relative;
+    height: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  @media (min-width: 480px) {
+    .app { border-inline: 1px solid var(--border); }
+  }
+
+  /* ---------- pages ---------- */
+  .viewport { position: relative; flex: 1; overflow: hidden; touch-action: pan-y; }
+  .track {
+    display: flex;
+    width: 300%;
+    height: 100%;
+    transition: transform 250ms var(--ease);
+    will-change: transform;
+  }
+  .track.dragging { transition: none; }
+  .page {
+    flex: 0 0 33.3333%;
+    min-width: 0;
+    height: 100%;
+    overflow-y: auto;
+    padding: 20px 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .page-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .page-title { font-size: 1.375rem; font-weight: 700; margin: 0; text-wrap: balance; }
+  .page-sub { color: var(--muted); font-size: .8125rem; }
+
+  .section { display: flex; flex-direction: column; gap: 10px; }
+  .label {
+    font-size: .8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .label .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .label .dot.snack { background: var(--snack); }
+
+  /* ---------- tiles ---------- */
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .tile {
+    position: relative;
+    min-height: 100px;
+    border-radius: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--tile-shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 6px 10px;
+    text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 160ms var(--ease), background 160ms;
+  }
+  .tile:active { transform: scale(.94); transition-duration: 80ms; background: var(--surface-2); }
+  .tile.has { background: var(--accent-soft); border-color: var(--accent-line); }
+  .tile .emoji { font-size: 2rem; line-height: 1; }
+  .tile .name {
+    font-size: .9375rem;
+    font-weight: 600;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+  .badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 7px;
+    border-radius: 14px;
+    background: var(--accent-fill);
+    color: var(--on-accent);
+    font-weight: 800;
+    font-size: 1.0625rem;
+    font-variant-numeric: tabular-nums;
+    display: grid;
+    place-items: center;
+  }
+  .tile.bump .badge { animation: pop 200ms var(--ease); }
+  @keyframes pop { 0% { transform: scale(.8); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+  .minus {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: none;
+    display: grid;
+    place-items: center;
+    padding: 0;
+  }
+  .minus span {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .tile.new { border: 1.5px dashed var(--border); background: transparent; box-shadow: none; color: var(--muted); }
+  .tile.new .emoji { font-size: 1.75rem; font-weight: 300; }
+
+  /* ---------- bottom bar + hint ---------- */
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 64px;
+    padding: 8px 12px 8px 8px;
+    background: var(--surface-2);
+    border-top: 1px solid var(--border);
+  }
+  .bar .count { flex: 1; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .bar .empty { flex: 1; text-align: center; color: var(--muted); }
+  .btn {
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    background: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn.primary { background: var(--accent-fill); color: var(--on-accent); }
+  .btn.outline { border-color: var(--accent-line); color: var(--accent); }
+  .btn.quiet { color: var(--muted); }
+  .btn.danger { color: var(--danger); }
+  .btn.block { width: 100%; }
+  .btn.big { min-height: 56px; font-size: 1.0625rem; }
+
+  .hint {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    padding: 2px 8px calc(4px + env(safe-area-inset-bottom, 0px));
+    background: var(--bg);
+  }
+  .hint button {
+    min-height: 44px;
+    border: 0;
+    background: none;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .6875rem;
+    color: var(--muted);
+  }
+  .hint i { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+  .hint button[aria-current="true"] { color: var(--text); }
+  .hint button[aria-current="true"] i { background: var(--accent); }
+
+  /* ---------- counter view ---------- */
+  .counter {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    padding: 8px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+    gap: 12px;
+    animation: slideup 280ms var(--ease);
+  }
+  @keyframes slideup { from { transform: translateY(100%); } to { transform: none; } }
+  .counter-top { display: flex; align-items: center; gap: 4px; }
+  .counter-top .spacer { flex: 1; }
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: none;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+  }
+  .icon-btn svg, .btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .lines { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+  .line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .line .n {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    min-width: 2.2ch;
+    text-align: right;
+  }
+  .line .x { color: var(--muted); font-size: 1.25rem; }
+  .line .what { flex: 1; font-size: 2rem; font-weight: 700; line-height: 1.15; overflow-wrap: anywhere; }
+  .line .ctl { display: flex; gap: 6px; }
+  .line .ctl button {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    font-size: 1.25rem;
+    color: var(--muted);
+  }
+  .divider { margin: 18px 0 4px; }
+  .total { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0 4px; }
+  .total span:first-child { font-size: 1.25rem; font-weight: 600; color: var(--muted); }
+  .total span:last-child { font-size: 2.5rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+  /* ---------- history ---------- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 14px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: var(--tile-shadow);
+  }
+  .card-head { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
+  .card-head b { font-size: 1.0625rem; }
+  .card-head span { color: var(--muted); }
+  .card-summary { border: 0; background: none; padding: 0; text-align: left; line-height: 1.45; }
+  .card-lines { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+  .card-lines li { display: flex; gap: 8px; }
+  .card-lines li b { min-width: 2ch; text-align: right; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .card-actions { display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
+  .empty-state { color: var(--muted); text-align: center; padding: 48px 16px; line-height: 1.5; }
+
+  /* ---------- items + settings ---------- */
+  .rows { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 0 8px 0 14px;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    background: none;
+    text-align: left;
+    width: 100%;
+  }
+  .row:last-child { border-bottom: 0; }
+  .row .emoji { font-size: 1.5rem; width: 1.75rem; text-align: center; }
+  .row .nm { flex: 1; font-weight: 500; }
+  .row svg { width: 18px; height: 18px; stroke: var(--muted); fill: none; stroke-width: 2; margin-right: 8px; }
+  .setting { display: flex; flex-direction: column; gap: 8px; }
+  .setting > span { font-weight: 600; }
+  .seg { display: flex; background: var(--surface-2); border-radius: 12px; padding: 3px; gap: 3px; }
+  .seg button {
+    flex: 1;
+    min-height: 40px;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    font-size: .875rem;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .seg button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgb(0 0 0 / .25); }
+  .proto-note { color: var(--muted); font-size: .8125rem; line-height: 1.5; border-top: 1px dashed var(--border); padding-top: 16px; }
+  .proto-note button { color: var(--accent); background: none; border: 0; padding: 0; text-decoration: underline; font-size: inherit; }
+
+  /* ---------- sheet, dialog, toast ---------- */
+  .scrim { position: absolute; inset: 0; z-index: 30; background: var(--scrim); display: flex; align-items: flex-end; }
+  .scrim.center { align-items: center; justify-content: center; padding: 16px; }
+  .sheet {
+    width: 100%;
+    max-height: 92%;
+    overflow-y: auto;
+    background: var(--surface);
+    border-radius: 24px 24px 0 0;
+    padding: 10px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: slideup 240ms var(--ease);
+  }
+  .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--border); align-self: center; }
+  .sheet h2 { margin: 0; font-size: 1.25rem; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label, .field > span { font-size: .8125rem; font-weight: 600; color: var(--muted); }
+  .input {
+    min-height: 48px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    padding: 0 14px;
+    font-size: 1rem;
+  }
+  .emojis { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+  .emojis button {
+    aspect-ratio: 1;
+    max-width: 100%;
+    min-height: 40px;
+    border-radius: 10px;
+    border: 1.5px solid transparent;
+    background: var(--surface-2);
+    font-size: 1.375rem;
+    padding: 0;
+  }
+  .emojis button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+  .sheet-actions { display: flex; gap: 8px; }
+  .sheet-actions .primary { flex: 1; }
+  .error { color: var(--danger); font-size: .875rem; }
+
+  .dialog {
+    width: 100%;
+    max-width: 340px;
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .dialog p { margin: 0; line-height: 1.45; font-size: 1.0625rem; }
+  .dialog .acts { display: flex; justify-content: flex-end; gap: 8px; }
+  .dialog .danger-fill { background: var(--danger); color: #fff; }
+
+  .toast {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: calc(118px + env(safe-area-inset-bottom, 0px));
+    z-index: 40;
+    min-height: 48px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 6px 0 16px;
+    box-shadow: 0 8px 24px rgb(0 0 0 / .3);
+    animation: rise 180ms var(--ease);
+  }
+  .toast span { flex: 1; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .track { transition: transform 120ms linear; }
+    .tile, .tile:active { transform: none; transition: background 120ms; }
+    .tile.bump .badge { animation: none; }
+    .counter, .sheet { animation: fade 120ms linear; }
+    .toast { animation: fade 120ms linear; }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  }
+</style>
+
+<div class="app" id="app">
+  <div class="viewport" id="viewport">
+    <div class="track" id="track">
+      <section class="page" id="page-history" aria-label="History"></section>
+      <section class="page" id="page-round" aria-label="Round"></section>
+      <section class="page" id="page-items" aria-label="Items"></section>
+    </div>
+  </div>
+  <div class="bar" id="bar"></div>
+  <nav class="hint" id="hint" aria-label="Pages"></nav>
+  <div id="overlay"></div>
+  <div id="toast-slot"></div>
+</div>
+
+<script>
+(() => {
+  // ---------------- i18n ----------------
+  const T = {
+    en: {
+      appName: 'This round is for me', history: 'History', round: 'Round', items: 'Items',
+      drinks: 'Drinks', snacks: 'Snacks', emptyHint: 'Tap a drink to start', show: 'Show', clear: 'Clear',
+      itemsN: n => `${n} ${n === 1 ? 'item' : 'items'}`, markOrdered: 'Mark as ordered', placed: 'Round placed',
+      undo: 'Undo', share: 'Share', total: 'Total', orderAgain: 'Order again', new: 'New',
+      deleteItemQ: n => `Delete “${n}”? History keeps it.`, clearHistQ: 'Delete all past Rounds?',
+      deleteRoundQ: 'Delete this Round from history?',
+      skipped: n => `${n} ${n === 1 ? 'item no longer exists and was' : 'items no longer exist and were'} skipped`,
+      copied: 'Copied to clipboard', copyFailed: 'Couldn’t copy — sharing isn’t available here',
+      today: 'Today', yesterday: 'Yesterday', addItem: 'Add Item', editItem: 'Edit Item', newItem: 'New Item',
+      name: 'Name', namePh: 'e.g. Kriek', category: 'Category', drink: 'Drink', snack: 'Snack', emoji: 'Emoji',
+      typeEmoji: 'or type your own', save: 'Save', add: 'Add', addToRound: 'Add to Round', cancel: 'Cancel',
+      del: 'Delete', settings: 'Settings', language: 'Language', theme: 'Theme', system: 'System',
+      dark: 'Dark', light: 'Light', clearHistory: 'Clear history', noHistory: 'No Rounds yet.\nMark a Round as ordered and it shows up here.',
+      back: 'Back to Round', inRound: (n, c) => c ? `${n}, ${c} in round` : n, removeOne: n => `Remove one ${n}`,
+      addOne: n => `Add one ${n}`, nameRequired: 'Give the Item a name',
+      protoNote: 'Prototype — mock data, stored only in this browser. Swipe (or use ← →) between pages.',
+      resetDemo: 'Reset demo data', rounds: n => `${n} ${n === 1 ? 'Round' : 'Rounds'}`, catalogN: n => `${n} in your catalog`,
+    },
+    nl: {
+      appName: 'Deze ronde is voor mij', history: 'Geschiedenis', round: 'Ronde', items: 'Items',
+      drinks: 'Dranken', snacks: 'Snacks', emptyHint: 'Tik op een drankje om te starten', show: 'Toon', clear: 'Wissen',
+      itemsN: n => `${n} ${n === 1 ? 'item' : 'items'}`, markOrdered: 'Besteld', placed: 'Ronde geplaatst',
+      undo: 'Ongedaan maken', share: 'Delen', total: 'Totaal', orderAgain: 'Opnieuw bestellen', new: 'Nieuw',
+      deleteItemQ: n => `“${n}” verwijderen? De geschiedenis blijft behouden.`, clearHistQ: 'Alle vorige rondes verwijderen?',
+      deleteRoundQ: 'Deze ronde uit de geschiedenis verwijderen?',
+      skipped: n => `${n} ${n === 1 ? 'item bestaat' : 'items bestaan'} niet meer en ${n === 1 ? 'is' : 'zijn'} overgeslagen`,
+      copied: 'Gekopieerd', copyFailed: 'Kopiëren lukt niet — delen is hier niet beschikbaar',
+      today: 'Vandaag', yesterday: 'Gisteren', addItem: 'Item toevoegen', editItem: 'Item bewerken', newItem: 'Nieuw item',
+      name: 'Naam', namePh: 'bv. Kriek', category: 'Categorie', drink: 'Drank', snack: 'Snack', emoji: 'Emoji',
+      typeEmoji: 'of typ er zelf een', save: 'Bewaren', add: 'Toevoegen', addToRound: 'Aan ronde toevoegen', cancel: 'Annuleren',
+      del: 'Verwijderen', settings: 'Instellingen', language: 'Taal', theme: 'Thema', system: 'Systeem',
+      dark: 'Donker', light: 'Licht', clearHistory: 'Geschiedenis wissen', noHistory: 'Nog geen rondes.\nMarkeer een ronde als besteld en ze verschijnt hier.',
+      back: 'Terug naar ronde', inRound: (n, c) => c ? `${n}, ${c} in ronde` : n, removeOne: n => `Eén ${n} minder`,
+      addOne: n => `Eén ${n} meer`, nameRequired: 'Geef het item een naam',
+      protoNote: 'Prototype — voorbeelddata, enkel bewaard in deze browser. Swipe (of gebruik ← →) tussen pagina’s.',
+      resetDemo: 'Demodata herstellen', rounds: n => `${n} ${n === 1 ? 'ronde' : 'rondes'}`, catalogN: n => `${n} in je catalogus`,
+    },
+  };
+
+  const SEED = [
+    ['🍺', 'drink', 'Beer', 'Bier'], ['🍺', 'drink', 'Duvel', 'Duvel'], ['🍺', 'drink', '0.0 Beer', '0.0 Bier'],
+    ['🥤', 'drink', 'Cola', 'Cola'], ['💧', 'drink', 'Still water', 'Plat water'], ['🫧', 'drink', 'Sparkling water', 'Bruiswater'],
+    ['☕', 'drink', 'Coffee', 'Koffie'], ['☕', 'drink', 'Decaf', 'Deca'], ['🍵', 'drink', 'Tea', 'Thee'],
+    ['🍊', 'drink', 'Fanta', 'Fanta'], ['🧋', 'drink', 'Ice Tea', 'Ice Tea'], ['🧃', 'drink', 'Juice', 'Fruitsap'],
+    ['🥂', 'drink', 'Cava', 'Cava'], ['🥂', 'drink', 'White wine', 'Witte wijn'], ['🍷', 'drink', 'Rosé', 'Rosé'],
+    ['🍷', 'drink', 'Red wine', 'Rode wijn'], ['🥃', 'drink', 'Liquor', 'Sterke drank'],
+    ['🥔', 'snack', 'Chips', 'Chips'], ['🥜', 'snack', 'Nuts', 'Nootjes'], ['🧀', 'snack', 'Cheese', 'Kaasblokjes'],
+    ['🧆', 'snack', 'Bitterballen', 'Bitterballen'],
+  ];
+  const EMOJIS = ['🍺','🍻','🍷','🥂','🍾','🥃','🍸','🍹','🧉','🍶','☕','🍵','🧋','🥤','🧃','💧','🫧','🥛','🍋','🍊','🍎','🍓','🥥','🧊',
+                  '🔥','🥔','🥜','🧀','🧆','🍟','🌭','🍕','🥨','🫒','🥓','🍗','🌮','🍪','🍫','🍦'];
+  const STORE = 'orderme-proto-v1';
+  const DAY = 864e5;
+
+  // ---------------- state ----------------
+  let S;
+  const uid = () => Math.random().toString(36).slice(2, 10);
+  const detectLang = () => (navigator.language || 'en').toLowerCase().startsWith('nl') ? 'nl' : 'en';
+  const lang = () => S.lang === 'system' ? detectLang() : S.lang;
+  const t = () => T[lang()];
+
+  function seedState() {
+    const L = detectLang();
+    const catalog = SEED.map(([emoji, category, en, nl]) => ({ id: uid(), emoji, category, name: L === 'nl' ? nl : en }));
+    const by = n => catalog.find(i => i.name === n || SEED.some(s => (s[2] === n || s[3] === n) && (s[2] === i.name || s[3] === i.name)));
+    const snap = (name, count) => { const i = by(name); return { itemId: i.id, name: i.name, category: i.category, emoji: i.emoji, count }; };
+    const now = Date.now();
+    const at = (daysAgo, h, m) => { const d = new Date(now - daysAgo * DAY); d.setHours(h, m, 0, 0); return d.toISOString(); };
+    const history = [
+      { id: uid(), placedAt: at(1, 22, 5), lines: [snap('Duvel', 3), snap('Cola', 1), snap('0.0 Beer', 1), snap('Chips', 2)] },
+      { id: uid(), placedAt: at(1, 21, 14), lines: [snap('Duvel', 2), snap('Beer', 2), snap('Sparkling water', 1)] },
+      { id: uid(), placedAt: at(6, 20, 40), lines: [snap('Duvel', 3), snap('Red wine', 2), snap('Nuts', 1)] },
+      { id: uid(), placedAt: at(13, 21, 30), lines: [snap('Beer', 4), snap('Cola', 2), snap('Bitterballen', 1)] },
+    ];
+    return { v: 1, lang: 'system', theme: 'dark', catalog, round: {}, history };
+  }
+  function load() {
+    try { const raw = localStorage.getItem(STORE); if (raw) return JSON.parse(raw); } catch (e) {}
+    return seedState();
+  }
+  function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
+
+  // ---------------- domain rules ----------------
+  const item = id => S.catalog.find(i => i.id === id);
+  const totalOf = counts => Object.values(counts).reduce((a, b) => a + b, 0);
+
+  function popularity() {
+    const cutoff = Date.now() - 90 * DAY, score = {};
+    for (const r of S.history) {
+      if (Date.parse(r.placedAt) < cutoff) continue;
+      for (const l of r.lines) score[l.itemId] = (score[l.itemId] || 0) + 1;
+    }
+    return score;
+  }
+  // Frozen while composing: recomputed only on load, place and undo-place.
+  let order = { drink: [], snack: [] };
+  function computeOrder() {
+    const pop = popularity(), coll = new Intl.Collator(lang());
+    for (const cat of ['drink', 'snack']) {
+      order[cat] = S.catalog.filter(i => i.category === cat)
+        .sort((a, b) => (pop[b.id] || 0) - (pop[a.id] || 0) || coll.compare(a.name, b.name))
+        .map(i => i.id);
+    }
+  }
+  function syncOrder() {
+    for (const cat of ['drink', 'snack']) order[cat] = order[cat].filter(id => item(id)?.category === cat);
+    for (const i of S.catalog) if (!order[i.category].includes(i.id)) order[i.category].push(i.id);
+  }
+
+  function add(id) { S.round[id] = (S.round[id] || 0) + 1; save(); }
+  function remove(id) { if (!S.round[id]) return; if (--S.round[id] <= 0) delete S.round[id]; save(); }
+  function clearRound() { S.round = {}; save(); }
+  function roundLines() {
+    return ['drink', 'snack'].flatMap(cat => order[cat].filter(id => S.round[id]).map(id => ({ ...item(id), count: S.round[id] })));
+  }
+  function place() {
+    const placed = { id: uid(), placedAt: new Date().toISOString(),
+      lines: roundLines().map(l => ({ itemId: l.id, name: l.name, category: l.category, emoji: l.emoji, count: l.count })) };
+    const prevRound = S.round;
+    S.history.unshift(placed); S.round = {}; save(); computeOrder();
+    return () => { S.history = S.history.filter(r => r.id !== placed.id); S.round = prevRound; save(); computeOrder(); };
+  }
+  function orderAgain(roundId) {
+    const r = S.history.find(x => x.id === roundId);
+    const next = {}; let skipped = 0;
+    for (const l of r.lines) { if (item(l.itemId)) next[l.itemId] = (next[l.itemId] || 0) + l.count; else skipped++; }
+    S.round = next; save();
+    return skipped;
+  }
+  function shareText() {
+    const L = roundLines();
+    return L.map(l => `${l.count}× ${l.name}`).join('\n') + `\n${t().total}: ${totalOf(S.round)}`;
+  }
+
+  // ---------------- rendering ----------------
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const ICON = {
+    back: '<svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>',
+    share: '<svg viewBox="0 0 24 24"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>',
+    trash: '<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12M9 7V4h6v3"/></svg>',
+    pencil: '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+    check: '<svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>',
+    arrow: '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  };
+  let page = 1, bumpId = null, expanded = new Set(), overlay = null;
+
+  function applyTheme() {
+    const mode = S.theme === 'system' ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : S.theme;
+    document.documentElement.dataset.mode = mode;
+    document.documentElement.lang = lang();
+  }
+
+  function tileHTML(id) {
+    const i = item(id), c = S.round[id] || 0;
+    return `<div class="tile${c ? ' has' : ''}${bumpId === id ? ' bump' : ''}" role="button" tabindex="0" data-add="${id}" aria-label="${esc(t().inRound(i.name, c))}">
+      ${c ? `<button class="minus" data-minus="${id}" aria-label="${esc(t().removeOne(i.name))}"><span aria-hidden="true">−</span></button><span class="badge" aria-hidden="true">${c}</span>` : ''}
+      <span class="emoji" aria-hidden="true">${i.emoji}</span><span class="name">${esc(i.name)}</span></div>`;
+  }
+  function renderRound() {
+    const tx = t();
+    $('page-round').innerHTML = `
+      <div class="page-head"><h1 class="page-title">${esc(tx.appName)}</h1></div>
+      <div class="section"><div class="label"><i class="dot"></i>${tx.drinks}</div>
+        <div class="grid">${order.drink.map(tileHTML).join('')}</div></div>
+      <div class="section"><div class="label"><i class="dot snack"></i>${tx.snacks}</div>
+        <div class="grid">${order.snack.map(tileHTML).join('')}
+          <button class="tile new" data-act="new-from-round"><span class="emoji" aria-hidden="true">+</span><span class="name">${tx.new}</span></button>
+        </div></div>`;
+    bumpId = null;
+  }
+  function renderBar() {
+    const tx = t(), n = totalOf(S.round), bar = $('bar');
+    bar.hidden = page !== 1 || !!overlay;
+    bar.innerHTML = n
+      ? `<button class="btn quiet" data-act="clear">${tx.clear}</button>
+         <span class="count" aria-live="polite">${tx.itemsN(n)}</span>
+         <button class="btn primary" data-act="show">${tx.show} ${ICON.arrow}</button>`
+      : `<span class="empty">${tx.emptyHint}</span>`;
+  }
+  function renderHint() {
+    const tx = t(), names = [tx.history, tx.round, tx.items];
+    $('hint').hidden = !!overlay;
+    $('hint').innerHTML = names.map((n, i) => `<button data-page="${i}" aria-current="${i === page}"><i></i>${n}</button>`).join('');
+  }
+  function dayLabel(iso) {
+    const d = new Date(iso), tx = t(), today = new Date(); today.setHours(0, 0, 0, 0);
+    const diff = Math.round((today - new Date(d).setHours(0, 0, 0, 0)) / DAY);
+    if (diff === 0) return tx.today;
+    if (diff === 1) return tx.yesterday;
+    return new Intl.DateTimeFormat(lang(), { weekday: 'long', day: 'numeric', month: 'long' }).format(d);
+  }
+  function renderHistory() {
+    const tx = t(), el = $('page-history');
+    const head = `<div class="page-head"><h1 class="page-title">${tx.history}</h1><span class="page-sub">${tx.rounds(S.history.length)}</span></div>`;
+    if (!S.history.length) { el.innerHTML = head + `<p class="empty-state">${esc(tx.noHistory).replace('\n', '<br>')}</p>`; return; }
+    const groups = [];
+    for (const r of S.history) {
+      const k = dayLabel(r.placedAt);
+      if (!groups.length || groups.at(-1).k !== k) groups.push({ k, rs: [] });
+      groups.at(-1).rs.push(r);
+    }
+    const time = iso => new Intl.DateTimeFormat(lang(), { hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+    el.innerHTML = head + groups.map(g => `<div class="section"><div class="label">${esc(g.k)}</div>
+      ${g.rs.map(r => {
+        const n = r.lines.reduce((a, l) => a + l.count, 0), open = expanded.has(r.id);
+        return `<article class="card">
+          <div class="card-head"><b>${time(r.placedAt)}</b><span>${tx.itemsN(n)}</span></div>
+          ${open
+            ? `<ul class="card-lines" data-toggle="${r.id}">${r.lines.map(l => `<li><b>${l.count}</b><span>${l.emoji} ${esc(l.name)}</span></li>`).join('')}</ul>`
+            : `<button class="card-summary" data-toggle="${r.id}" aria-expanded="false">${r.lines.map(l => `${l.count} ${esc(l.name)}`).join(' · ')}</button>`}
+          <div class="card-actions">
+            <button class="icon-btn" data-del-round="${r.id}" aria-label="${tx.del}">${ICON.trash}</button>
+            <button class="btn outline" data-again="${r.id}">${tx.orderAgain}</button>
+          </div></article>`;
+      }).join('')}</div>`).join('');
+  }
+  function renderItems() {
+    const tx = t(), coll = new Intl.Collator(lang());
+    const seg = (key, opts) => `<div class="seg" role="group">${opts.map(([v, l]) =>
+      `<button data-set="${key}" data-val="${v}" aria-pressed="${S[key] === v}">${l}</button>`).join('')}</div>`;
+    const rows = cat => S.catalog.filter(i => i.category === cat).sort((a, b) => coll.compare(a.name, b.name))
+      .map(i => `<button class="row" data-edit="${i.id}"><span class="emoji" aria-hidden="true">${i.emoji}</span><span class="nm">${esc(i.name)}</span>${ICON.pencil}</button>`).join('');
+    $('page-items').innerHTML = `
+      <div class="page-head"><h1 class="page-title">${tx.items}</h1><span class="page-sub">${tx.catalogN(S.catalog.length)}</span></div>
+      <button class="btn primary block" data-act="add-item">+ ${tx.addItem}</button>
+      <div class="section"><div class="label"><i class="dot"></i>${tx.drinks}</div><div class="rows">${rows('drink')}</div></div>
+      <div class="section"><div class="label"><i class="dot snack"></i>${tx.snacks}</div><div class="rows">${rows('snack')}</div></div>
+      <div class="section"><div class="label">${tx.settings}</div>
+        <div class="setting"><span>${tx.language}</span>${seg('lang', [['system', tx.system], ['nl', 'Nederlands'], ['en', 'English']])}</div>
+        <div class="setting"><span>${tx.theme}</span>${seg('theme', [['dark', tx.dark], ['light', tx.light], ['system', tx.system]])}</div>
+        <button class="btn danger" data-act="clear-history" style="align-self:flex-start">${tx.clearHistory}</button>
+      </div>
+      <p class="proto-note">${tx.protoNote} <button data-act="reset-demo">${tx.resetDemo}</button></p>`;
+  }
+  function renderCounter() {
+    const tx = t(), L = roundLines();
+    const line = l => `<div class="line"><span class="n">${l.count}</span><span class="x">×</span>
+      <span class="what">${l.emoji} ${esc(l.name)}</span>
+      <span class="ctl"><button data-minus="${l.id}" aria-label="${esc(tx.removeOne(l.name))}">−</button><button data-plus="${l.id}" aria-label="${esc(tx.addOne(l.name))}">+</button></span></div>`;
+    const drinks = L.filter(l => l.category === 'drink'), snacks = L.filter(l => l.category === 'snack');
+    return `<div class="counter" role="dialog" aria-label="${tx.show}">
+      <div class="counter-top">
+        <button class="icon-btn" data-act="close-counter" aria-label="${tx.back}">${ICON.back}</button>
+        <span class="spacer"></span>
+        <button class="btn quiet" data-act="share">${ICON.share} ${tx.share}</button>
+        <button class="btn quiet" data-act="clear">${tx.clear}</button>
+      </div>
+      <div class="lines">${drinks.map(line).join('')}
+        ${snacks.length ? `<div class="label divider"><i class="dot snack"></i>${tx.snacks}</div>${snacks.map(line).join('')}` : ''}
+        <div class="total"><span>${tx.total}</span><span>${totalOf(S.round)}</span></div>
+      </div>
+      <button class="btn primary block big" data-act="place">${ICON.check} ${tx.markOrdered}</button>
+    </div>`;
+  }
+  function renderSheet(o) {
+    const tx = t(), d = o.draft;
+    const title = o.mode === 'edit' ? tx.editItem : o.mode === 'round' ? tx.newItem : tx.addItem;
+    const cta = o.mode === 'edit' ? tx.save : o.mode === 'round' ? tx.addToRound : tx.add;
+    return `<div class="scrim" data-act="dismiss"><form class="sheet" id="sheet-form" role="dialog" aria-label="${title}" novalidate>
+      <div class="grab"></div><h2>${title}</h2>
+      <div class="field"><label for="f-name">${tx.name}</label>
+        <input class="input" id="f-name" value="${esc(d.name)}" placeholder="${tx.namePh}" autocomplete="off" maxlength="30">
+        ${o.error ? `<span class="error">${o.error}</span>` : ''}</div>
+      <div class="field"><span>${tx.category}</span><div class="seg" role="group">
+        ${['drink', 'snack'].map(c => `<button type="button" data-cat="${c}" aria-pressed="${d.category === c}">${tx[c]}</button>`).join('')}</div></div>
+      <div class="field"><span>${tx.emoji}</span>
+        <div class="emojis">${EMOJIS.map(e => `<button type="button" data-emoji="${e}" aria-pressed="${d.emoji === e}">${e}</button>`).join('')}</div>
+        <input class="input" id="f-emoji" value="${EMOJIS.includes(d.emoji) ? '' : esc(d.emoji)}" placeholder="${tx.typeEmoji}" maxlength="8" style="max-width:12rem">
+      </div>
+      <div class="sheet-actions">
+        ${o.mode === 'edit' ? `<button type="button" class="btn danger" data-act="delete-item">${tx.del}</button>` : ''}
+        <button type="button" class="btn quiet" data-act="dismiss-btn">${tx.cancel}</button>
+        <button type="submit" class="btn primary">${cta}</button>
+      </div></form></div>`;
+  }
+  function renderConfirm(o) {
+    const tx = t();
+    return `<div class="scrim center"><div class="dialog" role="alertdialog" aria-label="${esc(o.text)}">
+      <p>${esc(o.text)}</p>
+      <div class="acts"><button class="btn quiet" data-act="confirm-no">${tx.cancel}</button>
+      <button class="btn danger-fill" data-act="confirm-yes">${o.yes}</button></div></div></div>`;
+  }
+  function renderOverlay() {
+    const el = $('overlay');
+    if (!overlay) el.innerHTML = '';
+    else if (overlay.type === 'counter') el.innerHTML = renderCounter();
+    else if (overlay.type === 'sheet') el.innerHTML = renderSheet(overlay);
+    else if (overlay.type === 'confirm') el.innerHTML = (overlay.under ? renderCounter() : '') + renderConfirm(overlay);
+  }
+  function render() {
+    applyTheme(); renderRound(); renderHistory(); renderItems(); renderBar(); renderHint(); renderOverlay(); setPage(page, true);
+  }
+
+  // ---------------- toast ----------------
+  let toastTimer;
+  function toast(text, undo) {
+    clearTimeout(toastTimer);
+    const slot = $('toast-slot');
+    slot.innerHTML = `<div class="toast" role="status"><span>${esc(text)}</span>${undo ? `<button class="btn outline" data-act="undo">${t().undo}</button>` : ''}</div>`;
+    slot.undo = undo;
+    toastTimer = setTimeout(() => { slot.innerHTML = ''; slot.undo = null; }, 5000);
+  }
+
+  // ---------------- wake lock ----------------
+  let wake = null;
+  async function lockScreen() { try { wake = await navigator.wakeLock?.request('screen'); } catch (e) { wake = null; } }
+  function unlockScreen() { try { wake?.release(); } catch (e) {} wake = null; }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && overlay?.type === 'counter') lockScreen(); });
+
+  // ---------------- navigation ----------------
+  function setPage(p, instant) {
+    page = Math.max(0, Math.min(2, p));
+    const track = $('track');
+    if (instant) track.classList.add('dragging');
+    track.style.transform = `translateX(${-page * 33.3333}%)`;
+    if (instant) { track.offsetWidth; track.classList.remove('dragging'); }
+    ['page-history', 'page-round', 'page-items'].forEach((id, i) => $(id).inert = i !== page);
+    renderBar(); renderHint();
+  }
+  function openOverlay(o) { overlay = o; renderOverlay(); renderBar(); renderHint(); }
+  function closeOverlay() { if (overlay?.type === 'counter') unlockScreen(); overlay = null; renderOverlay(); renderBar(); renderHint(); }
+  function confirmThen(text, yes, fn) {
+    const under = overlay?.type === 'counter';
+    openOverlay({ type: 'confirm', text, yes, fn, under });
+  }
+
+  // swipe
+  const vp = $('viewport'), track = $('track');
+  let drag = null, suppressClick = false;
+  vp.addEventListener('pointerdown', e => {
+    if (overlay || e.button > 0) return;
+    drag = { x: e.clientX, y: e.clientY, t: performance.now(), state: 'pending', id: e.pointerId };
+  });
+  vp.addEventListener('pointermove', e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    let dx = e.clientX - drag.x; const dy = e.clientY - drag.y;
+    if (drag.state === 'pending') {
+      if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.4) { drag.state = 'drag'; track.classList.add('dragging'); vp.setPointerCapture(e.pointerId); }
+      else if (Math.abs(dy) > 12) { drag = null; return; }
+    }
+    if (drag.state === 'drag') {
+      if ((page === 0 && dx > 0) || (page === 2 && dx < 0)) dx *= .3;
+      track.style.transform = `translateX(${-page * vp.clientWidth + dx}px)`;
+    }
+  });
+  function endDrag(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    if (drag.state === 'drag') {
+      const dx = e.clientX - drag.x, v = dx / (performance.now() - drag.t), w = vp.clientWidth;
+      track.classList.remove('dragging');
+      let p = page;
+      if (dx < -w * .25 || v < -.5) p++; else if (dx > w * .25 || v > .5) p--;
+      setPage(p);
+      suppressClick = true; setTimeout(() => suppressClick = false, 60);
+    }
+    drag = null;
+  }
+  vp.addEventListener('pointerup', endDrag);
+  vp.addEventListener('pointercancel', e => { if (drag?.state === 'drag') { track.classList.remove('dragging'); setPage(page); } drag = null; });
+  document.addEventListener('click', e => { if (suppressClick) { e.stopPropagation(); e.preventDefault(); } }, true);
+
+  document.addEventListener('keydown', e => {
+    if (e.target.closest('input, textarea, [contenteditable]')) return;
+    if (e.key === 'Escape' && overlay) { closeOverlay(); return; }
+    if (overlay) return;
+    if (e.key === 'ArrowLeft') setPage(page - 1);
+    if (e.key === 'ArrowRight') setPage(page + 1);
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset.add) { e.preventDefault(); e.target.click(); }
+  });
+
+  // ---------------- actions ----------------
+  const haptic = () => { try { navigator.vibrate?.(10); } catch (e) {} };
+  function afterRoundChange() { renderRound(); renderBar(); if (overlay?.type === 'counter') { if (!totalOf(S.round)) closeOverlay(); else renderOverlay(); } }
+
+  document.addEventListener('click', async e => {
+    const el = e.target.closest('[data-add],[data-minus],[data-plus],[data-act],[data-page],[data-again],[data-del-round],[data-toggle],[data-edit],[data-set],[data-cat],[data-emoji]');
+    if (!el) return;
+    const d = el.dataset, tx = t();
+
+    if (d.minus) { e.stopPropagation(); remove(d.minus); haptic(); afterRoundChange(); return; }
+    if (d.plus) { add(d.plus); haptic(); afterRoundChange(); return; }
+    if (d.add) { add(d.add); haptic(); bumpId = d.add; afterRoundChange(); return; }
+    if (d.page) { setPage(+d.page); return; }
+    if (d.toggle) { expanded.has(d.toggle) ? expanded.delete(d.toggle) : expanded.add(d.toggle); renderHistory(); return; }
+    if (d.again) {
+      const skipped = orderAgain(d.again);
+      renderRound(); setPage(1);
+      if (skipped) toast(tx.skipped(skipped));
+      return;
+    }
+    if (d.delRound) {
+      confirmThen(tx.deleteRoundQ, tx.del, () => { S.history = S.history.filter(r => r.id !== d.delRound); save(); renderHistory(); });
+      return;
+    }
+    if (d.edit) { const i = item(d.edit); openOverlay({ type: 'sheet', mode: 'edit', id: i.id, draft: { ...i } }); return; }
+    if (d.set) {
+      S[d.set] = d.val; save();
+      if (d.set === 'lang') computeOrder();
+      render(); return;
+    }
+    if (d.cat) { overlay.draft.name = $('f-name').value; overlay.draft.category = d.cat; renderOverlay(); return; }
+    if (d.emoji) { overlay.draft.name = $('f-name').value; overlay.draft.emoji = d.emoji; renderOverlay(); return; }
+
+    switch (d.act) {
+      case 'show': openOverlay({ type: 'counter' }); lockScreen(); break;
+      case 'close-counter': closeOverlay(); break;
+      case 'clear': clearRound(); afterRoundChange(); break;
+      case 'place': {
+        const undo = place();
+        closeOverlay(); renderRound(); renderHistory(); renderBar();
+        toast(tx.placed, () => { undo(); renderRound(); renderHistory(); renderBar(); });
+        break;
+      }
+      case 'share': {
+        const text = shareText();
+        let framed = true; try { framed = window.self !== window.top; } catch (e3) {}
+        try { if (!navigator.share || framed) throw 0; await navigator.share({ text }); }
+        catch (err) {
+          if (err && err.name === 'AbortError') break;
+          try { await navigator.clipboard.writeText(text); toast(tx.copied); } catch (e2) { toast(tx.copyFailed); }
+        }
+        break;
+      }
+      case 'undo': { const slot = $('toast-slot'); const fn = slot.undo; slot.innerHTML = ''; slot.undo = null; fn?.(); break; }
+      case 'new-from-round': openOverlay({ type: 'sheet', mode: 'round', draft: { name: '', category: 'drink', emoji: '🍺' } }); break;
+      case 'add-item': openOverlay({ type: 'sheet', mode: 'add', draft: { name: '', category: 'drink', emoji: '🍺' } }); break;
+      case 'dismiss': if (e.target === el) closeOverlay(); break;
+      case 'dismiss-btn': closeOverlay(); break;
+      case 'delete-item': {
+        const id = overlay.id, name = item(id).name;
+        confirmThen(tx.deleteItemQ(name), tx.del, () => {
+          S.catalog = S.catalog.filter(i => i.id !== id); delete S.round[id]; save(); syncOrder();
+          renderRound(); renderItems(); renderBar();
+        });
+        break;
+      }
+      case 'clear-history': confirmThen(tx.clearHistQ, tx.clearHistory, () => { S.history = []; save(); renderHistory(); }); break;
+      case 'confirm-yes': { const o = overlay; overlay = o.under ? { type: 'counter' } : null; o.fn(); renderOverlay(); renderBar(); renderHint(); break; }
+      case 'confirm-no': overlay = overlay.under ? { type: 'counter' } : null; renderOverlay(); renderBar(); renderHint(); break;
+      case 'reset-demo': S = seedState(); save(); computeOrder(); expanded.clear(); setPage(1); render(); break;
+    }
+  });
+
+  document.addEventListener('input', e => {
+    if (e.target.id === 'f-emoji' && overlay?.type === 'sheet') {
+      const v = e.target.value.trim();
+      if (v) { overlay.draft.emoji = v; document.querySelectorAll('[data-emoji]').forEach(b => b.setAttribute('aria-pressed', 'false')); }
+    }
+  });
+  document.addEventListener('submit', e => {
+    if (e.target.id !== 'sheet-form') return;
+    e.preventDefault();
+    const o = overlay, name = $('f-name').value.trim();
+    if (!name) { o.draft.name = ''; o.error = t().nameRequired; renderOverlay(); $('f-name').focus(); return; }
+    const data = { name, category: o.draft.category, emoji: o.draft.emoji || '🍺' };
+    if (o.mode === 'edit') Object.assign(item(o.id), data);
+    else {
+      const it = { id: uid(), ...data };
+      S.catalog.push(it);
+      if (o.mode === 'round') S.round[it.id] = 1;
+    }
+    save(); syncOrder(); closeOverlay(); renderRound(); renderItems(); renderBar();
+  });
+
+  matchMedia('(prefers-color-scheme: light)').addEventListener?.('change', () => { if (S.theme === 'system') applyTheme(); });
+
+  // ---------------- boot ----------------
+  S = load();
+  computeOrder();
+  render();
+})();
+</script>

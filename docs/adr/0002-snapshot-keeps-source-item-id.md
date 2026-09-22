@@ -1,0 +1,3 @@
+# Placed Round lines keep the source Item's id, for Popularity only
+
+ADR-0001 made placed Rounds store a frozen snapshot of each Item (name, category, emoji) instead of a live reference. Popularity-sorted tiles need to count how often each *catalog* Item was ordered, and matching on the snapshot name would break the moment an Item is renamed. So each snapshot line also records the id of the Item it came from. That id is used only to compute Popularity and is never used to display or resolve a past Round: display always uses the snapshot fields, and a line whose source Item was deleted simply stops counting. This refines ADR-0001 rather than reversing it; a reader should not "clean up" the id as redundant, nor start rendering history through it.
