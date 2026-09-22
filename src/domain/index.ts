@@ -88,3 +88,63 @@ export function gridSections(catalog: Catalog, locale: Locale): GridSections {
     catalog.filter((i) => i.category === category).sort((a, b) => byName(a.name, b.name))
   return { drink: section('drink'), snack: section('snack') }
 }
+
+export interface RoundLine {
+  item: Item
+  count: number
+}
+
+/** The composing Round as lines, in the same order as the grid: Drinks, then Snacks. */
+export function roundLines(round: ComposingRound, sections: GridSections): RoundLine[] {
+  return [...sections.drink, ...sections.snack]
+    .map((item) => ({ item, count: countOf(round, item.id) }))
+    .filter((line) => line.count > 0)
+}
+
+/** One line of a placed Round: a frozen copy of the Item as it was (ADR-0001) plus its id, for Popularity only (ADR-0002). */
+export interface PlacedLine {
+  itemId: string
+  name: string
+  category: Category
+  emoji: string
+  count: number
+}
+
+export interface PlacedRound {
+  id: string
+  /** ISO 8601 timestamp. */
+  placedAt: string
+  lines: PlacedLine[]
+}
+
+export interface RoundAndHistory {
+  round: ComposingRound
+  /** Newest first. */
+  history: PlacedRound[]
+}
+
+/**
+ * Places the composing Round: it joins history as an immutable snapshot and composing starts afresh.
+ * Returns an `undo` that takes it back out and restores exactly what was being composed.
+ */
+export function markOrdered(
+  state: RoundAndHistory,
+  sections: GridSections,
+  meta: { id: string; placedAt: string },
+): { next: RoundAndHistory; undo: (current: RoundAndHistory) => RoundAndHistory } {
+  const placed: PlacedRound = {
+    ...meta,
+    lines: roundLines(state.round, sections).map(({ item, count }) => ({
+      itemId: item.id,
+      name: item.name,
+      category: item.category,
+      emoji: item.emoji,
+      count,
+    })),
+  }
+  const previous = state.round
+  return {
+    next: { round: emptyRound(), history: [placed, ...state.history] },
+    undo: (current) => ({ round: previous, history: current.history.filter((r) => r.id !== placed.id) }),
+  }
+}

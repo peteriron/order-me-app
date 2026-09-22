@@ -1,3 +1,4 @@
+import type { Ref } from 'react'
 import { countOf, totalOf, type ComposingRound, type GridSections } from '../domain/index.ts'
 import type { Messages } from '../i18n/index.ts'
 import { RoundBar } from './RoundBar.tsx'
@@ -10,10 +11,11 @@ interface RoundPageProps {
   onAdd: (itemId: string) => void
   onRemove: (itemId: string) => void
   onClear: () => void
-  onShow?: () => void
+  onShow: () => void
+  showRef?: Ref<HTMLButtonElement>
 }
 
-export function RoundPage({ sections, round, t, onAdd, onRemove, onClear, onShow }: RoundPageProps) {
+export function RoundPage({ sections, round, t, onAdd, onRemove, onClear, onShow, showRef }: RoundPageProps) {
   const section = (category: keyof GridSections, heading: string) => (
     <section className="section" aria-labelledby={`heading-${category}`}>
       <h2 className="section-label" id={`heading-${category}`}>
@@ -46,7 +48,7 @@ export function RoundPage({ sections, round, t, onAdd, onRemove, onClear, onShow
         {section('drink', t.drinks)}
         {section('snack', t.snacks)}
       </div>
-      <RoundBar total={totalOf(round)} t={t} onClear={onClear} onShow={onShow} />
+      <RoundBar total={totalOf(round)} t={t} onClear={onClear} onShow={onShow} showRef={showRef} />
     </>
   )
 }

@@ -59,4 +59,32 @@ describe('app state storage', () => {
     const state = loadAppState(store, { locale: 'en', newId: ids() })
     expect(state.catalog).toHaveLength(21)
   })
+
+  it('restores placed Rounds after a restart', () => {
+    const store = memoryStore()
+    const first = loadAppState(store, { locale: 'en', newId: ids() })
+    const placed = {
+      id: 'r1',
+      placedAt: '2026-09-22T21:14:00.000Z',
+      lines: [{ itemId: 'x', name: 'Duvel', category: 'drink' as const, emoji: '🍺', count: 3 }],
+    }
+    saveAppState(store, { ...first, history: [placed] })
+
+    expect(loadAppState(store, { locale: 'en', newId: ids() }).history).toEqual([placed])
+  })
+
+  it('starts with no history on first launch', () => {
+    expect(loadAppState(memoryStore(), { locale: 'en', newId: ids() }).history).toEqual([])
+  })
+
+  it('upgrades a save from before history existed, keeping the Catalog and the composing Round', () => {
+    const store = memoryStore()
+    const catalog = [{ id: 'd', name: 'Duvel', category: 'drink', emoji: '🍺' }]
+    store.setItem('order-me', JSON.stringify({ version: 1, catalog, round: { counts: { d: 2 } } }))
+
+    const state = loadAppState(store, { locale: 'en', newId: ids() })
+    expect(state.catalog).toEqual(catalog)
+    expect(countOf(state.round, 'd')).toBe(2)
+    expect(state.history).toEqual([])
+  })
 })

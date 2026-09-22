@@ -1,5 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { add, clear, countOf, emptyRound, gridSections, remove, seedCatalog, totalOf, type Item } from './index.ts'
+import {
+  add,
+  clear,
+  countOf,
+  emptyRound,
+  gridSections,
+  markOrdered,
+  remove,
+  roundLines,
+  seedCatalog,
+  totalOf,
+  type Item,
+} from './index.ts'
 
 const sequentialIds = () => {
   let n = 0
@@ -93,5 +105,70 @@ describe('grid sections', () => {
   it('sorts accented names where a reader expects them, not by code point', () => {
     const catalog = [item('1', 'Zwarte koffie', 'drink'), item('2', 'Éclair', 'drink')]
     expect(gridSections(catalog, 'nl').drink.map((i) => i.name)).toEqual(['Éclair', 'Zwarte koffie'])
+  })
+})
+
+describe('Round lines for the Counter view', () => {
+  const duvel: Item = { id: 'duvel', name: 'Duvel', category: 'drink', emoji: '🍺' }
+  const cola: Item = { id: 'cola', name: 'Cola', category: 'drink', emoji: '🥤' }
+  const chips: Item = { id: 'chips', name: 'Chips', category: 'snack', emoji: '🥔' }
+  const sections = gridSections([chips, duvel, cola], 'en')
+
+  it('lists drinks then snacks, in grid order, with their counts', () => {
+    const round = add(add(add(add(emptyRound(), 'chips'), 'duvel'), 'duvel'), 'cola')
+    expect(roundLines(round, sections).map((l) => [l.item.name, l.count])).toEqual([
+      ['Cola', 1],
+      ['Duvel', 2],
+      ['Chips', 1],
+    ])
+  })
+
+  it('leaves out Items that are not in the Round', () => {
+    const round = add(emptyRound(), 'duvel')
+    expect(roundLines(round, sections).map((l) => l.item.name)).toEqual(['Duvel'])
+  })
+})
+
+describe('marking a Round as ordered', () => {
+  const duvel: Item = { id: 'duvel', name: 'Duvel', category: 'drink', emoji: '🍺' }
+  const chips: Item = { id: 'chips', name: 'Chips', category: 'snack', emoji: '🥔' }
+  const catalog = [duvel, chips]
+  const meta = { id: 'round-1', placedAt: '2026-09-22T21:14:00.000Z' }
+  const composed = add(add(add(emptyRound(), 'duvel'), 'duvel'), 'chips')
+
+  it('adds a placed Round to history with a snapshot of each line, and empties the composing Round', () => {
+    const { next } = markOrdered({ round: composed, history: [] }, gridSections(catalog, 'en'), meta)
+
+    expect(totalOf(next.round)).toBe(0)
+    expect(next.history).toEqual([
+      {
+        id: 'round-1',
+        placedAt: '2026-09-22T21:14:00.000Z',
+        lines: [
+          { itemId: 'duvel', name: 'Duvel', category: 'drink', emoji: '🍺', count: 2 },
+          { itemId: 'chips', name: 'Chips', category: 'snack', emoji: '🥔', count: 1 },
+        ],
+      },
+    ])
+  })
+
+  it('puts the newest placed Round first', () => {
+    const older = { id: 'round-0', placedAt: '2026-09-21T20:00:00.000Z', lines: [] }
+    const { next } = markOrdered({ round: composed, history: [older] }, gridSections(catalog, 'en'), meta)
+    expect(next.history.map((r) => r.id)).toEqual(['round-1', 'round-0'])
+  })
+
+  it('keeps what was ordered even when the Item is edited in place afterwards', () => {
+    const editable: Item = { ...duvel }
+    const { next } = markOrdered({ round: composed, history: [] }, gridSections([editable, chips], 'en'), meta)
+    editable.name = 'Duvel Tripel Hop'
+    editable.emoji = '🍻'
+    expect(next.history[0].lines[0]).toMatchObject({ itemId: 'duvel', name: 'Duvel', emoji: '🍺' })
+  })
+
+  it('undo takes the Round back out of history and restores what was being composed', () => {
+    const before = { round: composed, history: [] }
+    const { next, undo } = markOrdered(before, gridSections(catalog, 'en'), meta)
+    expect(undo(next)).toEqual(before)
   })
 })
