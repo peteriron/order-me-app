@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { add, clear, remove, type Locale } from '../domain/index.ts'
+import { add, clear, markOrdered, remove, type GridSections, type Locale } from '../domain/index.ts'
 import { loadAppState, saveAppState, type AppState, type KeyValueStore } from '../storage/index.ts'
 
 /** window.localStorage, or an in-memory stand-in when the browser refuses access (e.g. some private modes). */
@@ -25,5 +25,14 @@ export function useAppState(locale: Locale) {
   const removeItem = useCallback((itemId: string) => setState((s) => ({ ...s, round: remove(s.round, itemId) })), [])
   const clearRound = useCallback(() => setState((s) => ({ ...s, round: clear(s.round) })), [])
 
-  return { state, addItem, removeItem, clearRound }
+
+  /** Places the composing Round and returns a function that undoes exactly that placement. */
+  const placeRound = (sections: GridSections) => {
+    const meta = { id: crypto.randomUUID(), placedAt: new Date().toISOString() }
+    const { next, undo } = markOrdered(state, sections, meta)
+    setState({ ...state, ...next })
+    return () => setState((s) => ({ ...s, ...undo(s) }))
+  }
+
+  return { state, addItem, removeItem, clearRound, placeRound }
 }

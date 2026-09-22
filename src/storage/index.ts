@@ -1,4 +1,11 @@
-import { emptyRound, seedCatalog, type Catalog, type ComposingRound, type Locale } from '../domain/index.ts'
+import {
+  emptyRound,
+  seedCatalog,
+  type Catalog,
+  type ComposingRound,
+  type Locale,
+  type PlacedRound,
+} from '../domain/index.ts'
 
 /** The slice of the Web Storage API this module needs; window.localStorage satisfies it. */
 export interface KeyValueStore {
@@ -9,6 +16,8 @@ export interface KeyValueStore {
 export interface AppState {
   catalog: Catalog
   round: ComposingRound
+  /** Placed Rounds, newest first. */
+  history: PlacedRound[]
 }
 
 interface Seed {
@@ -17,25 +26,34 @@ interface Seed {
 }
 
 const KEY = 'order-me'
-const SCHEMA_VERSION = 1
 
-interface StoredV1 extends AppState {
-  version: typeof SCHEMA_VERSION
+/** v1: Catalog + composing Round (#1). */
+interface StoredV1 {
+  version: 1
+  catalog: Catalog
+  round: ComposingRound
 }
+
+/** v2: adds history of placed Rounds (#3). */
+interface StoredV2 extends AppState {
+  version: 2
+}
+
+type Stored = StoredV1 | StoredV2
 
 /** Reads the saved app state, seeding and saving the starter Catalog on first launch. */
 export function loadAppState(store: KeyValueStore, seed: Seed): AppState {
   const saved = read(store)
-  if (saved) return { catalog: saved.catalog, round: saved.round }
+  if (saved) return upgrade(saved)
 
-  const fresh: AppState = { catalog: seedCatalog(seed.locale, seed.newId), round: emptyRound() }
+  const fresh: AppState = { catalog: seedCatalog(seed.locale, seed.newId), round: emptyRound(), history: [] }
   saveAppState(store, fresh)
   return fresh
 }
 
 /** Saves the app state. Failures (storage blocked or full) are swallowed: the app keeps working in memory. */
 export function saveAppState(store: KeyValueStore, state: AppState): void {
-  const stored: StoredV1 = { version: SCHEMA_VERSION, ...state }
+  const stored: StoredV2 = { version: 2, catalog: state.catalog, round: state.round, history: state.history }
   try {
     store.setItem(KEY, JSON.stringify(stored))
   } catch {
@@ -43,10 +61,19 @@ export function saveAppState(store: KeyValueStore, state: AppState): void {
   }
 }
 
-function read(store: KeyValueStore): StoredV1 | null {
+function upgrade(saved: Stored): AppState {
+  switch (saved.version) {
+    case 1:
+      return { catalog: saved.catalog, round: saved.round, history: [] }
+    case 2:
+      return { catalog: saved.catalog, round: saved.round, history: saved.history }
+  }
+}
+
+function read(store: KeyValueStore): Stored | null {
   try {
     const raw = store.getItem(KEY)
-    return raw === null ? null : (JSON.parse(raw) as StoredV1)
+    return raw === null ? null : (JSON.parse(raw) as Stored)
   } catch {
     return null
   }

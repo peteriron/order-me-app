@@ -16,6 +16,13 @@ export interface Messages {
   emptyHint: string
   clear: string
   show: string
+  counterTitle: string
+  backToRound: string
+  addOne: (name: string) => string
+  total: string
+  markOrdered: string
+  roundPlaced: string
+  undo: string
   history: string
   round: string
   items: string
@@ -36,6 +43,13 @@ export const messages: Record<Locale, Messages> = {
     emptyHint: 'Tap a drink to start',
     clear: 'Clear',
     show: 'Show',
+    counterTitle: 'Round for the counter',
+    backToRound: 'Back to Round',
+    addOne: (name) => `Add one ${name}`,
+    total: 'Total',
+    markOrdered: 'Mark as ordered',
+    roundPlaced: 'Round placed',
+    undo: 'Undo',
     history: 'History',
     round: 'Round',
     items: 'Items',
@@ -54,6 +68,13 @@ export const messages: Record<Locale, Messages> = {
     emptyHint: 'Tik op een drankje om te starten',
     clear: 'Wissen',
     show: 'Toon',
+    counterTitle: 'Ronde voor de toog',
+    backToRound: 'Terug naar ronde',
+    addOne: (name) => `Eén ${name} meer`,
+    total: 'Totaal',
+    markOrdered: 'Besteld',
+    roundPlaced: 'Ronde geplaatst',
+    undo: 'Ongedaan maken',
     history: 'Geschiedenis',
     round: 'Ronde',
     items: 'Items',

@@ -300,6 +300,17 @@ button {
   }
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* ---------- buttons ---------- */
 .btn {
   min-height: 44px;
@@ -327,6 +338,32 @@ button {
 
 .btn-quiet {
   color: var(--text-muted);
+}
+
+.btn-outline {
+  border-color: var(--accent-line);
+  color: var(--accent);
+}
+
+.btn-big {
+  min-height: 56px;
+  font-size: 1.0625rem;
+}
+
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  display: grid;
+  place-items: center;
+}
+
+.icon-btn .btn-icon {
+  width: 24px;
+  height: 24px;
 }
 
 .btn-icon {
@@ -365,6 +402,156 @@ button {
   color: var(--text-muted);
 }
 
+/* ---------- counter view: full screen, read at arm's length ---------- */
+.counter {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: calc(0.5rem + env(safe-area-inset-top, 0px)) 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--bg);
+  animation: slide-up 280ms var(--ease-out);
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.counter-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.counter-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.counter-lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.counter-line {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.counter-count {
+  min-width: 2.2ch;
+  text-align: right;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.counter-times {
+  font-size: 1.25rem;
+  color: var(--text-muted);
+}
+
+.counter-what {
+  flex: 1;
+  min-width: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.counter-controls {
+  display: flex;
+  gap: 0.375rem;
+}
+
+/* Quieter than the line text: the bartender reads the text, the Operator fixes counts. */
+.counter-controls button {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  touch-action: manipulation;
+}
+
+.counter-divider {
+  margin: 1.25rem 0 0.25rem;
+}
+
+.counter-total {
+  margin: 0;
+  padding: 0.75rem 0 0.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.counter-total span:first-child {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.counter-total span:last-child {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- toast ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+  z-index: 30;
+  width: min(408px, calc(100% - 2rem));
+  min-height: 48px;
+  padding: 0 0.375rem 0 1rem;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.3);
+  animation: toast-rise 180ms var(--ease-out);
+}
+
+.toast span {
+  flex: 1;
+}
+
+@keyframes toast-rise {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tile,
   .tile:has(.tile-add:active) {
@@ -376,5 +563,18 @@ button {
   }
   .pager-track {
     transition: none;
+  }
+  .counter,
+  .toast {
+    animation: fade-in 120ms linear;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
