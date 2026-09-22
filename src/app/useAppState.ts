@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { add, type Locale } from '../domain/index.ts'
+import { add, clear, remove, type Locale } from '../domain/index.ts'
 import { loadAppState, saveAppState, type AppState, type KeyValueStore } from '../storage/index.ts'
 
 /** window.localStorage, or an in-memory stand-in when the browser refuses access (e.g. some private modes). */
@@ -22,6 +22,8 @@ export function useAppState(locale: Locale) {
   useEffect(() => saveAppState(store, state), [store, state])
 
   const addItem = useCallback((itemId: string) => setState((s) => ({ ...s, round: add(s.round, itemId) })), [])
+  const removeItem = useCallback((itemId: string) => setState((s) => ({ ...s, round: remove(s.round, itemId) })), [])
+  const clearRound = useCallback(() => setState((s) => ({ ...s, round: clear(s.round) })), [])
 
-  return { state, addItem }
+  return { state, addItem, removeItem, clearRound }
 }

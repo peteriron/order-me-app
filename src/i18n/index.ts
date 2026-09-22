@@ -10,6 +10,12 @@ export interface Messages {
   drinks: string
   snacks: string
   tileLabel: (name: string, count: number) => string
+  removeOne: (name: string) => string
+  roundTotal: string
+  itemsCount: (n: number) => string
+  emptyHint: string
+  clear: string
+  show: string
   history: string
   round: string
   items: string
@@ -24,6 +30,12 @@ export const messages: Record<Locale, Messages> = {
     drinks: 'Drinks',
     snacks: 'Snacks',
     tileLabel: (name, count) => (count ? `${name}, ${count} in round` : name),
+    removeOne: (name) => `Remove one ${name}`,
+    roundTotal: 'Round total',
+    itemsCount: (n) => `${n} ${n === 1 ? 'item' : 'items'}`,
+    emptyHint: 'Tap a drink to start',
+    clear: 'Clear',
+    show: 'Show',
     history: 'History',
     round: 'Round',
     items: 'Items',
@@ -36,6 +48,12 @@ export const messages: Record<Locale, Messages> = {
     drinks: 'Dranken',
     snacks: 'Snacks',
     tileLabel: (name, count) => (count ? `${name}, ${count} in ronde` : name),
+    removeOne: (name) => `Eén ${name} minder`,
+    roundTotal: 'Totaal van de ronde',
+    itemsCount: (n) => `${n} ${n === 1 ? 'item' : 'items'}`,
+    emptyHint: 'Tik op een drankje om te starten',
+    clear: 'Wissen',
+    show: 'Toon',
     history: 'Geschiedenis',
     round: 'Ronde',
     items: 'Items',

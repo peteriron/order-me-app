@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { add, countOf, emptyRound, gridSections, seedCatalog, totalOf, type Item } from './index.ts'
+import { add, clear, countOf, emptyRound, gridSections, remove, seedCatalog, totalOf, type Item } from './index.ts'
 
 const sequentialIds = () => {
   let n = 0
@@ -43,6 +43,28 @@ describe('composing Round', () => {
     expect(countOf(round, 'duvel')).toBe(2)
     expect(countOf(round, 'cola')).toBe(1)
     expect(totalOf(round)).toBe(3)
+  })
+
+  it('removes one of an Item', () => {
+    const round = remove(add(add(emptyRound(), 'duvel'), 'duvel'), 'duvel')
+    expect(countOf(round, 'duvel')).toBe(1)
+    expect(totalOf(round)).toBe(1)
+  })
+
+  it('drops an Item from the Round when its count reaches zero', () => {
+    const round = remove(add(emptyRound(), 'duvel'), 'duvel')
+    expect(round.counts).toEqual({})
+  })
+
+  it('ignores removing an Item that is not in the Round', () => {
+    const round = add(emptyRound(), 'cola')
+    expect(remove(round, 'duvel').counts).toEqual({ cola: 1 })
+  })
+
+  it('clears every Item at once', () => {
+    const round = clear(add(add(add(emptyRound(), 'duvel'), 'duvel'), 'cola'))
+    expect(totalOf(round)).toBe(0)
+    expect(round.counts).toEqual({})
   })
 
   it('never mutates the Round it was given', () => {

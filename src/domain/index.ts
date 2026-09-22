@@ -59,6 +59,18 @@ export function add(round: ComposingRound, itemId: string): ComposingRound {
   return { counts: { ...round.counts, [itemId]: countOf(round, itemId) + 1 } }
 }
 
+export function remove(round: ComposingRound, itemId: string): ComposingRound {
+  const count = countOf(round, itemId)
+  if (count === 0) return round
+  const { [itemId]: _removed, ...rest } = round.counts
+  return { counts: count === 1 ? rest : { ...rest, [itemId]: count - 1 } }
+}
+
+/** Empties the Round in one go. Deliberately no undo (see PRD). */
+export function clear(_round: ComposingRound): ComposingRound {
+  return emptyRound()
+}
+
 export function countOf(round: ComposingRound, itemId: string): number {
   return round.counts[itemId] ?? 0
 }
