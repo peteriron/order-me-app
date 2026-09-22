@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { add, type Locale } from '../domain/index.ts'
 import { loadAppState, saveAppState, type AppState, type KeyValueStore } from '../storage/index.ts'
 
@@ -21,7 +21,7 @@ export function useAppState(locale: Locale) {
   // Save on every change so a killed tab or locked phone loses nothing.
   useEffect(() => saveAppState(store, state), [store, state])
 
-  const addItem = (itemId: string) => setState((s) => ({ ...s, round: add(s.round, itemId) }))
+  const addItem = useCallback((itemId: string) => setState((s) => ({ ...s, round: add(s.round, itemId) })), [])
 
   return { state, addItem }
 }

@@ -28,10 +28,10 @@ export function RoundPage({ sections, round, t, onAdd }: RoundPageProps) {
   )
 
   return (
-    <main className="page">
+    <div className="page">
       <h1 className="page-title">{t.appName}</h1>
       {section('drink', t.drinks)}
       {section('snack', t.snacks)}
-    </main>
+    </div>
   )
 }
