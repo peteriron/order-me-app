@@ -129,3 +129,40 @@ test('Cancel in the delete confirmation keeps the Item and the sheet', async ({ 
   await sheet(page).getByRole('button', { name: 'Cancel' }).tap()
   await expect(itemsPage(page).getByRole('button', { name: 'Edit Chips' })).toBeVisible()
 })
+
+test.describe('the + New tile on the Round page', () => {
+  const newTile = (page: Page) => page.getByRole('button', { name: 'New Item' })
+
+  test('sits last in the grid, after the Snacks', async ({ page }) => {
+    const snackTiles = page.getByRole('region', { name: 'Snacks' }).first().getByRole('button')
+    await expect(snackTiles.last()).toHaveAccessibleName('New Item')
+  })
+
+  test('adds a new Item to the Catalog and to the Round with a count of 1', async ({ page }) => {
+    await tapTiles(page, 'Duvel')
+    await newTile(page).tap()
+
+    await expect(sheet(page)).toHaveAccessibleName('New Item')
+    await sheet(page).getByLabel('Name').fill('Kriek')
+    await sheet(page).getByRole('radio', { name: '🍒' }).check()
+    await sheet(page).getByRole('button', { name: 'Add to Round' }).tap()
+
+    await expect(sheet(page)).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Kriek, 1 in round' })).toBeVisible()
+    await expect(roundBar(page)).toContainText('2 items')
+
+    await goTo(page, 'Items')
+    await expect(itemsPage(page).getByRole('button', { name: 'Edit Kriek' })).toBeVisible()
+  })
+
+  test('Cancel adds nothing', async ({ page }) => {
+    await newTile(page).tap()
+    await sheet(page).getByLabel('Name').fill('Kriek')
+    await sheet(page).getByRole('button', { name: 'Cancel' }).tap()
+
+    await expect(page.getByRole('button', { name: /^Kriek/ })).toHaveCount(0)
+    await expect(roundBar(page)).toContainText('Tap a drink to start')
+    await goTo(page, 'Items')
+    await expect(itemsPage(page)).toContainText('21 in your Catalog')
+  })
+})

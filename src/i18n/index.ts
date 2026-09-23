@@ -49,6 +49,9 @@ export interface Messages {
   skippedItems: (n: number) => string
   catalogCount: (n: number) => string
   addItem: string
+  newTile: string
+  newItem: string
+  addToRound: string
   editItem: string
   editNamed: (name: string) => string
   name: string
@@ -102,6 +105,9 @@ export const messages: Record<Locale, Messages> = {
       n === 1 ? '1 item no longer exists and was skipped' : `${n} items no longer exist and were skipped`,
     catalogCount: (n) => `${n} in your Catalog`,
     addItem: 'Add Item',
+    newTile: 'New',
+    newItem: 'New Item',
+    addToRound: 'Add to Round',
     editItem: 'Edit Item',
     editNamed: (name) => `Edit ${name}`,
     name: 'Name',
@@ -153,6 +159,9 @@ export const messages: Record<Locale, Messages> = {
       n === 1 ? '1 item bestaat niet meer en is overgeslagen' : `${n} items bestaan niet meer en zijn overgeslagen`,
     catalogCount: (n) => `${n} in je catalogus`,
     addItem: 'Item toevoegen',
+    newTile: 'Nieuw',
+    newItem: 'Nieuw item',
+    addToRound: 'Aan ronde toevoegen',
     editItem: 'Item bewerken',
     editNamed: (name) => `${name} bewerken`,
     name: 'Naam',

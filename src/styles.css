@@ -254,6 +254,17 @@ button {
   overflow-wrap: anywhere;
 }
 
+.tile-new {
+  border: 1.5px dashed var(--border);
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.tile-new .tile-emoji {
+  font-size: 1.75rem;
+  font-weight: 300;
+}
+
 /* 44×44 hit area in the corner; the visible part is a 28px circle. */
 .tile-remove {
   position: absolute;

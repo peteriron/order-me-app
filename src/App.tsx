@@ -29,8 +29,8 @@ export function App() {
   const [counterOpen, setCounterOpen] = useState(false)
   const [toast, setToast] = useState<ToastMessage | null>(null)
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null)
-  /** The Item sheet: `{}` to add a new Item, `{ item }` to edit one, null when closed. */
-  const [sheet, setSheet] = useState<{ item?: Item } | null>(null)
+  /** The Item sheet: `{}` to add a new Item, `{ item }` to edit one, `{ forRound }` from the + New tile. */
+  const [sheet, setSheet] = useState<{ item?: Item; forRound?: boolean } | null>(null)
   const showButton = useRef<HTMLButtonElement>(null)
   const {
     state,
@@ -69,11 +69,12 @@ export function App() {
   )
 
   const openAddItem = useCallback(() => setSheet({}), [])
+  const openNewForRound = useCallback(() => setSheet({ forRound: true }), [])
   const openEditItem = useCallback((item: Item) => setSheet({ item }), [])
   const closeSheet = useCallback(() => setSheet(null), [])
   const saveSheet = (draft: ItemDraft) => {
     if (sheet?.item) updateItem(sheet.item.id, draft)
-    else createItem(draft)
+    else createItem(draft, { addToRound: sheet?.forRound })
     setSheet(null)
   }
   const confirmDeleteItem = (item: Item) =>
@@ -117,6 +118,7 @@ export function App() {
         onRemove={removeFromRound}
         onClear={clearRound}
         onShow={openCounter}
+        onNew={openNewForRound}
         showRef={showButton}
       />,
       <ItemsPage
@@ -144,6 +146,7 @@ export function App() {
       orderAgainFrom,
       openAddItem,
       openEditItem,
+      openNewForRound,
     ],
   )
 
@@ -183,6 +186,7 @@ export function App() {
         <div inert={confirmation !== null}>
           <ItemSheet
             item={sheet.item}
+            forRound={sheet.forRound}
             t={t}
             onSave={saveSheet}
             onDelete={sheet.item ? () => confirmDeleteItem(sheet.item!) : undefined}
