@@ -181,3 +181,18 @@ export function placedTotal(round: PlacedRound): number {
 export function deletePlacedRound(history: PlacedRound[], roundId: string): PlacedRound[] {
   return history.filter((r) => r.id !== roundId)
 }
+
+/**
+ * A fresh composing Round copied from a placed one ("same as last time"). Lines are matched to the Catalog by
+ * source Item id (ADR-0002), so renamed Items still count; lines whose Item was deleted are skipped.
+ */
+export function orderAgain(placed: PlacedRound, catalog: Catalog): { round: ComposingRound; skipped: number } {
+  const inCatalog = new Set(catalog.map((i) => i.id))
+  const counts: Record<string, number> = {}
+  let skipped = 0
+  for (const line of placed.lines) {
+    if (inCatalog.has(line.itemId)) counts[line.itemId] = line.count
+    else skipped++
+  }
+  return { round: { counts }, skipped }
+}

@@ -71,6 +71,10 @@ export function Pager({ pages, page, onPageChange }: PagerProps) {
   return (
     <main
       className="pager"
+      // Fallback for browsers without overflow: clip (Safari before 16): undo any sideways scroll at once.
+      onScroll={(e) => {
+        if (e.currentTarget.scrollLeft !== 0) e.currentTarget.scrollLeft = 0
+      }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}

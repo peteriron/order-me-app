@@ -45,6 +45,8 @@ export interface Messages {
   deleteRoundConfirm: string
   delete: string
   cancel: string
+  orderAgain: string
+  skippedItems: (n: number) => string
   itemsSoon: string
 }
 
@@ -80,6 +82,9 @@ export const messages: Record<Locale, Messages> = {
     deleteRoundConfirm: 'Delete this Round from history?',
     delete: 'Delete',
     cancel: 'Cancel',
+    orderAgain: 'Order again',
+    skippedItems: (n) =>
+      n === 1 ? '1 item no longer exists and was skipped' : `${n} items no longer exist and were skipped`,
     itemsSoon: 'This is where you’ll add and edit the drinks and snacks in your Catalog.',
   },
   nl: {
@@ -113,6 +118,9 @@ export const messages: Record<Locale, Messages> = {
     deleteRoundConfirm: 'Deze ronde uit de geschiedenis verwijderen?',
     delete: 'Verwijderen',
     cancel: 'Annuleren',
+    orderAgain: 'Opnieuw bestellen',
+    skippedItems: (n) =>
+      n === 1 ? '1 item bestaat niet meer en is overgeslagen' : `${n} items bestaan niet meer en zijn overgeslagen`,
     itemsSoon: 'Hier voeg je straks drankjes en snacks aan je catalogus toe en bewerk je ze.',
   },
 }

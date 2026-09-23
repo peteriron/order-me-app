@@ -8,6 +8,7 @@ import {
   gridSections,
   groupByDay,
   markOrdered,
+  orderAgain,
   placedTotal,
   remove,
   roundLines,
@@ -220,5 +221,43 @@ describe('placed Rounds in history', () => {
   it('deletes one placed Round and keeps the rest in order', () => {
     const r0 = { ...r2, id: 'r0' }
     expect(deletePlacedRound([r1, r2, r0], 'r2').map((r) => r.id)).toEqual(['r1', 'r0'])
+  })
+})
+
+describe('order again', () => {
+  const duvel: Item = { id: 'duvel', name: 'Duvel', category: 'drink', emoji: '🍺' }
+  const chips: Item = { id: 'chips', name: 'Chips', category: 'snack', emoji: '🥔' }
+  const line = (item: Item, count: number, nameThen = item.name) => ({
+    itemId: item.id,
+    name: nameThen,
+    category: item.category,
+    emoji: item.emoji,
+    count,
+  })
+  const lastFriday = { id: 'r1', placedAt: '2026-09-18T21:00:00.000Z', lines: [line(duvel, 3), line(chips, 2)] }
+
+  it('makes a composing Round with the same counts', () => {
+    const { round, skipped } = orderAgain(lastFriday, [duvel, chips])
+    expect(round.counts).toEqual({ duvel: 3, chips: 2 })
+    expect(skipped).toBe(0)
+  })
+
+  it('still finds an Item that was renamed since, by its id', () => {
+    const renamed = { ...duvel, name: 'Duvel Tripel' }
+    const placed = { ...lastFriday, lines: [line(duvel, 3)] }
+    expect(orderAgain(placed, [renamed, chips]).round.counts).toEqual({ duvel: 3 })
+  })
+
+  it('skips lines whose Item was deleted from the Catalog, and says how many', () => {
+    const { round, skipped } = orderAgain(lastFriday, [chips])
+    expect(round.counts).toEqual({ chips: 2 })
+    expect(skipped).toBe(1)
+  })
+
+  it('copies the placed Round rather than reopening it', () => {
+    const before = structuredClone(lastFriday)
+    const { round } = orderAgain(lastFriday, [duvel, chips])
+    add(round, 'duvel')
+    expect(lastFriday).toEqual(before)
   })
 })

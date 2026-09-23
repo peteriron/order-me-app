@@ -102,3 +102,13 @@ test('pages that are off screen are hidden from assistive tech', async ({ page }
   await expect(page.getByRole('heading', { name: 'History', level: 1 })).toHaveCount(0)
   await expect(page.getByRole('heading', { name: 'Items', level: 1 })).toHaveCount(0)
 })
+
+test('pages stay aligned when something off screen is scrolled into view', async ({ page }) => {
+  // Focus moves, screen readers and find-in-page all scroll things into view; that must never shift the pager.
+  // The Items page sits to the right of Round, so it is the one the browser *can* scroll towards.
+  await page.evaluate(() => document.querySelectorAll('.pager-page')[2].querySelector('h1')!.scrollIntoView())
+  await expectOnPage(page, 'This round is for me', 'Round')
+
+  await page.getByRole('navigation', { name: 'Pages' }).getByRole('button', { name: 'History' }).tap()
+  await expectOnPage(page, 'History', 'History')
+})
