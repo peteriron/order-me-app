@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAppState } from './app/useAppState.ts'
-import { gridSections, roundLines, totalOf } from './domain/index.ts'
+import { gridSections, orderAgain, roundLines, totalOf, type PlacedRound } from './domain/index.ts'
 import { detectLocale, formattingLocale, messages } from './i18n/index.ts'
 import { ConfirmDialog, type Confirmation } from './ui/ConfirmDialog.tsx'
 import { CounterView } from './ui/CounterView.tsx'
@@ -20,7 +20,7 @@ export function App() {
   const [toast, setToast] = useState<ToastMessage | null>(null)
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null)
   const showButton = useRef<HTMLButtonElement>(null)
-  const { state, addItem, removeItem, clearRound, deleteRound, placeRound } = useAppState(locale)
+  const { state, addItem, removeItem, clearRound, replaceRound, deleteRound, placeRound } = useAppState(locale)
   const sections = useMemo(() => gridSections(state.catalog, locale), [state.catalog, locale])
   const total = totalOf(state.round)
   const t = messages[locale]
@@ -44,10 +44,28 @@ export function App() {
     [t, deleteRound],
   )
 
+  const orderAgainFrom = useCallback(
+    (placed: PlacedRound) => {
+      // Always replaces what is being composed (PRD): no prompt, no undo.
+      const { round, skipped } = orderAgain(placed, state.catalog)
+      replaceRound(round)
+      setPage(ROUND_PAGE)
+      if (skipped > 0) setToast({ id: Date.now(), text: t.skippedItems(skipped) })
+    },
+    [state.catalog, replaceRound, t],
+  )
+
   // Memoised so dragging (which re-renders only the Pager) never re-renders the page contents.
   const pages = useMemo(
     () => [
-      <HistoryPage key="history" history={state.history} dateLocale={dateLocale} t={t} onDelete={confirmDeleteRound} />,
+      <HistoryPage
+        key="history"
+        history={state.history}
+        dateLocale={dateLocale}
+        t={t}
+        onDelete={confirmDeleteRound}
+        onOrderAgain={orderAgainFrom}
+      />,
       <RoundPage
         key="round"
         sections={sections}
@@ -61,7 +79,7 @@ export function App() {
       />,
       <PlaceholderPage key="items" title={t.items} text={t.itemsSoon} />,
     ],
-    [t, dateLocale, sections, state.round, state.history, addItem, removeItem, clearRound, openCounter, confirmDeleteRound],
+    [t, dateLocale, sections, state.round, state.history, addItem, removeItem, clearRound, openCounter, confirmDeleteRound, orderAgainFrom],
   )
 
   return (

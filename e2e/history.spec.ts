@@ -129,3 +129,38 @@ test('a deleted Round is gone for good, and an empty history says so', async ({ 
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).tap()
   await expect(historyPage(page)).toContainText('No Rounds yet')
 })
+
+test('Order again replaces the Round being composed and lands on the grid with the counts', async ({ page }) => {
+  await page.getByRole('button', { name: /^Cola/ }).tap()
+  await seedHistory(page, [{ daysAgo: 1, time: [21, 0], lines: [['Duvel', 3], ['Chips', 2]] }])
+  await goToHistory(page)
+
+  await historyPage(page).getByRole('article').getByRole('button', { name: 'Order again' }).tap()
+
+  await expect(page.getByRole('heading', { name: 'This round is for me', level: 1 })).toBeInViewport()
+  await expect(page.getByRole('button', { name: 'Duvel, 3 in round' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Chips, 2 in round' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Cola', exact: true })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Round total' })).toContainText('5 items')
+
+  // The placed Round was copied, not reopened: it is still in history as it was.
+  await goToHistory(page)
+  await expect(historyPage(page).getByRole('article')).toContainText('3 Duvel · 2 Chips')
+})
+
+test('Order again skips Items that were deleted since, and says so', async ({ page }) => {
+  await seedHistory(page, [{ daysAgo: 1, time: [21, 0], lines: [['Duvel', 3], ['Chips', 2]] }])
+  await page.evaluate(() => {
+    const state = JSON.parse(localStorage.getItem('order-me')!)
+    state.catalog = state.catalog.filter((i: { name: string }) => i.name !== 'Duvel')
+    localStorage.setItem('order-me', JSON.stringify(state))
+  })
+  await page.reload()
+  await goToHistory(page)
+
+  await historyPage(page).getByRole('button', { name: 'Order again' }).tap()
+
+  await expect(page.getByRole('status').filter({ hasText: '1 item no longer exists and was skipped' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Chips, 2 in round' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Round total' })).toContainText('2 items')
+})

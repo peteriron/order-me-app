@@ -8,10 +8,11 @@ interface HistoryPageProps {
   dateLocale: string
   t: Messages
   onDelete: (round: PlacedRound, time: string) => void
+  onOrderAgain: (round: PlacedRound) => void
 }
 
 /** Past Rounds by day, newest first. Everything shown comes from the placed snapshot, never the live Catalog. */
-export function HistoryPage({ history, dateLocale, t, onDelete }: HistoryPageProps) {
+export function HistoryPage({ history, dateLocale, t, onDelete, onOrderAgain }: HistoryPageProps) {
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set())
   const now = new Date()
   const time = new Intl.DateTimeFormat(dateLocale, { hour: '2-digit', minute: '2-digit' })
@@ -74,6 +75,9 @@ export function HistoryPage({ history, dateLocale, t, onDelete }: HistoryPagePro
                   </ul>
                 )}
                 <div className="history-card-actions">
+                  <button type="button" className="btn btn-outline" onClick={() => onOrderAgain(round)}>
+                    {t.orderAgain}
+                  </button>
                   <button
                     type="button"
                     className="icon-btn icon-btn-quiet"
