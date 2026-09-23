@@ -3,9 +3,12 @@ import {
   add,
   clear,
   countOf,
+  deletePlacedRound,
   emptyRound,
   gridSections,
+  groupByDay,
   markOrdered,
+  placedTotal,
   remove,
   roundLines,
   seedCatalog,
@@ -170,5 +173,52 @@ describe('marking a Round as ordered', () => {
     const before = { round: composed, history: [] }
     const { next, undo } = markOrdered(before, gridSections(catalog, 'en'), meta)
     expect(undo(next)).toEqual(before)
+  })
+})
+
+describe('history grouped by day', () => {
+  // Local wall-clock times, as the Operator experiences them.
+  const at = (y: number, m: number, d: number, h: number, min = 0) => new Date(y, m - 1, d, h, min).toISOString()
+  const placed = (id: string, placedAt: string) => ({ id, placedAt, lines: [] })
+  const now = new Date(2026, 8, 23, 20, 0) // 23 Sep 2026, 20:00
+
+  it('groups placed Rounds by calendar day, newest first, with how many days ago each day was', () => {
+    const history = [
+      placed('tonight-2', at(2026, 9, 23, 19, 30)),
+      placed('tonight-1', at(2026, 9, 23, 18, 5)),
+      placed('last-night', at(2026, 9, 22, 23, 50)),
+      placed('last-month', at(2026, 8, 30, 21, 0)),
+    ]
+    expect(groupByDay(history, now).map((g) => [g.daysAgo, g.rounds.map((r) => r.id)])).toEqual([
+      [0, ['tonight-2', 'tonight-1']],
+      [1, ['last-night']],
+      [24, ['last-month']],
+    ])
+  })
+
+  it('splits at local midnight, not after 24 hours', () => {
+    const justBeforeMidnight = placed('late', at(2026, 9, 22, 23, 59))
+    const justAfterMidnight = placed('early', at(2026, 9, 23, 0, 1))
+    const groups = groupByDay([justAfterMidnight, justBeforeMidnight], new Date(2026, 8, 23, 0, 30))
+    expect(groups.map((g) => g.daysAgo)).toEqual([0, 1])
+  })
+
+  it('has no groups when nothing has been placed', () => {
+    expect(groupByDay([], now)).toEqual([])
+  })
+})
+
+describe('placed Rounds in history', () => {
+  const line = (itemId: string, name: string, count: number) => ({ itemId, name, category: 'drink' as const, emoji: '🍺', count })
+  const r1 = { id: 'r1', placedAt: '2026-09-23T19:00:00.000Z', lines: [line('d', 'Duvel', 3), line('c', 'Cola', 2)] }
+  const r2 = { id: 'r2', placedAt: '2026-09-22T19:00:00.000Z', lines: [line('d', 'Duvel', 1)] }
+
+  it('counts every Item in a placed Round', () => {
+    expect(placedTotal(r1)).toBe(5)
+  })
+
+  it('deletes one placed Round and keeps the rest in order', () => {
+    const r0 = { ...r2, id: 'r0' }
+    expect(deletePlacedRound([r1, r2, r0], 'r2').map((r) => r.id)).toEqual(['r1', 'r0'])
   })
 })

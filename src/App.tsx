@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAppState } from './app/useAppState.ts'
 import { gridSections, roundLines, totalOf } from './domain/index.ts'
-import { detectLocale, messages } from './i18n/index.ts'
+import { detectLocale, formattingLocale, messages } from './i18n/index.ts'
+import { ConfirmDialog, type Confirmation } from './ui/ConfirmDialog.tsx'
 import { CounterView } from './ui/CounterView.tsx'
+import { HistoryPage } from './ui/HistoryPage.tsx'
 import { PageHint } from './ui/PageHint.tsx'
 import { Pager } from './ui/Pager.tsx'
 import { PlaceholderPage } from './ui/PlaceholderPage.tsx'
@@ -16,11 +18,13 @@ export function App() {
   const [page, setPage] = useState(ROUND_PAGE)
   const [counterOpen, setCounterOpen] = useState(false)
   const [toast, setToast] = useState<ToastMessage | null>(null)
+  const [confirmation, setConfirmation] = useState<Confirmation | null>(null)
   const showButton = useRef<HTMLButtonElement>(null)
-  const { state, addItem, removeItem, clearRound, placeRound } = useAppState(locale)
+  const { state, addItem, removeItem, clearRound, deleteRound, placeRound } = useAppState(locale)
   const sections = useMemo(() => gridSections(state.catalog, locale), [state.catalog, locale])
   const total = totalOf(state.round)
   const t = messages[locale]
+  const dateLocale = formattingLocale(locale, navigator.language)
 
   useEffect(() => {
     document.documentElement.lang = locale
@@ -33,11 +37,17 @@ export function App() {
     showButton.current?.focus()
   }, [])
   const dismissToast = useCallback(() => setToast(null), [])
+  const closeConfirmation = useCallback(() => setConfirmation(null), [])
+  const confirmDeleteRound = useCallback(
+    (round: { id: string }) =>
+      setConfirmation({ text: t.deleteRoundConfirm, confirmLabel: t.delete, onConfirm: () => deleteRound(round.id) }),
+    [t, deleteRound],
+  )
 
   // Memoised so dragging (which re-renders only the Pager) never re-renders the page contents.
   const pages = useMemo(
     () => [
-      <PlaceholderPage key="history" title={t.history} text={t.historySoon} />,
+      <HistoryPage key="history" history={state.history} dateLocale={dateLocale} t={t} onDelete={confirmDeleteRound} />,
       <RoundPage
         key="round"
         sections={sections}
@@ -51,12 +61,12 @@ export function App() {
       />,
       <PlaceholderPage key="items" title={t.items} text={t.itemsSoon} />,
     ],
-    [t, sections, state.round, addItem, removeItem, clearRound, openCounter],
+    [t, dateLocale, sections, state.round, state.history, addItem, removeItem, clearRound, openCounter, confirmDeleteRound],
   )
 
   return (
     <>
-      <div className="shell" inert={counterOpen}>
+      <div className="shell" inert={counterOpen || confirmation !== null}>
         <Pager pages={pages} page={page} onPageChange={setPage} />
         <PageHint labels={[t.history, t.round, t.items]} page={page} navLabel={t.pages} onPageChange={setPage} />
       </div>
@@ -86,6 +96,8 @@ export function App() {
       )}
 
       {toast && <Toast key={toast.id} toast={toast} onDone={dismissToast} />}
+
+      {confirmation && <ConfirmDialog {...confirmation} cancelLabel={t.cancel} onClose={closeConfirmation} />}
     </>
   )
 }

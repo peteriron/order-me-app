@@ -5,6 +5,15 @@ export function detectLocale(language: string | undefined): Locale {
   return language?.toLowerCase().startsWith('nl') ? 'nl' : 'en'
 }
 
+/**
+ * The locale for formatting dates and times: the phone's full locale (e.g. en-GB, with its 24-hour clock) when it
+ * speaks the app language, otherwise just the app language.
+ */
+export function formattingLocale(appLocale: Locale, deviceLanguage: string | undefined): string {
+  const deviceLang = deviceLanguage?.toLowerCase().split('-')[0]
+  return deviceLanguage && deviceLang === appLocale ? deviceLanguage : appLocale
+}
+
 export interface Messages {
   appName: string
   drinks: string
@@ -27,7 +36,15 @@ export interface Messages {
   round: string
   items: string
   pages: string
-  historySoon: string
+  historyEmpty: string
+  roundsCount: (n: number) => string
+  today: string
+  yesterday: string
+  roundAt: (time: string) => string
+  deleteRoundFrom: (time: string) => string
+  deleteRoundConfirm: string
+  delete: string
+  cancel: string
   itemsSoon: string
 }
 
@@ -54,7 +71,15 @@ export const messages: Record<Locale, Messages> = {
     round: 'Round',
     items: 'Items',
     pages: 'Pages',
-    historySoon: 'Rounds you mark as ordered will show up here.',
+    historyEmpty: 'No Rounds yet. Mark a Round as ordered and it shows up here.',
+    roundsCount: (n) => `${n} ${n === 1 ? 'Round' : 'Rounds'}`,
+    today: 'Today',
+    yesterday: 'Yesterday',
+    roundAt: (time) => `Round at ${time}`,
+    deleteRoundFrom: (time) => `Delete Round from ${time}`,
+    deleteRoundConfirm: 'Delete this Round from history?',
+    delete: 'Delete',
+    cancel: 'Cancel',
     itemsSoon: 'This is where you’ll add and edit the drinks and snacks in your Catalog.',
   },
   nl: {
@@ -79,7 +104,15 @@ export const messages: Record<Locale, Messages> = {
     round: 'Ronde',
     items: 'Items',
     pages: 'Pagina’s',
-    historySoon: 'Rondes die je als besteld markeert, verschijnen hier.',
+    historyEmpty: 'Nog geen rondes. Markeer een ronde als besteld en ze verschijnt hier.',
+    roundsCount: (n) => `${n} ${n === 1 ? 'ronde' : 'rondes'}`,
+    today: 'Vandaag',
+    yesterday: 'Gisteren',
+    roundAt: (time) => `Ronde van ${time}`,
+    deleteRoundFrom: (time) => `Ronde van ${time} verwijderen`,
+    deleteRoundConfirm: 'Deze ronde uit de geschiedenis verwijderen?',
+    delete: 'Verwijderen',
+    cancel: 'Annuleren',
     itemsSoon: 'Hier voeg je straks drankjes en snacks aan je catalogus toe en bewerk je ze.',
   },
 }
