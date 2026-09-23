@@ -47,7 +47,22 @@ export interface Messages {
   cancel: string
   orderAgain: string
   skippedItems: (n: number) => string
-  itemsSoon: string
+  catalogCount: (n: number) => string
+  addItem: string
+  editItem: string
+  editNamed: (name: string) => string
+  name: string
+  namePlaceholder: string
+  category: string
+  drink: string
+  snack: string
+  emoji: string
+  typeYourOwn: string
+  add: string
+  save: string
+  nameRequired: string
+  emojiRequired: string
+  deleteItemConfirm: (name: string) => string
 }
 
 export const messages: Record<Locale, Messages> = {
@@ -85,7 +100,22 @@ export const messages: Record<Locale, Messages> = {
     orderAgain: 'Order again',
     skippedItems: (n) =>
       n === 1 ? '1 item no longer exists and was skipped' : `${n} items no longer exist and were skipped`,
-    itemsSoon: 'This is where you’ll add and edit the drinks and snacks in your Catalog.',
+    catalogCount: (n) => `${n} in your Catalog`,
+    addItem: 'Add Item',
+    editItem: 'Edit Item',
+    editNamed: (name) => `Edit ${name}`,
+    name: 'Name',
+    namePlaceholder: 'e.g. Kriek',
+    category: 'Category',
+    drink: 'Drink',
+    snack: 'Snack',
+    emoji: 'Emoji',
+    typeYourOwn: 'Or type your own',
+    add: 'Add',
+    save: 'Save',
+    nameRequired: 'Give the Item a name',
+    emojiRequired: 'Pick an emoji',
+    deleteItemConfirm: (name) => `Delete “${name}”? History keeps it.`,
   },
   nl: {
     appName: 'Deze ronde is voor mij',
@@ -121,6 +151,21 @@ export const messages: Record<Locale, Messages> = {
     orderAgain: 'Opnieuw bestellen',
     skippedItems: (n) =>
       n === 1 ? '1 item bestaat niet meer en is overgeslagen' : `${n} items bestaan niet meer en zijn overgeslagen`,
-    itemsSoon: 'Hier voeg je straks drankjes en snacks aan je catalogus toe en bewerk je ze.',
+    catalogCount: (n) => `${n} in je catalogus`,
+    addItem: 'Item toevoegen',
+    editItem: 'Item bewerken',
+    editNamed: (name) => `${name} bewerken`,
+    name: 'Naam',
+    namePlaceholder: 'bv. Kriek',
+    category: 'Categorie',
+    drink: 'Drank',
+    snack: 'Snack',
+    emoji: 'Emoji',
+    typeYourOwn: 'Of typ er zelf een',
+    add: 'Toevoegen',
+    save: 'Bewaren',
+    nameRequired: 'Geef het item een naam',
+    emojiRequired: 'Kies een emoji',
+    deleteItemConfirm: (name) => `“${name}” verwijderen? De geschiedenis blijft behouden.`,
   },
 }

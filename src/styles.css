@@ -382,6 +382,15 @@ button {
   color: var(--text-muted);
 }
 
+.btn-block {
+  width: 100%;
+}
+
+.btn-danger-text {
+  margin-right: auto;
+  color: var(--danger);
+}
+
 .btn-danger {
   background: var(--danger);
   color: var(--on-danger);
@@ -606,6 +615,216 @@ button {
   gap: 0.25rem;
 }
 
+/* ---------- items page ---------- */
+.item-rows {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.item-row {
+  width: 100%;
+  min-height: 56px;
+  padding: 0 0.75rem 0 0.875rem;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.item-row:last-child {
+  border-bottom: 0;
+}
+
+.item-row:active {
+  background: var(--surface-2);
+}
+
+.item-row-emoji {
+  width: 1.75rem;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.item-row-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.item-row-edit {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+}
+
+/* ---------- item sheet ---------- */
+.sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--scrim);
+  animation: fade-in 120ms linear;
+}
+
+.sheet {
+  width: min(440px, 100%);
+  max-height: 92%;
+  overflow-y: auto;
+  padding: 0.625rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  animation: slide-up 240ms var(--ease-out);
+}
+
+.sheet-grab {
+  width: 40px;
+  height: 4px;
+  align-self: center;
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.sheet-title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.field {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.field > label,
+.field > legend {
+  padding: 0;
+  margin-bottom: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.field > label:not(:first-child) {
+  margin: 0.375rem 0 0;
+}
+
+.field-sub {
+  font-weight: 400 !important;
+}
+
+.input {
+  min-height: 48px;
+  padding: 0 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.input-emoji {
+  max-width: 8rem;
+  font-size: 1.375rem;
+}
+
+.field-problem {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.875rem;
+}
+
+/* Radio choices: the real input covers the whole label (invisible), so taps, keyboard and tests all hit it. */
+.choice {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.choice input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.choice:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.segmented {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.segmented .choice {
+  flex: 1;
+  min-height: 40px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.segmented .choice:has(input:checked) {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+}
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.emoji-choice {
+  min-height: 40px;
+  aspect-ratio: 1;
+  max-width: 100%;
+  border: 1.5px solid transparent;
+  background: var(--surface-2);
+  font-size: 1.375rem;
+}
+
+.emoji-choice:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.sheet-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
 /* ---------- confirm dialog ---------- */
 .scrim {
   position: fixed;
@@ -688,6 +907,7 @@ button {
     transition: none;
   }
   .counter,
+  .sheet,
   .toast {
     animation: fade-in 120ms linear;
   }

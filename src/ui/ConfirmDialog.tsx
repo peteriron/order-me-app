@@ -20,9 +20,14 @@ export function ConfirmDialog({ text, confirmLabel, cancelLabel, onConfirm, onCl
 
   useEffect(() => {
     cancelRef.current?.focus()
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
+    // Capture phase + stopPropagation: Escape closes only this dialog, not a sheet it was opened over.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      e.stopPropagation()
+      onClose()
+    }
+    document.addEventListener('keydown', onKey, true)
+    return () => document.removeEventListener('keydown', onKey, true)
   }, [onClose])
 
   return (

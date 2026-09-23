@@ -1,13 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAppState } from './app/useAppState.ts'
-import { gridSections, orderAgain, roundLines, totalOf, type PlacedRound } from './domain/index.ts'
+import {
+  catalogSections,
+  gridSections,
+  orderAgain,
+  roundLines,
+  totalOf,
+  type Item,
+  type ItemDraft,
+  type PlacedRound,
+} from './domain/index.ts'
 import { detectLocale, formattingLocale, messages } from './i18n/index.ts'
 import { ConfirmDialog, type Confirmation } from './ui/ConfirmDialog.tsx'
 import { CounterView } from './ui/CounterView.tsx'
 import { HistoryPage } from './ui/HistoryPage.tsx'
+import { ItemSheet } from './ui/ItemSheet.tsx'
+import { ItemsPage } from './ui/ItemsPage.tsx'
 import { PageHint } from './ui/PageHint.tsx'
 import { Pager } from './ui/Pager.tsx'
-import { PlaceholderPage } from './ui/PlaceholderPage.tsx'
 import { RoundPage } from './ui/RoundPage.tsx'
 import { Toast, type ToastMessage } from './ui/Toast.tsx'
 
@@ -19,9 +29,23 @@ export function App() {
   const [counterOpen, setCounterOpen] = useState(false)
   const [toast, setToast] = useState<ToastMessage | null>(null)
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null)
+  /** The Item sheet: `{}` to add a new Item, `{ item }` to edit one, null when closed. */
+  const [sheet, setSheet] = useState<{ item?: Item } | null>(null)
   const showButton = useRef<HTMLButtonElement>(null)
-  const { state, addItem, removeItem, clearRound, replaceRound, deleteRound, placeRound } = useAppState(locale)
+  const {
+    state,
+    addToRound,
+    removeFromRound,
+    clearRound,
+    replaceRound,
+    deleteRound,
+    placeRound,
+    createItem,
+    updateItem,
+    removeFromCatalog,
+  } = useAppState(locale)
   const sections = useMemo(() => gridSections(state.catalog, locale), [state.catalog, locale])
+  const catalogByName = useMemo(() => catalogSections(state.catalog, locale), [state.catalog, locale])
   const total = totalOf(state.round)
   const t = messages[locale]
   const dateLocale = formattingLocale(locale, navigator.language)
@@ -43,6 +67,24 @@ export function App() {
       setConfirmation({ text: t.deleteRoundConfirm, confirmLabel: t.delete, onConfirm: () => deleteRound(round.id) }),
     [t, deleteRound],
   )
+
+  const openAddItem = useCallback(() => setSheet({}), [])
+  const openEditItem = useCallback((item: Item) => setSheet({ item }), [])
+  const closeSheet = useCallback(() => setSheet(null), [])
+  const saveSheet = (draft: ItemDraft) => {
+    if (sheet?.item) updateItem(sheet.item.id, draft)
+    else createItem(draft)
+    setSheet(null)
+  }
+  const confirmDeleteItem = (item: Item) =>
+    setConfirmation({
+      text: t.deleteItemConfirm(item.name),
+      confirmLabel: t.delete,
+      onConfirm: () => {
+        removeFromCatalog(item.id)
+        setSheet(null)
+      },
+    })
 
   const orderAgainFrom = useCallback(
     (placed: PlacedRound) => {
@@ -71,20 +113,43 @@ export function App() {
         sections={sections}
         round={state.round}
         t={t}
-        onAdd={addItem}
-        onRemove={removeItem}
+        onAdd={addToRound}
+        onRemove={removeFromRound}
         onClear={clearRound}
         onShow={openCounter}
         showRef={showButton}
       />,
-      <PlaceholderPage key="items" title={t.items} text={t.itemsSoon} />,
+      <ItemsPage
+        key="items"
+        sections={catalogByName}
+        count={state.catalog.length}
+        t={t}
+        onAdd={openAddItem}
+        onEdit={openEditItem}
+      />,
     ],
-    [t, dateLocale, sections, state.round, state.history, addItem, removeItem, clearRound, openCounter, confirmDeleteRound, orderAgainFrom],
+    [
+      t,
+      dateLocale,
+      sections,
+      catalogByName,
+      state.catalog.length,
+      state.round,
+      state.history,
+      addToRound,
+      removeFromRound,
+      clearRound,
+      openCounter,
+      confirmDeleteRound,
+      orderAgainFrom,
+      openAddItem,
+      openEditItem,
+    ],
   )
 
   return (
     <>
-      <div className="shell" inert={counterOpen || confirmation !== null}>
+      <div className="shell" inert={counterOpen || sheet !== null || confirmation !== null}>
         <Pager pages={pages} page={page} onPageChange={setPage} />
         <PageHint labels={[t.history, t.round, t.items]} page={page} navLabel={t.pages} onPageChange={setPage} />
       </div>
@@ -94,11 +159,11 @@ export function App() {
           lines={roundLines(state.round, sections)}
           total={total}
           t={t}
-          onAdd={addItem}
+          onAdd={addToRound}
           onRemove={(itemId) => {
             // The Counter view has nothing to show once the last Item is gone.
             if (total === 1) setCounterOpen(false)
-            removeItem(itemId)
+            removeFromRound(itemId)
           }}
           onClear={() => {
             setCounterOpen(false)
@@ -111,6 +176,19 @@ export function App() {
             setToast({ id: Date.now(), text: t.roundPlaced, action: { label: t.undo, run: undo } })
           }}
         />
+      )}
+
+      {sheet && (
+        // The sheet stays open under a delete confirmation, but must not take taps while it is.
+        <div inert={confirmation !== null}>
+          <ItemSheet
+            item={sheet.item}
+            t={t}
+            onSave={saveSheet}
+            onDelete={sheet.item ? () => confirmDeleteItem(sheet.item!) : undefined}
+            onCancel={closeSheet}
+          />
+        </div>
       )}
 
       {toast && <Toast key={toast.id} toast={toast} onDone={dismissToast} />}
