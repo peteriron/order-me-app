@@ -6,6 +6,8 @@ import { EMOJI_CHOICES } from './emoji.ts'
 interface ItemSheetProps {
   /** The Item being edited, or undefined when adding a new one. */
   item?: Item
+  /** Opened from the "+ New" tile: the new Item also goes straight into the Round. */
+  forRound?: boolean
   t: Messages
   onSave: (draft: ItemDraft) => void
   onDelete?: () => void
@@ -18,7 +20,7 @@ const isChoice = (emoji: string) => (EMOJI_CHOICES as readonly string[]).include
  * Bottom sheet to add or edit an Item. It works on its own copy of the Item, so Cancel (or tapping outside)
  * throws every change away; only Save touches the Catalog.
  */
-export function ItemSheet({ item, t, onSave, onDelete, onCancel }: ItemSheetProps) {
+export function ItemSheet({ item, forRound, t, onSave, onDelete, onCancel }: ItemSheetProps) {
   const [name, setName] = useState(item?.name ?? '')
   const [category, setCategory] = useState<Category>(item?.category ?? 'drink')
   const [picked, setPicked] = useState(item && isChoice(item.emoji) ? item.emoji : item ? '' : EMOJI_CHOICES[0])
@@ -38,7 +40,7 @@ export function ItemSheet({ item, t, onSave, onDelete, onCancel }: ItemSheetProp
     else setProblem(checked.problem)
   }
 
-  const title = item ? t.editItem : t.addItem
+  const title = item ? t.editItem : forRound ? t.newItem : t.addItem
   return (
     <div className="sheet-scrim" onClick={(e) => e.target === e.currentTarget && onCancel()}>
       <form className="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" onSubmit={submit} noValidate>
@@ -130,7 +132,7 @@ export function ItemSheet({ item, t, onSave, onDelete, onCancel }: ItemSheetProp
             {t.cancel}
           </button>
           <button type="submit" className="btn btn-primary">
-            {item ? t.save : t.add}
+            {item ? t.save : forRound ? t.addToRound : t.add}
           </button>
         </div>
       </form>

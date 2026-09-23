@@ -37,10 +37,15 @@ export function useAppState(locale: Locale) {
   const addToRound = useCallback((itemId: string) => setState((s) => ({ ...s, round: add(s.round, itemId) })), [])
   const removeFromRound = useCallback((itemId: string) => setState((s) => ({ ...s, round: remove(s.round, itemId) })), [])
   const clearRound = useCallback(() => setState((s) => ({ ...s, round: clear(s.round) })), [])
-  const createItem = useCallback(
-    (draft: ItemDraft) => setState((s) => ({ ...s, catalog: addToCatalog(s.catalog, draft, crypto.randomUUID()) })),
-    [],
-  )
+  /** Adds a new Item to the Catalog, and optionally straight into the composing Round ("+ New" tile). */
+  const createItem = useCallback((draft: ItemDraft, options: { addToRound?: boolean } = {}) => {
+    const id = crypto.randomUUID()
+    setState((s) => ({
+      ...s,
+      catalog: addToCatalog(s.catalog, draft, id),
+      round: options.addToRound ? add(s.round, id) : s.round,
+    }))
+  }, [])
   const updateItem = useCallback(
     (itemId: string, draft: ItemDraft) => setState((s) => ({ ...s, catalog: editItem(s.catalog, itemId, draft) })),
     [],

@@ -12,10 +12,11 @@ interface RoundPageProps {
   onRemove: (itemId: string) => void
   onClear: () => void
   onShow: () => void
+  onNew: () => void
   showRef?: Ref<HTMLButtonElement>
 }
 
-export function RoundPage({ sections, round, t, onAdd, onRemove, onClear, onShow, showRef }: RoundPageProps) {
+export function RoundPage({ sections, round, t, onAdd, onRemove, onClear, onShow, onNew, showRef }: RoundPageProps) {
   const section = (category: keyof GridSections, heading: string) => (
     <section className="section" aria-labelledby={`heading-${category}`}>
       <h2 className="section-label" id={`heading-${category}`}>
@@ -37,6 +38,17 @@ export function RoundPage({ sections, round, t, onAdd, onRemove, onClear, onShow
             />
           )
         })}
+        {category === 'snack' && (
+          // Last tile of the grid: add something that isn't in the Catalog yet, straight into the Round.
+          <div className="tile tile-new">
+            <button type="button" className="tile-add" aria-label={t.newItem} onClick={onNew}>
+              <span className="tile-emoji" aria-hidden="true">
+                +
+              </span>
+              <span className="tile-name">{t.newTile}</span>
+            </button>
+          </div>
+        )}
       </div>
     </section>
   )
