@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   add,
+  addToCatalog,
   clear,
+  deleteItem,
   deletePlacedRound,
+  editItem,
   markOrdered,
   remove,
   type ComposingRound,
   type GridSections,
+  type ItemDraft,
   type Locale,
 } from '../domain/index.ts'
 import { loadAppState, saveAppState, type AppState, type KeyValueStore } from '../storage/index.ts'
@@ -30,9 +34,18 @@ export function useAppState(locale: Locale) {
   // Save on every change so a killed tab or locked phone loses nothing.
   useEffect(() => saveAppState(store, state), [store, state])
 
-  const addItem = useCallback((itemId: string) => setState((s) => ({ ...s, round: add(s.round, itemId) })), [])
-  const removeItem = useCallback((itemId: string) => setState((s) => ({ ...s, round: remove(s.round, itemId) })), [])
+  const addToRound = useCallback((itemId: string) => setState((s) => ({ ...s, round: add(s.round, itemId) })), [])
+  const removeFromRound = useCallback((itemId: string) => setState((s) => ({ ...s, round: remove(s.round, itemId) })), [])
   const clearRound = useCallback(() => setState((s) => ({ ...s, round: clear(s.round) })), [])
+  const createItem = useCallback(
+    (draft: ItemDraft) => setState((s) => ({ ...s, catalog: addToCatalog(s.catalog, draft, crypto.randomUUID()) })),
+    [],
+  )
+  const updateItem = useCallback(
+    (itemId: string, draft: ItemDraft) => setState((s) => ({ ...s, catalog: editItem(s.catalog, itemId, draft) })),
+    [],
+  )
+  const removeFromCatalog = useCallback((itemId: string) => setState((s) => ({ ...s, ...deleteItem(s, itemId) })), [])
   const replaceRound = useCallback((round: ComposingRound) => setState((s) => ({ ...s, round })), [])
   const deleteRound = useCallback(
     (roundId: string) => setState((s) => ({ ...s, history: deletePlacedRound(s.history, roundId) })),
@@ -48,5 +61,16 @@ export function useAppState(locale: Locale) {
     return () => setState((s) => ({ ...s, ...undo(s) }))
   }
 
-  return { state, addItem, removeItem, clearRound, replaceRound, deleteRound, placeRound }
+  return {
+    state,
+    addToRound,
+    removeFromRound,
+    clearRound,
+    replaceRound,
+    deleteRound,
+    placeRound,
+    createItem,
+    updateItem,
+    removeFromCatalog,
+  }
 }

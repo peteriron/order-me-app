@@ -81,12 +81,17 @@ export function totalOf(round: ComposingRound): number {
 
 export type GridSections = Record<Category, Item[]>
 
-/** Tile order for the Round page: Drinks then Snacks, each A–Z in the Operator's language. */
-export function gridSections(catalog: Catalog, locale: Locale): GridSections {
+/** The Catalog as the Items page lists it: Drinks then Snacks, each A–Z in the Operator's language. */
+export function catalogSections(catalog: Catalog, locale: Locale): GridSections {
   const byName = new Intl.Collator(locale).compare
   const section = (category: Category) =>
     catalog.filter((i) => i.category === category).sort((a, b) => byName(a.name, b.name))
   return { drink: section('drink'), snack: section('snack') }
+}
+
+/** Tile order for the Round page. A–Z for now; Popularity ordering arrives with #7. */
+export function gridSections(catalog: Catalog, locale: Locale): GridSections {
+  return catalogSections(catalog, locale)
 }
 
 export interface RoundLine {
@@ -195,4 +200,41 @@ export function orderAgain(placed: PlacedRound, catalog: Catalog): { round: Comp
     else skipped++
   }
   return { round: { counts }, skipped }
+}
+
+/** What the Operator fills in when adding or editing an Item. */
+export interface ItemDraft {
+  name: string
+  category: Category
+  emoji: string
+}
+
+export type DraftProblem = 'nameRequired' | 'emojiRequired'
+
+/** Tidies a draft (trimmed name, a single emoji) or says what is missing. */
+export function checkDraft(draft: ItemDraft): { ok: true; value: ItemDraft } | { ok: false; problem: DraftProblem } {
+  const name = draft.name.trim().replace(/\s+/g, ' ')
+  if (!name) return { ok: false, problem: 'nameRequired' }
+  // First grapheme, so multi-part emoji such as 👩‍🍳 survive intact.
+  const [first] = new Intl.Segmenter().segment(draft.emoji.trim())
+  if (!first) return { ok: false, problem: 'emojiRequired' }
+  return { ok: true, value: { name, category: draft.category, emoji: first.segment } }
+}
+
+export function addToCatalog(catalog: Catalog, draft: ItemDraft, id: string): Catalog {
+  return [...catalog, { id, ...draft }]
+}
+
+/** Changes an Item's name, category or emoji. Its id, and so its count in the composing Round, stays the same. */
+export function editItem(catalog: Catalog, itemId: string, draft: ItemDraft): Catalog {
+  return catalog.map((item) => (item.id === itemId ? { id: itemId, ...draft } : item))
+}
+
+/** Removes an Item from the Catalog and from the Round being composed. Placed Rounds keep their snapshot (ADR-0001). */
+export function deleteItem(
+  state: { catalog: Catalog; round: ComposingRound },
+  itemId: string,
+): { catalog: Catalog; round: ComposingRound } {
+  const { [itemId]: _removed, ...counts } = state.round.counts
+  return { catalog: state.catalog.filter((i) => i.id !== itemId), round: { counts } }
 }
