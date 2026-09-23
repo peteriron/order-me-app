@@ -148,3 +148,36 @@ export function markOrdered(
     undo: (current) => ({ round: previous, history: current.history.filter((r) => r.id !== placed.id) }),
   }
 }
+
+export interface HistoryDay {
+  /** 0 for today, 1 for yesterday, … counted in local calendar days. */
+  daysAgo: number
+  /** Local midnight at the start of that day. */
+  day: Date
+  rounds: PlacedRound[]
+}
+
+const startOfLocalDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate())
+
+/** Placed Rounds grouped by the local calendar day they were placed on, newest first. */
+export function groupByDay(history: PlacedRound[], now: Date): HistoryDay[] {
+  const today = startOfLocalDay(now).getTime()
+  const groups: HistoryDay[] = []
+  for (const round of history) {
+    const day = startOfLocalDay(new Date(round.placedAt))
+    // Rounding absorbs the 23- or 25-hour days around daylight-saving changes.
+    const daysAgo = Math.round((today - day.getTime()) / 86_400_000)
+    const last = groups.at(-1)
+    if (last?.daysAgo === daysAgo) last.rounds.push(round)
+    else groups.push({ daysAgo, day, rounds: [round] })
+  }
+  return groups
+}
+
+export function placedTotal(round: PlacedRound): number {
+  return round.lines.reduce((sum, line) => sum + line.count, 0)
+}
+
+export function deletePlacedRound(history: PlacedRound[], roundId: string): PlacedRound[] {
+  return history.filter((r) => r.id !== roundId)
+}
