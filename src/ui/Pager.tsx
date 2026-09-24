@@ -1,5 +1,5 @@
 import { useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from 'react'
-import { classify, dragOffset, settle, type GestureIntent } from './swipe.ts'
+import { classify, dragOffset, releaseVelocity, settle, type GestureIntent, type Sample } from './swipe.ts'
 
 interface PagerProps {
   pages: ReactNode[]
@@ -11,8 +11,9 @@ interface Gesture {
   pointerId: number
   x: number
   y: number
-  startedAt: number
   intent: GestureIntent
+  /** Horizontal positions over time, for the flick speed at release. */
+  samples: Sample[]
 }
 
 /** A tap straight after a swipe is the swipe's own click; swallow it so it can't add a tile. */
@@ -30,13 +31,20 @@ export function Pager({ pages, page, onPageChange }: PagerProps) {
 
   const onPointerDown = (e: PointerEvent) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return
-    gesture.current = { pointerId: e.pointerId, x: e.clientX, y: e.clientY, startedAt: e.timeStamp, intent: 'undecided' }
+    gesture.current = {
+      pointerId: e.pointerId,
+      x: e.clientX,
+      y: e.clientY,
+      intent: 'undecided',
+      samples: [{ x: e.clientX, t: e.timeStamp }],
+    }
   }
 
   const onPointerMove = (e: PointerEvent<HTMLElement>) => {
     const g = gesture.current
     if (!g || g.pointerId !== e.pointerId || g.intent === 'other') return
     const dx = e.clientX - g.x
+    g.samples.push({ x: e.clientX, t: e.timeStamp })
     if (g.intent === 'undecided') {
       g.intent = classify(dx, e.clientY - g.y)
       if (g.intent !== 'swipe') return
@@ -52,7 +60,14 @@ export function Pager({ pages, page, onPageChange }: PagerProps) {
     if (g.intent !== 'swipe') return
     swallowClicksUntil.current = e.timeStamp + SWALLOW_CLICK_MS
     setOffset(null)
-    const next = settle({ page, lastPage, dx: e.clientX - g.x, ms: e.timeStamp - g.startedAt, width: e.currentTarget.clientWidth })
+    g.samples.push({ x: e.clientX, t: e.timeStamp })
+    const next = settle({
+      page,
+      lastPage,
+      dx: e.clientX - g.x,
+      velocity: releaseVelocity(g.samples),
+      width: e.currentTarget.clientWidth,
+    })
     if (next !== page) onPageChange(next)
   }
 

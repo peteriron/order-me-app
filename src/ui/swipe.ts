@@ -24,10 +24,36 @@ export function dragOffset(dx: number, page: number, lastPage: number): number {
   return pastEdge ? dx * EDGE_RESISTANCE : dx
 }
 
+/** How far back from release the flick speed is measured. */
+export const VELOCITY_WINDOW_MS = 100
+
+export interface Sample {
+  x: number
+  /** Event timestamp, ms. */
+  t: number
+}
+
+/**
+ * Finger speed (px/ms) at release: how far it travelled in the last VELOCITY_WINDOW_MS, divided by that window.
+ * Where the finger was at the start of the window is taken from the latest sample at or before that moment (between
+ * samples the finger may simply have rested). Robust to what goes wrong on real phones:
+ * - a pause before the flick doesn't dilute it (averaging over the whole gesture would);
+ * - a busy phone coalescing the moves into one or two events still yields the same travel.
+ */
+export function releaseVelocity(samples: Sample[]): number {
+  const last = samples.at(-1)
+  const first = samples[0]
+  if (!last || !first || last.t <= first.t) return 0
+  // Gestures shorter than the window: average over the whole gesture.
+  if (last.t - first.t < VELOCITY_WINDOW_MS) return (last.x - first.x) / (last.t - first.t)
+  const windowStart = last.t - VELOCITY_WINDOW_MS
+  const from = samples.findLast((s) => s.t <= windowStart) ?? first
+  return (last.x - from.x) / VELOCITY_WINDOW_MS
+}
+
 /** The page a released swipe lands on. Positive dx means the finger moved right, towards earlier pages. */
-export function settle(args: { page: number; lastPage: number; dx: number; ms: number; width: number }): number {
-  const { page, lastPage, dx, ms, width } = args
-  const velocity = dx / Math.max(ms, 1)
+export function settle(args: { page: number; lastPage: number; dx: number; velocity: number; width: number }): number {
+  const { page, lastPage, dx, velocity, width } = args
   let next = page
   if (dx <= -width * DISTANCE_THRESHOLD || velocity <= -FLING_VELOCITY) next = page + 1
   else if (dx >= width * DISTANCE_THRESHOLD || velocity >= FLING_VELOCITY) next = page - 1
