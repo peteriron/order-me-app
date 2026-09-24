@@ -1,0 +1,19 @@
+<!--
+  App icon source (look-and-feel.md: amber rounded square, dark tray + two glasses, line style, no text).
+  512×512. The artwork stays inside the central 80% circle so maskable crops never cut it.
+  scripts/render-icons.mjs renders the PNGs in public/icons from this file; `full-bleed` drops the corner rounding.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect id="bg" width="512" height="512" rx="112" fill="#f5a524"/>
+  <g fill="none" stroke="#1a1204" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+    <!-- pint glass, with a beer line below the foam -->
+    <path d="M158 152 H252 L240 326 H170 Z"/>
+    <path d="M163 198 H247"/>
+    <!-- wine glass: bowl, stem, foot -->
+    <path d="M284 152 H364 C364 216 348 250 324 252 C300 250 284 216 284 152 Z"/>
+    <path d="M324 252 V322"/>
+    <path d="M294 326 H354"/>
+  </g>
+  <!-- the tray -->
+  <rect x="116" y="336" width="280" height="26" rx="13" fill="#1a1204"/>
+</svg>
