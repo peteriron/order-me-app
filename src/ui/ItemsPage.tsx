@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { Category, GridSections, Item } from '../domain/index.ts'
 import type { Messages } from '../i18n/index.ts'
 
@@ -8,10 +9,12 @@ interface ItemsPageProps {
   t: Messages
   onAdd: () => void
   onEdit: (item: Item) => void
+  /** The Settings section, shown below the Catalog. */
+  children?: ReactNode
 }
 
 /** The Operator's Catalog: every Item by category, A–Z, each row opening the edit sheet. */
-export function ItemsPage({ sections, count, t, onAdd, onEdit }: ItemsPageProps) {
+export function ItemsPage({ sections, count, t, onAdd, onEdit, children }: ItemsPageProps) {
   const section = (category: Category, heading: string) => (
     <section className="section" aria-labelledby={`items-heading-${category}`}>
       <h2 className="section-label" id={`items-heading-${category}`}>
@@ -54,6 +57,7 @@ export function ItemsPage({ sections, count, t, onAdd, onEdit }: ItemsPageProps)
       </button>
       {section('drink', t.drinks)}
       {section('snack', t.snacks)}
+      {children}
     </section>
   )
 }

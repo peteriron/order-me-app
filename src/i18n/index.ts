@@ -1,8 +1,14 @@
+import type { LanguageSetting } from '../app/settings.ts'
 import type { Locale } from '../domain/index.ts'
 
 /** Dutch when the device language is any flavour of Dutch, otherwise English. */
 export function detectLocale(language: string | undefined): Locale {
   return language?.toLowerCase().startsWith('nl') ? 'nl' : 'en'
+}
+
+/** The language the app speaks: the Operator's choice, or the phone's language for 'system'. */
+export function resolveLocale(setting: LanguageSetting, deviceLanguage: string | undefined): Locale {
+  return setting === 'system' ? detectLocale(deviceLanguage) : setting
 }
 
 /**
@@ -66,6 +72,14 @@ export interface Messages {
   nameRequired: string
   emojiRequired: string
   deleteItemConfirm: (name: string) => string
+  settings: string
+  language: string
+  theme: string
+  system: string
+  dark: string
+  light: string
+  clearHistory: string
+  clearHistoryConfirm: string
 }
 
 export const messages: Record<Locale, Messages> = {
@@ -122,6 +136,14 @@ export const messages: Record<Locale, Messages> = {
     nameRequired: 'Give the Item a name',
     emojiRequired: 'Pick an emoji',
     deleteItemConfirm: (name) => `Delete “${name}”? History keeps it.`,
+    settings: 'Settings',
+    language: 'Language',
+    theme: 'Theme',
+    system: 'System',
+    dark: 'Dark',
+    light: 'Light',
+    clearHistory: 'Clear history',
+    clearHistoryConfirm: 'Delete all past Rounds?',
   },
   nl: {
     appName: 'Deze ronde is voor mij',
@@ -176,5 +198,13 @@ export const messages: Record<Locale, Messages> = {
     nameRequired: 'Geef het item een naam',
     emojiRequired: 'Kies een emoji',
     deleteItemConfirm: (name) => `“${name}” verwijderen? De geschiedenis blijft behouden.`,
+    settings: 'Instellingen',
+    language: 'Taal',
+    theme: 'Thema',
+    system: 'Systeem',
+    dark: 'Donker',
+    light: 'Licht',
+    clearHistory: 'Geschiedenis wissen',
+    clearHistoryConfirm: 'Alle vorige rondes verwijderen?',
   },
 }

@@ -87,4 +87,26 @@ describe('app state storage', () => {
     expect(countOf(state.round, 'd')).toBe(2)
     expect(state.history).toEqual([])
   })
+
+  it('starts with the default settings: language follows the phone, dark theme', () => {
+    expect(loadAppState(memoryStore(), { locale: 'en', newId: ids() }).settings).toEqual({ language: 'system', theme: 'dark' })
+  })
+
+  it('remembers the chosen language and theme after a restart', () => {
+    const store = memoryStore()
+    const first = loadAppState(store, { locale: 'en', newId: ids() })
+    saveAppState(store, { ...first, settings: { language: 'nl', theme: 'light' } })
+    expect(loadAppState(store, { locale: 'en', newId: ids() }).settings).toEqual({ language: 'nl', theme: 'light' })
+  })
+
+  it('upgrades a save from before settings existed, keeping history', () => {
+    const store = memoryStore()
+    const catalog = [{ id: 'd', name: 'Duvel', category: 'drink', emoji: '🍺' }]
+    const history = [{ id: 'r1', placedAt: '2026-09-22T21:14:00.000Z', lines: [] }]
+    store.setItem('order-me', JSON.stringify({ version: 2, catalog, round: { counts: {} }, history }))
+
+    const state = loadAppState(store, { locale: 'en', newId: ids() })
+    expect(state.history).toEqual(history)
+    expect(state.settings).toEqual({ language: 'system', theme: 'dark' })
+  })
 })
