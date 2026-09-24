@@ -14,6 +14,7 @@ import {
   type Locale,
 } from '../domain/index.ts'
 import { loadAppState, saveAppState, type AppState, type KeyValueStore } from '../storage/index.ts'
+import type { LanguageSetting, ThemeSetting } from './settings.ts'
 
 /** window.localStorage, or an in-memory stand-in when the browser refuses access (e.g. some private modes). */
 function browserStore(): KeyValueStore {
@@ -25,10 +26,11 @@ function browserStore(): KeyValueStore {
   }
 }
 
-export function useAppState(locale: Locale) {
+/** `seedLocale` only matters on first launch, when the starter Catalog is created. */
+export function useAppState(seedLocale: Locale) {
   const [store] = useState(browserStore)
   const [state, setState] = useState<AppState>(() =>
-    loadAppState(store, { locale, newId: () => crypto.randomUUID() }),
+    loadAppState(store, { locale: seedLocale, newId: () => crypto.randomUUID() }),
   )
 
   // Save on every change so a killed tab or locked phone loses nothing.
@@ -51,6 +53,15 @@ export function useAppState(locale: Locale) {
     [],
   )
   const removeFromCatalog = useCallback((itemId: string) => setState((s) => ({ ...s, ...deleteItem(s, itemId) })), [])
+  const clearHistory = useCallback(() => setState((s) => ({ ...s, history: [] })), [])
+  const setLanguage = useCallback(
+    (language: LanguageSetting) => setState((s) => ({ ...s, settings: { ...s.settings, language } })),
+    [],
+  )
+  const setTheme = useCallback(
+    (theme: ThemeSetting) => setState((s) => ({ ...s, settings: { ...s.settings, theme } })),
+    [],
+  )
   const replaceRound = useCallback((round: ComposingRound) => setState((s) => ({ ...s, round })), [])
   const deleteRound = useCallback(
     (roundId: string) => setState((s) => ({ ...s, history: deletePlacedRound(s.history, roundId) })),
@@ -77,5 +88,8 @@ export function useAppState(locale: Locale) {
     createItem,
     updateItem,
     removeFromCatalog,
+    clearHistory,
+    setLanguage,
+    setTheme,
   }
 }

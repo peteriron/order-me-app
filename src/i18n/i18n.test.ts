@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { detectLocale, formattingLocale } from './index.ts'
+import { detectLocale, formattingLocale, resolveLocale } from './index.ts'
 
 describe('app language', () => {
   it('is Dutch for any Dutch-speaking region and English otherwise', () => {
@@ -26,5 +26,17 @@ describe('formatting locale for dates and times', () => {
   it('formats an English time on a British phone as 24-hour', () => {
     const time = new Intl.DateTimeFormat(formattingLocale('en', 'en-GB'), { hour: '2-digit', minute: '2-digit' })
     expect(time.format(new Date(2026, 8, 23, 19, 25))).toBe('19:25')
+  })
+})
+
+describe('language setting', () => {
+  it('System follows the phone', () => {
+    expect(resolveLocale('system', 'nl-BE')).toBe('nl')
+    expect(resolveLocale('system', 'en-GB')).toBe('en')
+  })
+
+  it('a chosen language wins over the phone', () => {
+    expect(resolveLocale('nl', 'en-GB')).toBe('nl')
+    expect(resolveLocale('en', 'nl-BE')).toBe('en')
   })
 })

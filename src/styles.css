@@ -1,4 +1,5 @@
-/* Tokens from docs/look-and-feel.md. Dark is the default; the light theme arrives with Settings. */
+/* Tokens from docs/look-and-feel.md. Dark is the default; Settings can switch to light (data-theme on <html>).
+   contrast.test.ts checks every text/background pair against WCAG AA in both themes. */
 :root {
   color-scheme: dark;
   --bg: #0e0e10;
@@ -16,9 +17,31 @@
   --danger: #f87171;
   --on-danger: #1c0707;
   --scrim: rgb(0 0 0 / 0.6);
+  --tile-shadow: none;
 
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --font: -apple-system, 'SF Pro Text', Roboto, 'Segoe UI', system-ui, sans-serif;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #fafaf9;
+  --surface: #ffffff;
+  --surface-2: #f0efec;
+  --border: #e2e0db;
+  --text: #1c1917;
+  --text-muted: #57534e;
+  --accent: #b45309;
+  --accent-fill: #f59e0b;
+  --on-accent: #1a1204;
+  --accent-soft: rgb(245 158 11 / 0.14);
+  --accent-line: rgb(180 83 9 / 0.45);
+  --snack: #0f766e;
+  --danger: #b91c1c;
+  --on-danger: #ffffff;
+  --scrim: rgb(28 25 23 / 0.4);
+  /* Light surfaces are close to the background, so tiles and cards get a hairline lift (look-and-feel.md). */
+  --tile-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
 }
 
 *,
@@ -203,6 +226,7 @@ button {
   border-radius: 16px;
   background: var(--surface);
   border: 1px solid var(--border);
+  box-shadow: var(--tile-shadow);
   transition:
     transform 160ms var(--ease-out),
     background-color 160ms;
@@ -257,6 +281,7 @@ button {
 .tile-new {
   border: 1.5px dashed var(--border);
   background: transparent;
+  box-shadow: none;
   color: var(--text-muted);
 }
 
@@ -400,6 +425,15 @@ button {
 .btn-danger-text {
   margin-right: auto;
   color: var(--danger);
+}
+
+.btn:disabled.btn-danger-text {
+  color: var(--text-muted);
+}
+
+.settings-clear {
+  align-self: flex-start;
+  padding-inline: 0;
 }
 
 .btn-danger {
@@ -572,6 +606,7 @@ button {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
+  box-shadow: var(--tile-shadow);
 }
 
 .history-card-head {

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAppState } from './app/useAppState.ts'
+import { useTheme } from './app/useTheme.ts'
 import {
   catalogSections,
   gridSections,
@@ -10,7 +11,7 @@ import {
   type ItemDraft,
   type PlacedRound,
 } from './domain/index.ts'
-import { detectLocale, formattingLocale, messages } from './i18n/index.ts'
+import { detectLocale, formattingLocale, messages, resolveLocale } from './i18n/index.ts'
 import { ConfirmDialog, type Confirmation } from './ui/ConfirmDialog.tsx'
 import { CounterView } from './ui/CounterView.tsx'
 import { HistoryPage } from './ui/HistoryPage.tsx'
@@ -19,12 +20,12 @@ import { ItemsPage } from './ui/ItemsPage.tsx'
 import { PageHint } from './ui/PageHint.tsx'
 import { Pager } from './ui/Pager.tsx'
 import { RoundPage } from './ui/RoundPage.tsx'
+import { SettingsSection } from './ui/SettingsSection.tsx'
 import { Toast, type ToastMessage } from './ui/Toast.tsx'
 
 const ROUND_PAGE = 1
 
 export function App() {
-  const [locale] = useState(() => detectLocale(navigator.language))
   const [page, setPage] = useState(ROUND_PAGE)
   const [counterOpen, setCounterOpen] = useState(false)
   const [toast, setToast] = useState<ToastMessage | null>(null)
@@ -43,7 +44,12 @@ export function App() {
     createItem,
     updateItem,
     removeFromCatalog,
-  } = useAppState(locale)
+    clearHistory,
+    setLanguage,
+    setTheme,
+  } = useAppState(detectLocale(navigator.language))
+  const locale = resolveLocale(state.settings.language, navigator.language)
+  useTheme(state.settings.theme)
   const sections = useMemo(() => gridSections(state.catalog, locale), [state.catalog, locale])
   const catalogByName = useMemo(() => catalogSections(state.catalog, locale), [state.catalog, locale])
   const total = totalOf(state.round)
@@ -68,6 +74,10 @@ export function App() {
     [t, deleteRound],
   )
 
+  const confirmClearHistory = useCallback(
+    () => setConfirmation({ text: t.clearHistoryConfirm, confirmLabel: t.clearHistory, onConfirm: clearHistory }),
+    [t, clearHistory],
+  )
   const openAddItem = useCallback(() => setSheet({}), [])
   const openNewForRound = useCallback(() => setSheet({ forRound: true }), [])
   const openEditItem = useCallback((item: Item) => setSheet({ item }), [])
@@ -128,7 +138,16 @@ export function App() {
         t={t}
         onAdd={openAddItem}
         onEdit={openEditItem}
-      />,
+      >
+        <SettingsSection
+          settings={state.settings}
+          hasHistory={state.history.length > 0}
+          t={t}
+          onLanguage={setLanguage}
+          onTheme={setTheme}
+          onClearHistory={confirmClearHistory}
+        />
+      </ItemsPage>,
     ],
     [
       t,
@@ -147,6 +166,10 @@ export function App() {
       openAddItem,
       openEditItem,
       openNewForRound,
+      state.settings,
+      setLanguage,
+      setTheme,
+      confirmClearHistory,
     ],
   )
 
