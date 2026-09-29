@@ -35,6 +35,8 @@ export interface Messages {
   backToRound: string
   addOne: (name: string) => string
   total: string
+  share: string
+  copied: string
   markOrdered: string
   roundPlaced: string
   undo: string
@@ -98,6 +100,8 @@ export const messages: Record<Locale, Messages> = {
     backToRound: 'Back to Round',
     addOne: (name) => `Add one ${name}`,
     total: 'Total',
+    share: 'Share',
+    copied: 'Copied to clipboard',
     markOrdered: 'Mark as ordered',
     roundPlaced: 'Round placed',
     undo: 'Undo',
@@ -160,6 +164,8 @@ export const messages: Record<Locale, Messages> = {
     backToRound: 'Terug naar ronde',
     addOne: (name) => `Eén ${name} meer`,
     total: 'Totaal',
+    share: 'Delen',
+    copied: 'Gekopieerd',
     markOrdered: 'Besteld',
     roundPlaced: 'Ronde geplaatst',
     undo: 'Ongedaan maken',

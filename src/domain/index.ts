@@ -113,6 +113,12 @@ export function roundLines(round: ComposingRound, sections: GridSections): Round
     .filter((line) => line.count > 0)
 }
 
+/** The Round as plain text for the share sheet: "{count}× {name}" per line in grid order, then the total. No emoji. */
+export function shareText(lines: RoundLine[], totalLabel: string): string {
+  const total = lines.reduce((sum, line) => sum + line.count, 0)
+  return [...lines.map(({ item, count }) => `${count}× ${item.name}`), `${totalLabel}: ${total}`].join('\n')
+}
+
 /** One line of a placed Round: a frozen copy of the Item as it was (ADR-0001) plus its id, for Popularity only (ADR-0002). */
 export interface PlacedLine {
   itemId: string

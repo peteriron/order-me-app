@@ -512,6 +512,11 @@ button {
   justify-content: space-between;
 }
 
+.counter-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
 .counter-body {
   flex: 1;
   min-height: 0;

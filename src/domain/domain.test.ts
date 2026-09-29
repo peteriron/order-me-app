@@ -20,10 +20,12 @@ import {
   remove,
   roundLines,
   seedCatalog,
+  shareText,
   totalOf,
   type Item,
   type PlacedRound,
 } from './index.ts'
+import { messages } from '../i18n/index.ts'
 
 const sequentialIds = () => {
   let n = 0
@@ -250,6 +252,22 @@ describe('Round lines for the Counter view', () => {
   it('leaves out Items that are not in the Round', () => {
     const round = add(emptyRound(), 'duvel')
     expect(roundLines(round, sections).map((l) => l.item.name)).toEqual(['Duvel'])
+  })
+})
+
+describe('share text', () => {
+  const duvel: Item = { id: 'duvel', name: 'Duvel', category: 'drink', emoji: '🍺' }
+  const cola: Item = { id: 'cola', name: 'Cola', category: 'drink', emoji: '🥤' }
+  const chips: Item = { id: 'chips', name: 'Chips', category: 'snack', emoji: '🥔' }
+  const sections = { drink: [duvel, cola], snack: [chips] }
+  const round = add(add(add(add(add(emptyRound(), 'chips'), 'cola'), 'duvel'), 'duvel'), 'duvel')
+
+  it('lists one plain line per Item in grid order, drinks then snacks, then the total', () => {
+    expect(shareText(roundLines(round, sections), messages.en.total)).toBe('3× Duvel\n1× Cola\n1× Chips\nTotal: 5')
+  })
+
+  it('says Totaal in Dutch', () => {
+    expect(shareText(roundLines(round, sections), messages.nl.total)).toBe('3× Duvel\n1× Cola\n1× Chips\nTotaal: 5')
   })
 })
 
