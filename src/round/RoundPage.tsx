@@ -1,11 +1,12 @@
 import type { Ref } from 'react'
-import { countOf, totalOf, type ComposingRound, type GridSections } from '../domain/index.ts'
-import type { Messages } from '../i18n/index.ts'
+import type { Sections } from '../items/catalog.ts'
+import type { Messages } from '../shared/i18n.ts'
 import { RoundBar } from './RoundBar.tsx'
 import { Tile } from './Tile.tsx'
+import { countOf, totalOf, type ComposingRound } from './round.ts'
 
 interface RoundPageProps {
-  sections: GridSections
+  sections: Sections
   round: ComposingRound
   t: Messages
   onAdd: (itemId: string) => void
@@ -17,7 +18,7 @@ interface RoundPageProps {
 }
 
 export function RoundPage({ sections, round, t, onAdd, onRemove, onClear, onShow, onNew, showRef }: RoundPageProps) {
-  const section = (category: keyof GridSections, heading: string) => (
+  const section = (category: keyof Sections, heading: string) => (
     <section className="section" aria-labelledby={`heading-${category}`}>
       <h2 className="section-label" id={`heading-${category}`}>
         <span className={`dot dot-${category}`} aria-hidden="true" />

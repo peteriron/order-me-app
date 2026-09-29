@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
-import { browserHost, keepScreenAwake } from '../app/wakeLock.ts'
-import type { RoundLine } from '../domain/index.ts'
-import type { Messages } from '../i18n/index.ts'
+import type { RoundLine } from '../round/round.ts'
+import type { Messages } from '../shared/i18n.ts'
+import { browserHost, keepScreenAwake } from './wakeLock.ts'
 
 interface CounterViewProps {
   lines: RoundLine[]

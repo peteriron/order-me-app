@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react'
-import type { Category, GridSections, Item } from '../domain/index.ts'
-import type { Messages } from '../i18n/index.ts'
+import type { Messages } from '../shared/i18n.ts'
+import type { Category, Item, Sections } from './catalog.ts'
 
 interface ItemsPageProps {
   /** The Catalog A–Z per category (catalogSections), independent of the grid's order. */
-  sections: GridSections
+  sections: Sections
   count: number
   t: Messages
   onAdd: () => void

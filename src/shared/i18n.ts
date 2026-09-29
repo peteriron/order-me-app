@@ -1,5 +1,6 @@
-import type { LanguageSetting } from '../app/settings.ts'
-import type { Locale } from '../domain/index.ts'
+export type Locale = 'en' | 'nl'
+/** 'system' follows the phone's language. */
+export type LanguageSetting = 'system' | Locale
 
 /** Dutch when the device language is any flavour of Dutch, otherwise English. */
 export function detectLocale(language: string | undefined): Locale {

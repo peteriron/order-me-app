@@ -1,20 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import {
-  add,
-  addToCatalog,
-  clear,
-  deleteItem,
-  deletePlacedRound,
-  editItem,
-  markOrdered,
-  remove,
-  type ComposingRound,
-  type GridSections,
-  type ItemDraft,
-  type Locale,
-} from '../domain/index.ts'
-import { loadAppState, saveAppState, type AppState, type KeyValueStore } from '../storage/index.ts'
-import type { LanguageSetting, ThemeSetting } from './settings.ts'
+import { deletePlacedRound, markOrdered } from './history/history.ts'
+import { addToCatalog, deleteItem, editItem, type ItemDraft, type Sections } from './items/catalog.ts'
+import { add, clear, remove, type ComposingRound } from './round/round.ts'
+import type { ThemeSetting } from './settings/settings.ts'
+import type { LanguageSetting, Locale } from './shared/i18n.ts'
+import { loadAppState, saveAppState, type AppState, type KeyValueStore } from './shared/storage.ts'
 
 /** window.localStorage, or an in-memory stand-in when the browser refuses access (e.g. some private modes). */
 function browserStore(): KeyValueStore {
@@ -72,7 +62,7 @@ export function useAppState(seedLocale: Locale) {
   )
 
   /** Places the composing Round and returns a function that undoes exactly that placement. */
-  const placeRound = (sections: GridSections) => {
+  const placeRound = (sections: Sections) => {
     const meta = { id: crypto.randomUUID(), placedAt: new Date().toISOString() }
     const { next, undo } = markOrdered(state, sections, meta)
     setState({ ...state, ...next })

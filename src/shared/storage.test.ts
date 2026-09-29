@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { add, countOf } from '../domain/index.ts'
-import { loadAppState, saveAppState, type KeyValueStore } from './index.ts'
+import { add, countOf } from '../round/round.ts'
+import { loadAppState, saveAppState, type KeyValueStore } from './storage.ts'
 
 /** In-memory stand-in for window.localStorage. */
 function memoryStore(): KeyValueStore & { data: Map<string, string> } {

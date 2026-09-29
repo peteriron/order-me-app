@@ -1,5 +1,5 @@
-import type { LanguageSetting, Settings, ThemeSetting } from '../app/settings.ts'
-import type { Messages } from '../i18n/index.ts'
+import type { LanguageSetting, Messages } from '../shared/i18n.ts'
+import type { Settings, ThemeSetting } from './settings.ts'
 
 interface SettingsSectionProps {
   settings: Settings

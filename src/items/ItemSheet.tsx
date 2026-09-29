@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { checkDraft, type Category, type DraftProblem, type Item, type ItemDraft } from '../domain/index.ts'
-import type { Messages } from '../i18n/index.ts'
+import type { Messages } from '../shared/i18n.ts'
+import { checkDraft, type Category, type DraftProblem, type Item, type ItemDraft } from './catalog.ts'
 import { EMOJI_CHOICES } from './emoji.ts'
 
 interface ItemSheetProps {

@@ -1,29 +1,22 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useAppState } from './app/useAppState.ts'
-import { shareOrCopy } from './app/share.ts'
-import { useTheme } from './app/useTheme.ts'
-import { useTileOrder } from './app/useTileOrder.ts'
-import {
-  catalogSections,
-  orderAgain,
-  roundLines,
-  shareText,
-  totalOf,
-  type Item,
-  type ItemDraft,
-  type PlacedRound,
-} from './domain/index.ts'
-import { detectLocale, formattingLocale, messages, resolveLocale } from './i18n/index.ts'
-import { ConfirmDialog, type Confirmation } from './ui/ConfirmDialog.tsx'
-import { CounterView } from './ui/CounterView.tsx'
-import { HistoryPage } from './ui/HistoryPage.tsx'
-import { ItemSheet } from './ui/ItemSheet.tsx'
-import { ItemsPage } from './ui/ItemsPage.tsx'
-import { PageHint } from './ui/PageHint.tsx'
-import { Pager } from './ui/Pager.tsx'
-import { RoundPage } from './ui/RoundPage.tsx'
-import { SettingsSection } from './ui/SettingsSection.tsx'
-import { Toast, type ToastMessage } from './ui/Toast.tsx'
+import { CounterView } from './counter/CounterView.tsx'
+import { shareOrCopy, shareText } from './counter/share.ts'
+import { HistoryPage } from './history/HistoryPage.tsx'
+import { orderAgain, type PlacedRound } from './history/history.ts'
+import { ItemSheet } from './items/ItemSheet.tsx'
+import { ItemsPage } from './items/ItemsPage.tsx'
+import { catalogSections, type Item, type ItemDraft } from './items/catalog.ts'
+import { RoundPage } from './round/RoundPage.tsx'
+import { roundLines, totalOf } from './round/round.ts'
+import { useTileOrder } from './round/useTileOrder.ts'
+import { SettingsSection } from './settings/SettingsSection.tsx'
+import { useTheme } from './settings/useTheme.ts'
+import { detectLocale, formattingLocale, messages, resolveLocale } from './shared/i18n.ts'
+import { ConfirmDialog, type Confirmation } from './shared/ui/ConfirmDialog.tsx'
+import { PageHint } from './shared/ui/PageHint.tsx'
+import { Pager } from './shared/ui/Pager.tsx'
+import { Toast, type ToastMessage } from './shared/ui/Toast.tsx'
+import { useAppState } from './useAppState.ts'
 
 const ROUND_PAGE = 1
 

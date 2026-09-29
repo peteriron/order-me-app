@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { groupByDay, placedTotal, type HistoryDay, type PlacedRound } from '../domain/index.ts'
-import type { Messages } from '../i18n/index.ts'
+import type { Messages } from '../shared/i18n.ts'
+import { groupByDay, placedTotal, type HistoryDay, type PlacedRound } from './history.ts'
 
 interface HistoryPageProps {
   history: PlacedRound[]

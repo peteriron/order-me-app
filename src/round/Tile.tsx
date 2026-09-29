@@ -1,4 +1,4 @@
-import type { Item } from '../domain/index.ts'
+import type { Item } from '../items/catalog.ts'
 
 interface TileProps {
   item: Item
