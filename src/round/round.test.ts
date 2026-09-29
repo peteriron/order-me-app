@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { catalogSections, type Item } from '../items/catalog.ts'
-import { add, clear, countOf, emptyRound, remove, roundLines, totalOf } from './round.ts'
+import { add, countOf, emptyRound, remove, roundLines, totalOf } from './round.ts'
 
 describe('composing Round', () => {
   it('starts empty', () => {
@@ -33,12 +33,6 @@ describe('composing Round', () => {
   it('ignores removing an Item that is not in the Round', () => {
     const round = add(emptyRound(), 'cola')
     expect(remove(round, 'duvel').counts).toEqual({ cola: 1 })
-  })
-
-  it('clears every Item at once', () => {
-    const round = clear(add(add(add(emptyRound(), 'duvel'), 'duvel'), 'cola'))
-    expect(totalOf(round)).toBe(0)
-    expect(round.counts).toEqual({})
   })
 
   it('never mutates the Round it was given', () => {

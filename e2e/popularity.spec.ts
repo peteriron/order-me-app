@@ -20,7 +20,7 @@ async function seedHistory(page: Page, rounds: { daysAgo: number; items: string[
 const firstDrinks = (page: Page) =>
   page
     // The Round page's Drinks section (the Items page has one too).
-    .locator('section[aria-labelledby="heading-drink"]')
+    .locator('section[aria-labelledby="round-heading-drink"]')
     .locator('.tile-name')
     .allTextContents()
     .then((names) => names.slice(0, 4))

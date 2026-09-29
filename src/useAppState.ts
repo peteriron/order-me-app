@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { deletePlacedRound, markOrdered } from './history/history.ts'
 import { addToCatalog, deleteItem, editItem, type ItemDraft, type Sections } from './items/catalog.ts'
-import { add, clear, remove, type ComposingRound } from './round/round.ts'
+import { add, emptyRound, remove, type ComposingRound } from './round/round.ts'
 import type { ThemeSetting } from './settings/settings.ts'
 import type { LanguageSetting, Locale } from './shared/i18n.ts'
 import { loadAppState, saveAppState, type AppState, type KeyValueStore } from './shared/storage.ts'
@@ -29,37 +29,31 @@ export function useAppState(seedLocale: Locale) {
   /** Goes up on every place and undo-place: the moments the tile order is recomputed (see useTileOrder). */
   const [placements, setPlacements] = useState(0)
 
-  const addToRound = useCallback((itemId: string) => setState((s) => ({ ...s, round: add(s.round, itemId) })), [])
-  const removeFromRound = useCallback((itemId: string) => setState((s) => ({ ...s, round: remove(s.round, itemId) })), [])
-  const clearRound = useCallback(() => setState((s) => ({ ...s, round: clear(s.round) })), [])
-  /** Adds a new Item to the Catalog, and optionally straight into the composing Round ("+ New" tile). */
-  const createItem = useCallback((draft: ItemDraft, options: { addToRound?: boolean } = {}) => {
-    const id = crypto.randomUUID()
-    setState((s) => ({
-      ...s,
-      catalog: addToCatalog(s.catalog, draft, id),
-      round: options.addToRound ? add(s.round, id) : s.round,
-    }))
+  // Every action goes through setState's updater, so the object never changes and features can hold on to it.
+  const actions = useMemo(() => {
+    const update = (change: (s: AppState) => Partial<AppState>) => setState((s) => ({ ...s, ...change(s) }))
+    return {
+      addToRound: (itemId: string) => update((s) => ({ round: add(s.round, itemId) })),
+      removeFromRound: (itemId: string) => update((s) => ({ round: remove(s.round, itemId) })),
+      /** Empties the Round in one go. Deliberately no undo (see PRD). */
+      clearRound: () => update(() => ({ round: emptyRound() })),
+      replaceRound: (round: ComposingRound) => update(() => ({ round })),
+      deleteRound: (roundId: string) => update((s) => ({ history: deletePlacedRound(s.history, roundId) })),
+      /** Adds a new Item to the Catalog, and optionally straight into the composing Round ("+ New" tile). */
+      createItem: (draft: ItemDraft, options: { addToRound?: boolean } = {}) => {
+        const id = crypto.randomUUID()
+        update((s) => ({
+          catalog: addToCatalog(s.catalog, draft, id),
+          round: options.addToRound ? add(s.round, id) : s.round,
+        }))
+      },
+      updateItem: (itemId: string, draft: ItemDraft) => update((s) => ({ catalog: editItem(s.catalog, itemId, draft) })),
+      removeFromCatalog: (itemId: string) => update((s) => deleteItem(s, itemId)),
+      clearHistory: () => update(() => ({ history: [] })),
+      setLanguage: (language: LanguageSetting) => update((s) => ({ settings: { ...s.settings, language } })),
+      setTheme: (theme: ThemeSetting) => update((s) => ({ settings: { ...s.settings, theme } })),
+    }
   }, [])
-  const updateItem = useCallback(
-    (itemId: string, draft: ItemDraft) => setState((s) => ({ ...s, catalog: editItem(s.catalog, itemId, draft) })),
-    [],
-  )
-  const removeFromCatalog = useCallback((itemId: string) => setState((s) => ({ ...s, ...deleteItem(s, itemId) })), [])
-  const clearHistory = useCallback(() => setState((s) => ({ ...s, history: [] })), [])
-  const setLanguage = useCallback(
-    (language: LanguageSetting) => setState((s) => ({ ...s, settings: { ...s.settings, language } })),
-    [],
-  )
-  const setTheme = useCallback(
-    (theme: ThemeSetting) => setState((s) => ({ ...s, settings: { ...s.settings, theme } })),
-    [],
-  )
-  const replaceRound = useCallback((round: ComposingRound) => setState((s) => ({ ...s, round })), [])
-  const deleteRound = useCallback(
-    (roundId: string) => setState((s) => ({ ...s, history: deletePlacedRound(s.history, roundId) })),
-    [],
-  )
 
   /** Places the composing Round and returns a function that undoes exactly that placement. */
   const placeRound = (sections: Sections) => {
@@ -73,20 +67,7 @@ export function useAppState(seedLocale: Locale) {
     }
   }
 
-  return {
-    state,
-    placements,
-    addToRound,
-    removeFromRound,
-    clearRound,
-    replaceRound,
-    deleteRound,
-    placeRound,
-    createItem,
-    updateItem,
-    removeFromCatalog,
-    clearHistory,
-    setLanguage,
-    setTheme,
-  }
+  return { state, placements, actions, placeRound }
 }
+
+export type AppActions = ReturnType<typeof useAppState>['actions']

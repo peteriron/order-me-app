@@ -20,11 +20,6 @@ export function remove(round: ComposingRound, itemId: string): ComposingRound {
   return { counts: count === 1 ? rest : { ...rest, [itemId]: count - 1 } }
 }
 
-/** Empties the Round in one go. Deliberately no undo (see PRD). */
-export function clear(_round: ComposingRound): ComposingRound {
-  return emptyRound()
-}
-
 export function countOf(round: ComposingRound, itemId: string): number {
   return round.counts[itemId] ?? 0
 }

@@ -1,5 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import type { Messages } from '../shared/i18n.ts'
+import type { Overlays } from '../shared/ui/overlays.ts'
+import type { AppActions } from '../useAppState.ts'
 import { checkDraft, type Category, type DraftProblem, type Item, type ItemDraft } from './catalog.ts'
 import { EMOJI_CHOICES } from './emoji.ts'
 
@@ -9,9 +11,9 @@ interface ItemSheetProps {
   /** Opened from the "+ New" tile: the new Item also goes straight into the Round. */
   forRound?: boolean
   t: Messages
-  onSave: (draft: ItemDraft) => void
-  onDelete?: () => void
-  onCancel: () => void
+  actions: Pick<AppActions, 'createItem' | 'updateItem' | 'removeFromCatalog'>
+  overlays: Overlays
+  onClose: () => void
 }
 
 const isChoice = (emoji: string) => (EMOJI_CHOICES as readonly string[]).includes(emoji)
@@ -20,7 +22,7 @@ const isChoice = (emoji: string) => (EMOJI_CHOICES as readonly string[]).include
  * Bottom sheet to add or edit an Item. It works on its own copy of the Item, so Cancel (or tapping outside)
  * throws every change away; only Save touches the Catalog.
  */
-export function ItemSheet({ item, forRound, t, onSave, onDelete, onCancel }: ItemSheetProps) {
+export function ItemSheet({ item, forRound, t, actions, overlays, onClose }: ItemSheetProps) {
   const [name, setName] = useState(item?.name ?? '')
   const [category, setCategory] = useState<Category>(item?.category ?? 'drink')
   const [picked, setPicked] = useState(item && isChoice(item.emoji) ? item.emoji : item ? '' : EMOJI_CHOICES[0])
@@ -28,21 +30,36 @@ export function ItemSheet({ item, forRound, t, onSave, onDelete, onCancel }: Ite
   const [problem, setProblem] = useState<DraftProblem | null>(null)
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onCancel()
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [onCancel])
+  }, [onClose])
+
+  const save = (draft: ItemDraft) => {
+    if (item) actions.updateItem(item.id, draft)
+    else actions.createItem(draft, { addToRound: forRound })
+    onClose()
+  }
+  const confirmDelete = (item: Item) =>
+    overlays.confirm({
+      text: t.deleteItemConfirm(item.name),
+      confirmLabel: t.delete,
+      onConfirm: () => {
+        actions.removeFromCatalog(item.id)
+        onClose()
+      },
+    })
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
     const checked = checkDraft({ name, category, emoji: typed || picked })
-    if (checked.ok) onSave(checked.value)
+    if (checked.ok) save(checked.value)
     else setProblem(checked.problem)
   }
 
   const title = item ? t.editItem : forRound ? t.newItem : t.addItem
   return (
-    <div className="sheet-scrim" onClick={(e) => e.target === e.currentTarget && onCancel()}>
+    <div className="sheet-scrim" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <form className="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" onSubmit={submit} noValidate>
         <div className="sheet-grab" aria-hidden="true" />
         <h2 className="sheet-title" id="sheet-title">
@@ -123,12 +140,12 @@ export function ItemSheet({ item, forRound, t, onSave, onDelete, onCancel }: Ite
         </fieldset>
 
         <div className="sheet-actions">
-          {onDelete && (
-            <button type="button" className="btn btn-danger-text" onClick={onDelete}>
+          {item && (
+            <button type="button" className="btn btn-danger-text" onClick={() => confirmDelete(item)}>
               {t.delete}
             </button>
           )}
-          <button type="button" className="btn btn-quiet" onClick={onCancel}>
+          <button type="button" className="btn btn-quiet" onClick={onClose}>
             {t.cancel}
           </button>
           <button type="submit" className="btn btn-primary">

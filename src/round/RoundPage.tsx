@@ -1,6 +1,8 @@
 import type { Ref } from 'react'
 import type { Sections } from '../items/catalog.ts'
 import type { Messages } from '../shared/i18n.ts'
+import { CategorySection } from '../shared/ui/CategorySection.tsx'
+import type { AppActions } from '../useAppState.ts'
 import { RoundBar } from './RoundBar.tsx'
 import { Tile } from './Tile.tsx'
 import { countOf, totalOf, type ComposingRound } from './round.ts'
@@ -9,21 +11,15 @@ interface RoundPageProps {
   sections: Sections
   round: ComposingRound
   t: Messages
-  onAdd: (itemId: string) => void
-  onRemove: (itemId: string) => void
-  onClear: () => void
+  actions: Pick<AppActions, 'addToRound' | 'removeFromRound' | 'clearRound'>
   onShow: () => void
   onNew: () => void
   showRef?: Ref<HTMLButtonElement>
 }
 
-export function RoundPage({ sections, round, t, onAdd, onRemove, onClear, onShow, onNew, showRef }: RoundPageProps) {
+export function RoundPage({ sections, round, t, actions, onShow, onNew, showRef }: RoundPageProps) {
   const section = (category: keyof Sections, heading: string) => (
-    <section className="section" aria-labelledby={`heading-${category}`}>
-      <h2 className="section-label" id={`heading-${category}`}>
-        <span className={`dot dot-${category}`} aria-hidden="true" />
-        {heading}
-      </h2>
+    <CategorySection category={category} heading={heading} idPrefix="round">
       <div className="grid">
         {sections[category].map((item) => {
           const count = countOf(round, item.id)
@@ -34,8 +30,8 @@ export function RoundPage({ sections, round, t, onAdd, onRemove, onClear, onShow
               count={count}
               label={t.tileLabel(item.name, count)}
               removeLabel={t.removeOne(item.name)}
-              onAdd={() => onAdd(item.id)}
-              onRemove={() => onRemove(item.id)}
+              onAdd={() => actions.addToRound(item.id)}
+              onRemove={() => actions.removeFromRound(item.id)}
             />
           )
         })}
@@ -51,7 +47,7 @@ export function RoundPage({ sections, round, t, onAdd, onRemove, onClear, onShow
           </div>
         )}
       </div>
-    </section>
+    </CategorySection>
   )
 
   return (
@@ -61,7 +57,7 @@ export function RoundPage({ sections, round, t, onAdd, onRemove, onClear, onShow
         {section('drink', t.drinks)}
         {section('snack', t.snacks)}
       </div>
-      <RoundBar total={totalOf(round)} t={t} onClear={onClear} onShow={onShow} showRef={showRef} />
+      <RoundBar total={totalOf(round)} t={t} onClear={actions.clearRound} onShow={onShow} showRef={showRef} />
     </>
   )
 }
