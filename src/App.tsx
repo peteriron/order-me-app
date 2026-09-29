@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAppState } from './app/useAppState.ts'
+import { shareOrCopy } from './app/share.ts'
 import { useTheme } from './app/useTheme.ts'
 import { useTileOrder } from './app/useTileOrder.ts'
 import {
   catalogSections,
   orderAgain,
   roundLines,
+  shareText,
   totalOf,
   type Item,
   type ItemDraft,
@@ -195,6 +197,10 @@ export function App() {
           onClear={() => {
             setCounterOpen(false)
             clearRound()
+          }}
+          onShare={async () => {
+            const outcome = await shareOrCopy(shareText(roundLines(state.round, sections), t.total), navigator)
+            if (outcome === 'copied') setToast({ id: Date.now(), text: t.copied })
           }}
           onBack={closeCounter}
           onMarkOrdered={() => {

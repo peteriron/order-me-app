@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
+import { browserHost, keepScreenAwake } from '../app/wakeLock.ts'
 import type { RoundLine } from '../domain/index.ts'
 import type { Messages } from '../i18n/index.ts'
 
@@ -9,6 +10,7 @@ interface CounterViewProps {
   onAdd: (itemId: string) => void
   onRemove: (itemId: string) => void
   onClear: () => void
+  onShare: () => void
   onBack: () => void
   onMarkOrdered: () => void
 }
@@ -32,7 +34,17 @@ function fitName(el: HTMLElement) {
 }
 
 /** Full-screen, large-type Round to read out or show to the bartender, and the place to mark it as ordered. */
-export function CounterView({ lines, total, t, onAdd, onRemove, onClear, onBack, onMarkOrdered }: CounterViewProps) {
+export function CounterView({
+  lines,
+  total,
+  t,
+  onAdd,
+  onRemove,
+  onClear,
+  onShare,
+  onBack,
+  onMarkOrdered,
+}: CounterViewProps) {
   const backRef = useRef<HTMLButtonElement>(null)
   const bodyRef = useRef<HTMLDivElement>(null)
 
@@ -42,6 +54,9 @@ export function CounterView({ lines, total, t, onAdd, onRemove, onClear, onBack,
     window.addEventListener('resize', fitAll)
     return () => window.removeEventListener('resize', fitAll)
   }, [lines])
+
+  // The screen stays on while the bartender reads it.
+  useEffect(() => keepScreenAwake(browserHost()), [])
 
   useEffect(() => {
     backRef.current?.focus()
@@ -89,9 +104,17 @@ export function CounterView({ lines, total, t, onAdd, onRemove, onClear, onBack,
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
-        <button type="button" className="btn btn-quiet" onClick={onClear}>
-          {t.clear}
-        </button>
+        <div className="counter-actions">
+          <button type="button" className="btn btn-quiet" onClick={onShare}>
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+              <path d="M12 15V3M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
+            </svg>
+            {t.share}
+          </button>
+          <button type="button" className="btn btn-quiet" onClick={onClear}>
+            {t.clear}
+          </button>
+        </div>
       </div>
 
       <div className="counter-body" ref={bodyRef}>
