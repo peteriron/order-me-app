@@ -36,6 +36,9 @@ export function useAppState(seedLocale: Locale) {
   // Save on every change so a killed tab or locked phone loses nothing.
   useEffect(() => saveAppState(store, state), [store, state])
 
+  /** Goes up on every place and undo-place: the moments the tile order is recomputed (see useTileOrder). */
+  const [placements, setPlacements] = useState(0)
+
   const addToRound = useCallback((itemId: string) => setState((s) => ({ ...s, round: add(s.round, itemId) })), [])
   const removeFromRound = useCallback((itemId: string) => setState((s) => ({ ...s, round: remove(s.round, itemId) })), [])
   const clearRound = useCallback(() => setState((s) => ({ ...s, round: clear(s.round) })), [])
@@ -68,17 +71,21 @@ export function useAppState(seedLocale: Locale) {
     [],
   )
 
-
   /** Places the composing Round and returns a function that undoes exactly that placement. */
   const placeRound = (sections: GridSections) => {
     const meta = { id: crypto.randomUUID(), placedAt: new Date().toISOString() }
     const { next, undo } = markOrdered(state, sections, meta)
     setState({ ...state, ...next })
-    return () => setState((s) => ({ ...s, ...undo(s) }))
+    setPlacements((n) => n + 1)
+    return () => {
+      setState((s) => ({ ...s, ...undo(s) }))
+      setPlacements((n) => n + 1)
+    }
   }
 
   return {
     state,
+    placements,
     addToRound,
     removeFromRound,
     clearRound,
