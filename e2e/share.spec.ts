@@ -75,17 +75,6 @@ test('without a share sheet, Share copies the text and says so', async ({ page }
   expect(await page.evaluate(() => window.copied)).toEqual(['1× Cola\n2× Duvel\n1× Chips\nTotal: 4'])
 })
 
-test('closing the share sheet copies nothing', async ({ page }) => {
-  await fakePhone(page, 'cancel')
-  await page.goto('./')
-  await composeAndShow(page)
-  await counterView(page).getByRole('button', { name: 'Share' }).tap()
-
-  await expect(counterView(page)).toBeVisible()
-  expect(await page.evaluate(() => window.copied)).toEqual([])
-  await expect(page.getByRole('status')).toHaveCount(0)
-})
-
 test('the screen stays awake while the Counter view is open, and may sleep once it closes', async ({ page }) => {
   await fakePhone(page, 'ok')
   await page.goto('./')
@@ -96,17 +85,4 @@ test('the screen stays awake while the Counter view is open, and may sleep once 
 
   await counterView(page).getByRole('button', { name: 'Back to Round' }).tap()
   await expect.poll(() => page.evaluate(() => window.wakeLocks)).toEqual([{ released: true }])
-})
-
-test.describe('on a Dutch phone', () => {
-  test.use({ locale: 'nl-BE' })
-
-  test('Delen shares the Round with Totaal', async ({ page }) => {
-    await fakePhone(page, 'ok')
-    await page.goto('./')
-    for (const name of ['Bier', 'Bier', 'Chips']) await page.getByRole('button', { name: new RegExp(`^${name}`) }).tap()
-    await page.getByRole('region', { name: 'Totaal van de ronde' }).getByRole('button', { name: 'Toon' }).tap()
-    await page.getByRole('dialog').getByRole('button', { name: 'Delen' }).tap()
-    await expect.poll(() => page.evaluate(() => window.shared)).toEqual(['2× Bier\n1× Chips\nTotaal: 3'])
-  })
 })

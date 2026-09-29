@@ -58,7 +58,7 @@ test('System follows the phone’s light/dark preference live', async ({ page })
   await expect.poll(() => theme(page)).toBe('dark')
 })
 
-test('Clear history asks first, then empties history but leaves the Round and Catalog alone', async ({ page }) => {
+test('Clear history asks first, empties history but not the Round or Catalog, then is disabled', async ({ page }) => {
   await page.getByRole('button', { name: /^Duvel/ }).tap()
   await page.getByRole('button', { name: 'Show' }).tap()
   await page.getByRole('button', { name: 'Mark as ordered' }).tap()
@@ -78,7 +78,3 @@ test('Clear history asks first, then empties history but leaves the Round and Ca
   await expect(page.getByRole('button', { name: 'Cola, 1 in round' })).toBeVisible()
 })
 
-test('Clear history is disabled while there is nothing to clear', async ({ page }) => {
-  await openSettings(page)
-  await expect(page.getByRole('button', { name: 'Clear history' })).toBeDisabled()
-})
