@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAppState } from './app/useAppState.ts'
 import { useTheme } from './app/useTheme.ts'
+import { useTileOrder } from './app/useTileOrder.ts'
 import {
   catalogSections,
-  gridSections,
   orderAgain,
   roundLines,
   totalOf,
@@ -35,6 +35,7 @@ export function App() {
   const showButton = useRef<HTMLButtonElement>(null)
   const {
     state,
+    placements,
     addToRound,
     removeFromRound,
     clearRound,
@@ -50,7 +51,7 @@ export function App() {
   } = useAppState(detectLocale(navigator.language))
   const locale = resolveLocale(state.settings.language, navigator.language)
   useTheme(state.settings.theme)
-  const sections = useMemo(() => gridSections(state.catalog, locale), [state.catalog, locale])
+  const sections = useTileOrder(state.catalog, state.history, locale, placements)
   const catalogByName = useMemo(() => catalogSections(state.catalog, locale), [state.catalog, locale])
   const total = totalOf(state.round)
   const t = messages[locale]
