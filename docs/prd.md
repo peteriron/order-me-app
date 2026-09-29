@@ -150,30 +150,4 @@ A phone app, installed from the browser to the home screen, that works offline i
 
 ## Further Notes
 
-- The biggest UX risk is swipe navigation vs. rapid tile tapping. Validate the swipe threshold on a real phone with the prototype before building.
 - Open question for later: should the Counter view offer a "large text only" mode for very long Rounds (> 10 lines)? For now, lines scroll.
-
-## Appendix — Analysis of the Lovable build (github.com/peteriron/order-me)
-
-**What it is:** React 18 + Vite + shadcn/Tailwind with localStorage. There are two routes, `/` (grid + summary + history toggle) and `/manage-drinks`. It has 18 default drinks, each with a lucide icon and a Tailwind text colour.
-
-**Worth keeping**
-- One tap on a tile adds one; there's a count badge on the tile.
-- A big-type summary screen "to show the bartender".
-- An editable catalog stored on the device.
-- A PWA manifest and home-screen icon.
-
-**Problems to fix in the rebuild**
-| Area | Lovable behaviour | v1 answer |
-|---|---|---|
-| Tap targets | −/+ are 24 px, labels `text-xs` | Tiles ~100 px tall, − corner ≥ 44 px, 15 px names |
-| Discoverability | Swipe right on the grid opens the summary; nothing hints at it | Sticky bottom bar with a Show button; swipes only switch pages, with a footer hint |
-| Identity | Item name is the key in orders; renaming mid-order orphans counts, duplicates collide | Stable Item ids (ADR-0002) |
-| Persistence | Composing order lost on reload | Saved on every tap |
-| Safety | Reset instant; catalog delete instant; edit Cancel doesn't revert | Clear stays instant (deliberate); delete is confirmed; edits are staged until Save |
-| Iconography | Edit button uses the Save icon; `import * as Icons` pulls in all of lucide | Emoji for Items, a tiny explicit icon set for UI |
-| Feedback | A toast for every action | Toasts only for undoable or surprising events |
-| Consistency | "This round is **for** me" vs "…**from** me"; forced `.dark` purple theme vs orange manifest colour | One name, one theme system, manifest colour matching |
-| Offline | Manifest but no service worker | Precached app shell |
-| Scope gaps | Drinks only; no reorder | Categories (drink/snack); Order again |
-| Hygiene | ~40 unused shadcn/Radix dependencies, leftover `App.css`, Lovable OG tags | Minimal dependencies; own meta tags |

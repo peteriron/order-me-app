@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 test-results
 playwright-report
+
+# Agent skills: installed locally per developer, not part of the app
+.agents/skills/
+.claude/skills/
+skills-lock.json
