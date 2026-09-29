@@ -1,5 +1,5 @@
 import type { Ref } from 'react'
-import type { Messages } from '../i18n/index.ts'
+import type { Messages } from '../shared/i18n.ts'
 
 interface RoundBarProps {
   total: number

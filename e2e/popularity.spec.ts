@@ -20,7 +20,7 @@ async function seedHistory(page: Page, rounds: { daysAgo: number; items: string[
 const firstDrinks = (page: Page) =>
   page
     // The Round page's Drinks section (the Items page has one too).
-    .locator('section[aria-labelledby="heading-drink"]')
+    .locator('section[aria-labelledby="round-heading-drink"]')
     .locator('.tile-name')
     .allTextContents()
     .then((names) => names.slice(0, 4))
@@ -31,26 +31,15 @@ test.beforeEach(async ({ page }) => {
   await page.goto('./')
 })
 
-test('before anything is placed, drinks are A–Z', async ({ page }) => {
-  expect(await firstDrinks(page)).toEqual(['0.0 Beer', 'Beer', 'Cava', 'Coffee'])
-})
-
-test('the drinks ordered most over the last 90 days come first', async ({ page }) => {
-  await seedHistory(page, [
-    { daysAgo: 1, items: ['Tea', 'Chips'] },
-    { daysAgo: 2, items: ['Tea'] },
-    { daysAgo: 3, items: ['Rosé'] },
-    { daysAgo: 120, items: ['Red wine', 'Red wine'] },
-  ])
-  expect(await firstDrinks(page)).toEqual(['Tea', 'Rosé', '0.0 Beer', 'Beer'])
-})
-
-test('tiles hold still while composing, and reorder once the Round is placed and again on Undo', async ({ page }) => {
+test('most ordered first; tiles hold still while composing, and reorder on place and on Undo', async ({ page }) => {
   await seedHistory(page, [
     { daysAgo: 1, items: ['Tea'] },
     { daysAgo: 2, items: ['Tea'] },
     { daysAgo: 3, items: ['Rosé'] },
+    // Too old to count.
+    { daysAgo: 120, items: ['Red wine', 'Red wine'] },
   ])
+  expect(await firstDrinks(page)).toEqual(['Tea', 'Rosé', '0.0 Beer', 'Beer'])
 
   for (let n = 0; n < 3; n++) await page.getByRole('button', { name: /^Rosé/ }).tap()
   expect(await firstDrinks(page)).toEqual(['Tea', 'Rosé', '0.0 Beer', 'Beer'])

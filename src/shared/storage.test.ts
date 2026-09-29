@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { add, countOf } from '../domain/index.ts'
-import { loadAppState, saveAppState, type KeyValueStore } from './index.ts'
+import { add, countOf } from '../round/round.ts'
+import { loadAppState, saveAppState, type KeyValueStore } from './storage.ts'
 
 /** In-memory stand-in for window.localStorage. */
 function memoryStore(): KeyValueStore & { data: Map<string, string> } {
@@ -18,10 +18,13 @@ const ids = () => {
 }
 
 describe('app state storage', () => {
-  it('seeds the starter Catalog on first launch, with an empty Round', () => {
+  it('first launch: the starter Catalog, an empty Round, no history, default settings', () => {
     const state = loadAppState(memoryStore(), { locale: 'en', newId: ids() })
     expect(state.catalog).toHaveLength(21)
     expect(state.round.counts).toEqual({})
+    expect(state.history).toEqual([])
+    // Language follows the phone; dark theme.
+    expect(state.settings).toEqual({ language: 'system', theme: 'dark' })
   })
 
   it('seeds only once: a later launch in another language keeps the Operator’s Catalog', () => {
@@ -73,10 +76,6 @@ describe('app state storage', () => {
     expect(loadAppState(store, { locale: 'en', newId: ids() }).history).toEqual([placed])
   })
 
-  it('starts with no history on first launch', () => {
-    expect(loadAppState(memoryStore(), { locale: 'en', newId: ids() }).history).toEqual([])
-  })
-
   it('upgrades a save from before history existed, keeping the Catalog and the composing Round', () => {
     const store = memoryStore()
     const catalog = [{ id: 'd', name: 'Duvel', category: 'drink', emoji: '🍺' }]
@@ -86,10 +85,6 @@ describe('app state storage', () => {
     expect(state.catalog).toEqual(catalog)
     expect(countOf(state.round, 'd')).toBe(2)
     expect(state.history).toEqual([])
-  })
-
-  it('starts with the default settings: language follows the phone, dark theme', () => {
-    expect(loadAppState(memoryStore(), { locale: 'en', newId: ids() }).settings).toEqual({ language: 'system', theme: 'dark' })
   })
 
   it('remembers the chosen language and theme after a restart', () => {

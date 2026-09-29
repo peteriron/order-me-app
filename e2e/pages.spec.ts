@@ -36,10 +36,6 @@ test.beforeEach(async ({ page }) => {
   await page.goto('./')
 })
 
-test('opens on the Round page', async ({ page }) => {
-  await expectOnPage(page, 'This round is for me', 'Round')
-})
-
 test('swiping right from Round shows History, swiping left shows Items', async ({ page }) => {
   const { x, y } = middle(page)
   await touchDrag(page, { x: 40, y }, { x: width(page) - 40, y })
@@ -99,7 +95,8 @@ test('scrolling the grid vertically never changes page', async ({ page }) => {
   )
 })
 
-test('footer labels navigate between pages', async ({ page }) => {
+test('opens on the Round page, and footer labels navigate between pages', async ({ page }) => {
+  await expectOnPage(page, 'This round is for me', 'Round')
   const footer = page.getByRole('navigation', { name: 'Pages' })
   await footer.getByRole('button', { name: 'History' }).tap()
   await expectOnPage(page, 'History', 'History')

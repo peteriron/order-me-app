@@ -1,12 +1,8 @@
 import { useMemo, useState } from 'react'
-import {
-  gridSections,
-  popularityOrder,
-  type Catalog,
-  type GridSections,
-  type Locale,
-  type PlacedRound,
-} from '../domain/index.ts'
+import type { PlacedRound } from '../history/history.ts'
+import type { Catalog, Sections } from '../items/catalog.ts'
+import type { Locale } from '../shared/i18n.ts'
+import { gridSections, popularityOrder } from './tileOrder.ts'
 
 /**
  * Tiles for the Round page in Popularity order. The order is computed once at app start and again whenever
@@ -18,7 +14,7 @@ export function useTileOrder(
   history: PlacedRound[],
   locale: Locale,
   placements: number,
-): GridSections {
+): Sections {
   const rank = () => ({ placements, order: popularityOrder(catalog, history, locale, new Date()) })
   const [ranked, setRanked] = useState(rank)
   // Recompute during render rather than in an effect, so the old order is never painted after a placement.

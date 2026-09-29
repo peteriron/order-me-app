@@ -1,13 +1,13 @@
 /** Pixels a finger may drift before we decide whether a gesture is a swipe, a scroll or a tap. */
-export const DECIDE_AFTER_PX = 10
+const DECIDE_AFTER_PX = 10
 /** How much more horizontal than vertical a movement must be to count as a page swipe. */
-export const HORIZONTAL_BIAS = 1.4
+const HORIZONTAL_BIAS = 1.4
 /** Share of the page width a slow drag must travel to change page. */
-export const DISTANCE_THRESHOLD = 0.25
+const DISTANCE_THRESHOLD = 0.25
 /** Speed (px/ms) above which even a short flick changes page. */
-export const FLING_VELOCITY = 0.5
+const FLING_VELOCITY = 0.5
 /** How far the track follows the finger past the first or last page. */
-export const EDGE_RESISTANCE = 0.3
+const EDGE_RESISTANCE = 0.3
 
 export type GestureIntent = 'undecided' | 'swipe' | 'other'
 
@@ -25,7 +25,7 @@ export function dragOffset(dx: number, page: number, lastPage: number): number {
 }
 
 /** How far back from release the flick speed is measured. */
-export const VELOCITY_WINDOW_MS = 100
+const VELOCITY_WINDOW_MS = 100
 
 export interface Sample {
   x: number

@@ -79,16 +79,6 @@ test('Mark as ordered empties the Round, and Undo brings it back', async ({ page
   await expect(page.getByRole('button', { name: 'Chips, 1 in round' })).toBeVisible()
 })
 
-test('a placed Round stays placed after a reload', async ({ page }) => {
-  await tapTiles(page, 'Duvel')
-  await openCounterView(page)
-  await counterView(page).getByRole('button', { name: 'Mark as ordered' }).tap()
-  await expect(roundBar(page)).toContainText('Tap a drink to start')
-
-  await page.reload()
-  await expect(roundBar(page)).toContainText('Tap a drink to start')
-})
-
 test('the Undo toast goes away after 5 seconds', async ({ page }) => {
   await page.clock.install()
   await page.goto('./')

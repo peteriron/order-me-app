@@ -7,7 +7,7 @@ export interface ToastMessage {
 }
 
 /** How long a toast (and its Undo) stays up. */
-export const TOAST_MS = 5000
+const TOAST_MS = 5000
 
 /** One short message at a time, above the bottom bar, gone after 5 s. */
 export function Toast({ toast, onDone }: { toast: ToastMessage; onDone: () => void }) {

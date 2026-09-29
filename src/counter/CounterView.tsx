@@ -1,18 +1,22 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
-import { browserHost, keepScreenAwake } from '../app/wakeLock.ts'
-import type { RoundLine } from '../domain/index.ts'
-import type { Messages } from '../i18n/index.ts'
+import type { Sections } from '../items/catalog.ts'
+import { roundLines, totalOf, type ComposingRound } from '../round/round.ts'
+import type { Messages } from '../shared/i18n.ts'
+import type { Overlays } from '../shared/ui/overlays.ts'
+import type { AppActions } from '../useAppState.ts'
+import { shareOrCopy, shareText } from './share.ts'
+import { browserHost, keepScreenAwake } from './wakeLock.ts'
 
 interface CounterViewProps {
-  lines: RoundLine[]
-  total: number
+  round: ComposingRound
+  /** The grid's tile order, so lines read in the same order as the tiles. */
+  sections: Sections
   t: Messages
-  onAdd: (itemId: string) => void
-  onRemove: (itemId: string) => void
-  onClear: () => void
-  onShare: () => void
-  onBack: () => void
-  onMarkOrdered: () => void
+  actions: Pick<AppActions, 'addToRound' | 'removeFromRound' | 'clearRound'>
+  /** Places the Round and returns its Undo (see useAppState). */
+  onPlace: (sections: Sections) => () => void
+  overlays: Overlays
+  onClose: () => void
 }
 
 /** Smallest size a name may shrink to before it is allowed to break mid-word. */
@@ -34,17 +38,9 @@ function fitName(el: HTMLElement) {
 }
 
 /** Full-screen, large-type Round to read out or show to the bartender, and the place to mark it as ordered. */
-export function CounterView({
-  lines,
-  total,
-  t,
-  onAdd,
-  onRemove,
-  onClear,
-  onShare,
-  onBack,
-  onMarkOrdered,
-}: CounterViewProps) {
+export function CounterView({ round, sections, t, actions, onPlace, overlays, onClose }: CounterViewProps) {
+  const lines = roundLines(round, sections)
+  const total = totalOf(round)
   const backRef = useRef<HTMLButtonElement>(null)
   const bodyRef = useRef<HTMLDivElement>(null)
 
@@ -60,10 +56,29 @@ export function CounterView({
 
   useEffect(() => {
     backRef.current?.focus()
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onBack()
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [onBack])
+  }, [onClose])
+
+  const removeOne = (itemId: string) => {
+    // Nothing is left to show once the last Item is gone.
+    if (total === 1) onClose()
+    actions.removeFromRound(itemId)
+  }
+  const clear = () => {
+    onClose()
+    actions.clearRound()
+  }
+  const markOrdered = () => {
+    const undo = onPlace(sections)
+    onClose()
+    overlays.notify(t.roundPlaced, { label: t.undo, run: undo })
+  }
+  const share = async () => {
+    const outcome = await shareOrCopy(shareText(lines, t.total), navigator)
+    if (outcome === 'copied') overlays.notify(t.copied)
+  }
 
   const list = (category: 'drink' | 'snack') => (
     <ul className="counter-lines">
@@ -80,10 +95,10 @@ export function CounterView({
               {item.name}
             </span>
             <span className="counter-controls">
-              <button type="button" aria-label={t.removeOne(item.name)} onClick={() => onRemove(item.id)}>
+              <button type="button" aria-label={t.removeOne(item.name)} onClick={() => removeOne(item.id)}>
                 −
               </button>
-              <button type="button" aria-label={t.addOne(item.name)} onClick={() => onAdd(item.id)}>
+              <button type="button" aria-label={t.addOne(item.name)} onClick={() => actions.addToRound(item.id)}>
                 +
               </button>
             </span>
@@ -99,19 +114,19 @@ export function CounterView({
         {t.counterTitle}
       </h1>
       <div className="counter-top">
-        <button ref={backRef} type="button" className="icon-btn" aria-label={t.backToRound} onClick={onBack}>
+        <button ref={backRef} type="button" className="icon-btn" aria-label={t.backToRound} onClick={onClose}>
           <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
         <div className="counter-actions">
-          <button type="button" className="btn btn-quiet" onClick={onShare}>
+          <button type="button" className="btn btn-quiet" onClick={share}>
             <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
               <path d="M12 15V3M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
             </svg>
             {t.share}
           </button>
-          <button type="button" className="btn btn-quiet" onClick={onClear}>
+          <button type="button" className="btn btn-quiet" onClick={clear}>
             {t.clear}
           </button>
         </div>
@@ -134,7 +149,7 @@ export function CounterView({
         </p>
       </div>
 
-      <button type="button" className="btn btn-primary btn-big" onClick={onMarkOrdered}>
+      <button type="button" className="btn btn-primary btn-big" onClick={markOrdered}>
         <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
           <path d="M5 12l5 5 9-10" />
         </svg>

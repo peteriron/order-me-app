@@ -1,4 +1,6 @@
-# PRD — order-me-app v1 ("This round is for me")
+# PRD — order-me-app ("This round is for me")
+
+v1 is built and shipped. The [v2 scope](#v2-scope) is at the end.
 
 Vocabulary follows [CONTEXT.md](../CONTEXT.md). Decisions referenced as ADR-000N live in [docs/adr/](adr/). Visual design lives in [look-and-feel.md](look-and-feel.md).
 
@@ -83,27 +85,37 @@ A phone app, installed from the browser to the home screen, that works offline i
 - **Platform:** Installable, offline-first PWA built with React + Vite + TypeScript. There's a service worker that precaches the app shell, and a web app manifest with icons, `display: standalone` and a theme colour matching the dark theme. It's hosted on GitHub Pages, so the Vite `base` and the manifest `start_url`/`scope` must use the repo sub-path.
 - **Storage:** On-device only (IndexedDB, or localStorage behind a single storage module). Three persisted aggregates: Catalog, composing Round, placed Rounds. Every mutation of the composing Round is persisted immediately. Stored data carries a schema version so future migrations are possible.
 - **Identity:** Items have a generated stable id. Names are *not* identity, so renames are safe and duplicate names are allowed.
-- **Core domain module (one deep module, pure and framework-free)** owning the rules. Rough shape:
+- **Code layout:** Code is grouped by feature. `src/round/`, `src/counter/`, `src/history/`, `src/items/` and `src/settings/` each hold their own logic, UI and tests. `src/shared/` holds storage, i18n and common UI. Each feature's rules live in a pure, framework-free module:
 
   ```ts
+  // items/catalog.ts
   type Category = 'drink' | 'snack';
   type Item = { id: string; name: string; category: Category; emoji: string };
   type Catalog = Item[];
+  seedCatalog(locale, newId) / checkDraft(draft) / addToCatalog / editItem
+  deleteItem({ catalog, round }, itemId) -> { catalog, round }   // also strips it from the Round
 
-  type ComposingRound = { counts: Record<ItemId, number> };          // count > 0 only
+  // round/round.ts
+  type ComposingRound = { counts: Record<ItemId, number> };       // count > 0 only
+  add(round, itemId) / remove(round, itemId) / totalOf(round) / roundLines(round, sections)
+
+  // round/tileOrder.ts
+  popularity(history, now) -> Record<ItemId, number>              // last 90 days, via PlacedLine.itemId
+  popularityOrder(catalog, history, locale, now) -> ItemId[]      // pop desc, then A–Z; frozen
+  gridSections(catalog, order) -> { drink: Item[], snack: Item[] }
+
+  // history/history.ts
   type PlacedLine = { itemId: string; name: string; category: Category; emoji: string; count: number }; // snapshot (ADR-0001/0002)
   type PlacedRound = { id: string; placedAt: string; lines: PlacedLine[] };
+  markOrdered(state, sections, meta) -> { next, undo }            // snapshots Catalog fields
+  orderAgain(placed, catalog) -> { round, skipped }               // replaces; skips deleted Items
+  groupByDay(history, now)
 
-  // Operations
-  add(round, itemId) / remove(round, itemId) / clear(round)
-  place(round, catalog, now) -> PlacedRound           // snapshots catalog fields
-  orderAgain(placed, catalog) -> { round, skipped }    // replaces; skips deleted Items
-  deleteItem(catalog, round, itemId) -> { catalog, round }
-  popularity(history, now) -> Record<ItemId, number>   // last ~90 days, via PlacedLine.itemId
-  gridOrder(catalog, popularity) -> { drink: Item[], snack: Item[] } // pop desc, then A–Z
-  shareText(round, catalog, locale) -> string
+  // counter/share.ts
+  shareText(lines, totalLabel) -> string
   ```
 
+  React state lives in one hook (`src/useAppState.ts`), which returns a stable `actions` object. Each feature receives those actions and the shared overlays (confirm, toast) and wires its own handlers, so `App.tsx` only composes pages and overlays.
 - **Popularity:** The score is the number of placed Rounds in the last 90 days that contain the Item (a count of *appearances*, not quantity, so one big round doesn't dominate). The grid order is computed when the app starts and after each `place`, then held fixed for the rest of the composing session. Undoing a place recomputes it. Items with no score go last in their section, alphabetically (locale-aware compare).
 - **Place / Undo:** `place` appends to history and resets the composing Round. Undo within 5 s removes that placed Round and restores the previous composing Round exactly.
 - **Order again:** Always replaces the composing Round (no prompt, no undo) and navigates to the Round page. Lines whose `itemId` is no longer in the Catalog are skipped, and a toast reports the number skipped.
@@ -120,8 +132,8 @@ A phone app, installed from the browser to the home screen, that works offline i
 ## Testing Decisions
 
 - A good test drives external behaviour through a public interface and asserts on outcomes, never on internals or React component structure.
-- **Primary seam: the core domain module.** It gets thorough unit tests covering:
-  - add/remove/clear
+- **Primary seam: each feature's pure logic module** (see Code layout). Thorough unit tests cover:
+  - add/remove
   - place snapshots, and renaming after placing doesn't change history
   - order-again replaces and skips deleted Items
   - deleting an Item strips it from the composing Round
@@ -134,7 +146,7 @@ A phone app, installed from the browser to the home screen, that works offline i
   - order again from History
   - add an Item via "+ New"
   - the app reloads with the composing Round intact
-- There are no existing tests in the repo. These establish the prior art. Use the `tdd` skill when building the domain module.
+- An e2e test doesn't repeat a rule a unit test already proves. E2E covers the wiring and the journeys; unit tests cover the rules.
 
 ## Out of Scope
 
@@ -142,12 +154,25 @@ A phone app, installed from the browser to the home screen, that works offline i
 - Any integration with the venue's systems.
 - Multiple simultaneous composing Rounds / named drafts.
 - Accounts, cloud sync, multi-device, sharing a live Round with friends.
-- JSON export/import or backup (candidate for v2).
+- Backup / restore of History. (Sharing the Catalog is in v2.)
 - Hiding/archiving Items (delete only).
-- Manual tile reordering (Popularity + A–Z only).
+- Free manual ordering of every tile. v2 has Pinned Items instead.
 - Languages other than Dutch and English.
 - Native app-store distribution.
 
 ## Further Notes
 
 - Open question for later: should the Counter view offer a "large text only" mode for very long Rounds (> 10 lines)? For now, lines scroll.
+
+## v2 scope
+
+Decided in a grilling session on 2026-09-29; one GitHub issue each, done in this order.
+
+1. **Cleanup** (#25, done): agent skills stay local, the v1 prototype and the Lovable analysis are removed.
+2. **Refactor** (#26): feature folders, a slim `App.tsx`, and no duplicated tests.
+3. **Rename** (#27): the heading and page title become "This round is on me" / "Dit rondje is van mij". The app's own name (home screen, manifest) is **OrderMe**. The Dutch UI says "rondje" throughout.
+4. **Icon polish** (#28): the same amber tray-and-glasses icon, with more depth.
+5. **Pinned Items** (#29): pin Items on the Items page and drag pinned Items into order. On the Round page, pinned Items come first in each section, then the rest by Popularity. Pin changes show right away. Pins are the Operator's own and aren't shared.
+6. **Share Items by QR** (#30): the Items page shows a QR code (with Save image and Copy link) carrying only the Catalog. Opening it replaces the Catalog after a confirm, and History is kept. Accepted limitation: an iPhone home-screen app keeps its storage separate from Safari, and scanned links open in Safari, so an already-installed app on iOS doesn't receive a shared Catalog.
+
+Dropped: a second "clear history" entry point. It already exists in Settings.

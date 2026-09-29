@@ -17,8 +17,16 @@ The Operator's persistent, editable list of Items, independent of any Round. See
 _Avoid_: Menu, drink list
 
 **Popularity**:
-How often an Item appeared in `placed` Rounds over roughly the last 90 days. It orders tiles within each category and is recomputed only when a Round is placed, never while a Round is being composed.
+How often an Item appeared in `placed` Rounds over roughly the last 90 days. It orders the unpinned tiles within each category and is recomputed only when a Round is placed, never while a Round is being composed.
 _Avoid_: Favourites, ranking
+
+**Pinned Item** (v2):
+An Item the Operator has pinned on the Items page. Pinned Items come first in their section, in the order the Operator drags them into; unpinned Items follow by Popularity. Pins belong to the Operator's device and are never part of a Shared Catalog.
+_Avoid_: Favourite, starred
+
+**Shared Catalog** (v2):
+A copy of the Catalog (each Item's name, category and emoji, nothing else) carried in a link or QR code so a friend can start with the same Items. Opening one replaces the recipient's Catalog after a confirm; their History is kept.
+_Avoid_: Menu export, sync
 
 **Counter view**:
 The full-screen, large-type presentation of the composing Round that the Operator reads from or shows to the bartender; the screen stays awake while it is open, and it is where a Round is marked as ordered.

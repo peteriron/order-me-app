@@ -1,3 +1,11 @@
+import type { RoundLine } from '../round/round.ts'
+
+/** The Round as plain text for the share sheet: "{count}× {name}" per line in grid order, then the total. No emoji. */
+export function shareText(lines: RoundLine[], totalLabel: string): string {
+  const total = lines.reduce((sum, line) => sum + line.count, 0)
+  return [...lines.map(({ item, count }) => `${count}× ${item.name}`), `${totalLabel}: ${total}`].join('\n')
+}
+
 /** The slice of `navigator` that sharing needs; the real one satisfies it. */
 export interface ShareHost {
   share?: (data: { text: string }) => Promise<void>

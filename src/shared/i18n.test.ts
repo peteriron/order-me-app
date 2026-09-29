@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { detectLocale, formattingLocale, resolveLocale } from './index.ts'
+import { detectLocale, formattingLocale, resolveLocale } from './i18n.ts'
 
 describe('app language', () => {
   it('is Dutch for any Dutch-speaking region and English otherwise', () => {

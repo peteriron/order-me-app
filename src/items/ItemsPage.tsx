@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react'
-import type { Category, GridSections, Item } from '../domain/index.ts'
-import type { Messages } from '../i18n/index.ts'
+import type { Messages } from '../shared/i18n.ts'
+import { CategorySection } from '../shared/ui/CategorySection.tsx'
+import type { Category, Item, Sections } from './catalog.ts'
 
 interface ItemsPageProps {
   /** The Catalog A–Z per category (catalogSections), independent of the grid's order. */
-  sections: GridSections
+  sections: Sections
   count: number
   t: Messages
   onAdd: () => void
@@ -16,11 +17,7 @@ interface ItemsPageProps {
 /** The Operator's Catalog: every Item by category, A–Z, each row opening the edit sheet. */
 export function ItemsPage({ sections, count, t, onAdd, onEdit, children }: ItemsPageProps) {
   const section = (category: Category, heading: string) => (
-    <section className="section" aria-labelledby={`items-heading-${category}`}>
-      <h2 className="section-label" id={`items-heading-${category}`}>
-        <span className={`dot dot-${category}`} aria-hidden="true" />
-        {heading}
-      </h2>
+    <CategorySection category={category} heading={heading} idPrefix="items">
       <div className="item-rows">
         {sections[category].map((item) => (
           <button
@@ -38,7 +35,7 @@ export function ItemsPage({ sections, count, t, onAdd, onEdit, children }: Items
           </button>
         ))}
       </div>
-    </section>
+    </CategorySection>
   )
 
   return (

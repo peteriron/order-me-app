@@ -41,11 +41,6 @@ test.beforeEach(async ({ page }) => {
   await page.goto('./')
 })
 
-test('explains that placed Rounds show up here when there are none yet', async ({ page }) => {
-  await goToHistory(page)
-  await expect(historyPage(page)).toContainText('No Rounds yet')
-})
-
 test('a Round marked as ordered shows up under Today with its time, total and summary', async ({ page }) => {
   for (const name of ['Duvel', 'Duvel', 'Cola']) await page.getByRole('button', { name: new RegExp(`^${name}`) }).tap()
   await page.getByRole('button', { name: 'Show' }).tap()
@@ -59,6 +54,12 @@ test('a Round marked as ordered shows up under Today with its time, total and su
   await expect(card).toContainText('3 items')
   // Lines follow grid order (as in the Counter view), not the order they were tapped.
   await expect(card).toContainText('1 Cola · 2 Duvel')
+
+  // Placed for good: after a reload it is still in history, and the Round stays empty.
+  await page.reload()
+  await expect(page.getByRole('region', { name: 'Round total' })).toContainText('Tap a drink to start')
+  await goToHistory(page)
+  await expect(card).toHaveCount(1)
 })
 
 test('groups Rounds by day, newest first: Today, Yesterday, then the date', async ({ page }) => {
