@@ -126,8 +126,10 @@ Three dots, 6 px, with 11 px muted labels; the active one is an amber dot with a
 - "Order again" is an outlined accent button. Delete (trash icon) asks for confirmation.
 
 ### Items page
-- A list row (56 px) per Item: emoji, name, a small category chip, and a pencil icon. Tapping the row opens the edit sheet.
-- Rows are grouped by category, alphabetically. Popularity order applies only to the grid.
+- A list row (56 px) per Item: emoji, name, a small category chip, a pencil icon and a pin toggle at the far right. Tapping the row opens the edit sheet; the pin toggle (48 px wide) pins or unpins the Item without opening it. The pin is a muted outline when off and an accent-filled pin when on.
+- Rows are grouped by category. In each section the **Pinned Items** come first, in the Operator's order, then the rest alphabetically. Popularity order applies only to the grid.
+- A pinned row starts with a drag handle: a 44 px wide column with a muted six-dot grip. Dragging the handle moves the row live among the section's pinned rows; while dragging, the row lifts onto `--surface-2` with a soft shadow and the grip turns `--accent`. The handle takes the whole gesture (`touch-action: none`), so it never scrolls the list or swipes the page.
+- For keyboard and screen-reader users, each pinned row also has "Move up" / "Move down" buttons ("Move Duvel up" / "Duvel omhoog"). They are visually hidden until focused, then appear as a pill over the handle. At the ends of the list they are marked unavailable rather than removed, so focus stays put.
 - An "Add Item" button sits at the top.
 - Below the list is the **Settings** section: Language (System / Nederlands / English), Theme (Dark / Light / System) as segmented controls, and a "Clear history" danger text button.
 

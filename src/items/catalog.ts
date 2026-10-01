@@ -1,5 +1,6 @@
 import type { ComposingRound } from '../round/round.ts'
 import type { Locale } from '../shared/i18n.ts'
+import { pinnedFirst, type Pins } from './pins.ts'
 
 export type Category = 'drink' | 'snack'
 
@@ -50,11 +51,14 @@ export function seedCatalog(locale: Locale, newId: () => string): Catalog {
 
 export type Sections = Record<Category, Item[]>
 
-/** The Catalog as the Items page lists it: Drinks then Snacks, each A–Z in the Operator's language. */
-export function catalogSections(catalog: Catalog, locale: Locale): Sections {
+/** The Catalog as the Items page lists it: Drinks then Snacks, each with its Pinned Items first, then A–Z. */
+export function catalogSections(catalog: Catalog, locale: Locale, pins: Pins = []): Sections {
   const byName = new Intl.Collator(locale).compare
   const section = (category: Category) =>
-    catalog.filter((i) => i.category === category).sort((a, b) => byName(a.name, b.name))
+    pinnedFirst(
+      catalog.filter((i) => i.category === category).sort((a, b) => byName(a.name, b.name)),
+      pins,
+    )
   return { drink: section('drink'), snack: section('snack') }
 }
 
@@ -86,11 +90,18 @@ export function editItem(catalog: Catalog, itemId: string, draft: ItemDraft): Ca
   return catalog.map((item) => (item.id === itemId ? { id: itemId, ...draft } : item))
 }
 
-/** Removes an Item from the Catalog and from the Round being composed. Placed Rounds keep their snapshot (ADR-0001). */
+/**
+ * Removes an Item from the Catalog, from the Round being composed and from the pins. Placed Rounds keep their
+ * snapshot (ADR-0001).
+ */
 export function deleteItem(
-  state: { catalog: Catalog; round: ComposingRound },
+  state: { catalog: Catalog; round: ComposingRound; pins: Pins },
   itemId: string,
-): { catalog: Catalog; round: ComposingRound } {
+): { catalog: Catalog; round: ComposingRound; pins: Pins } {
   const { [itemId]: _removed, ...counts } = state.round.counts
-  return { catalog: state.catalog.filter((i) => i.id !== itemId), round: { counts } }
+  return {
+    catalog: state.catalog.filter((i) => i.id !== itemId),
+    round: { counts },
+    pins: state.pins.filter((id) => id !== itemId),
+  }
 }

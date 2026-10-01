@@ -71,6 +71,12 @@ A phone app, installed from the browser to the home screen, that works offline i
 44. As an Operator, I want the app dark by default, with Light and System options in Settings, so that it's easy on the eyes in a dim bar and still readable on a sunny terrace.
 45. As an Operator, I want a "Clear history" action in Settings, with a confirmation, so that I can start fresh deliberately.
 
+### Pinned Items (v2)
+
+52. As an Operator, I want to pin my favourite Items on the Items page, so that they always come first in their section of the grid.
+53. As an Operator, I want to drag my pinned Items into the order I like, with Move up / Move down when I use a keyboard or screen reader, so that the grid matches how my group orders.
+54. As an Operator, I want pinning, unpinning and reordering to show on the grid right away, so that I see the effect of a deliberate choice immediately.
+
 ### Navigation, install & robustness
 
 46. As an Operator, I want a subtle footer hint (dots with small labels) showing that History and Items exist on either side, so that the swipe navigation is discoverable; tapping a label also navigates.
@@ -83,7 +89,7 @@ A phone app, installed from the browser to the home screen, that works offline i
 ## Implementation Decisions
 
 - **Platform:** Installable, offline-first PWA built with React + Vite + TypeScript. There's a service worker that precaches the app shell, and a web app manifest with icons, `display: standalone` and a theme colour matching the dark theme. It's hosted on GitHub Pages, so the Vite `base` and the manifest `start_url`/`scope` must use the repo sub-path.
-- **Storage:** On-device only (IndexedDB, or localStorage behind a single storage module). Three persisted aggregates: Catalog, composing Round, placed Rounds. Every mutation of the composing Round is persisted immediately. Stored data carries a schema version so future migrations are possible.
+- **Storage:** On-device only (IndexedDB, or localStorage behind a single storage module). Persisted aggregates: Catalog, composing Round, placed Rounds, settings and (v2) Pinned Items. Every mutation of the composing Round is persisted immediately. Stored data carries a schema version so future migrations are possible.
 - **Identity:** Items have a generated stable id. Names are *not* identity, so renames are safe and duplicate names are allowed.
 - **Code layout:** Code is grouped by feature. `src/round/`, `src/counter/`, `src/history/`, `src/items/` and `src/settings/` each hold their own logic, UI and tests. `src/shared/` holds storage, i18n and common UI. Each feature's rules live in a pure, framework-free module:
 
@@ -93,7 +99,12 @@ A phone app, installed from the browser to the home screen, that works offline i
   type Item = { id: string; name: string; category: Category; emoji: string };
   type Catalog = Item[];
   seedCatalog(locale, newId) / checkDraft(draft) / addToCatalog / editItem
-  deleteItem({ catalog, round }, itemId) -> { catalog, round }   // also strips it from the Round
+  deleteItem({ catalog, round, pins }, itemId) -> { catalog, round, pins }   // also strips it from the Round and pins
+
+  // items/pins.ts (v2)
+  type Pins = ItemId[]                                            // the Operator's order, both sections
+  togglePin(pins, itemId) / movePin(pins, catalog, itemId, to) / pinsAfterEdit(pins, catalog, itemId, draft)
+  pinnedFirst(items, pins) -> Item[]
 
   // round/round.ts
   type ComposingRound = { counts: Record<ItemId, number> };       // count > 0 only
@@ -102,7 +113,7 @@ A phone app, installed from the browser to the home screen, that works offline i
   // round/tileOrder.ts
   popularity(history, now) -> Record<ItemId, number>              // last 90 days, via PlacedLine.itemId
   popularityOrder(catalog, history, locale, now) -> ItemId[]      // pop desc, then A–Z; frozen
-  gridSections(catalog, order) -> { drink: Item[], snack: Item[] }
+  gridSections(catalog, order, pins) -> { drink: Item[], snack: Item[] }   // pinned first, then frozen order
 
   // history/history.ts
   type PlacedLine = { itemId: string; name: string; category: Category; emoji: string; count: number }; // snapshot (ADR-0001/0002)
@@ -116,6 +127,7 @@ A phone app, installed from the browser to the home screen, that works offline i
   ```
 
   React state lives in one hook (`src/useAppState.ts`), which returns a stable `actions` object. Each feature receives those actions and the shared overlays (confirm, toast) and wires its own handlers, so `App.tsx` only composes pages and overlays.
+- **Pinned Items** (v2, `items/pins.ts`): pins are one ordered list of Item ids; a section's pin order is that list filtered to its Items. Pinned Items come first in their section on both the grid and the Items page; the rest follow Popularity on the grid and A–Z on the Items page. Pin changes apply to the grid at once, while Popularity still only recomputes at app start, place and undo-place. Deleting an Item drops its pin; a pinned Item that changes category stays pinned, last among the other section's pins; new Items start unpinned. Pins are saved with the app state (storage v4, upgraded from v3 with no pins) and aren't part of a Shared Catalog, so an imported Catalog arrives unpinned.
 - **Popularity:** The score is the number of placed Rounds in the last 90 days that contain the Item (a count of *appearances*, not quantity, so one big round doesn't dominate). The grid order is computed when the app starts and after each `place`, then held fixed for the rest of the composing session. Undoing a place recomputes it. Items with no score go last in their section, alphabetically (locale-aware compare).
 - **Place / Undo:** `place` appends to history and resets the composing Round. Undo within 5 s removes that placed Round and restores the previous composing Round exactly.
 - **Order again:** Always replaces the composing Round (no prompt, no undo) and navigates to the Round page. Lines whose `itemId` is no longer in the Catalog are skipped, and a toast reports the number skipped.

@@ -22,9 +22,9 @@ test('lists every Item A–Z under Drinks and Snacks, with Add Item at the top',
   await expect(itemsPage(page)).toContainText('21 in your Catalog')
   await expect(itemsPage(page).getByRole('button', { name: 'Add Item' })).toBeVisible()
 
-  const snacks = itemsPage(page).getByRole('region', { name: 'Snacks' }).getByRole('button')
+  const snacks = itemsPage(page).getByRole('region', { name: 'Snacks' }).getByRole('button', { name: /^Edit / })
   await expect(snacks).toHaveText([/Bitterballen/, /Cheese/, /Chips/, /Nuts/])
-  await expect(itemsPage(page).getByRole('region', { name: 'Drinks' }).getByRole('button')).toHaveCount(17)
+  await expect(itemsPage(page).getByRole('region', { name: 'Drinks' }).getByRole('button', { name: /^Edit / })).toHaveCount(17)
 })
 
 test('adds an Item that appears in the Catalog and as a tile, and survives a reload', async ({ page }) => {

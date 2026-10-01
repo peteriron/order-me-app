@@ -677,24 +677,126 @@ button {
 }
 
 .item-row {
-  width: 100%;
+  position: relative;
   min-height: 56px;
-  padding: 0 0.75rem 0 0.875rem;
-  border: 0;
   border-bottom: 1px solid var(--border);
-  background: none;
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  text-align: left;
+  align-items: stretch;
 }
 
 .item-row:last-child {
   border-bottom: 0;
 }
 
-.item-row:active {
+/* The row's main part: emoji, name and pencil, opening the edit sheet. */
+.item-row-main {
+  flex: 1;
+  min-width: 0;
+  padding: 0 0.25rem 0 0.875rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.item-row-main:active {
   background: var(--surface-2);
+}
+
+.item-row.pinned .item-row-main {
+  padding-left: 0;
+}
+
+/* Drag handle on pinned rows. touch-action: none keeps the finger's drag for reordering, not scrolling. */
+.item-row-handle {
+  flex: none;
+  width: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  cursor: grab;
+  touch-action: none;
+}
+
+.item-row-handle .grip {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* While a pinned row is dragged, the rows it passes slide out of its way; the dragged row follows the finger. */
+.item-rows.reordering .item-row {
+  transition: transform 150ms var(--ease-out);
+}
+
+.item-rows.reordering .item-row.dragging {
+  transition: none;
+}
+
+.item-row.dragging {
+  z-index: 1;
+  background: var(--surface-2);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.25);
+}
+
+.item-row.dragging .item-row-handle {
+  color: var(--accent);
+  cursor: grabbing;
+}
+
+.item-row-pin {
+  flex: none;
+  width: 48px;
+  border: 0;
+  background: none;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+}
+
+.item-row-pin[aria-pressed='true'] {
+  color: var(--accent);
+}
+
+.item-row-pin[aria-pressed='true'] .btn-icon {
+  fill: currentColor;
+}
+
+/* Move up / down: for keyboard and screen readers. Hidden until focused, then shown over the handle. */
+.item-row-move {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+  padding: 0;
+}
+
+.item-row-move:focus-visible {
+  z-index: 2;
+  top: 50%;
+  left: 0.5rem;
+  width: auto;
+  height: auto;
+  min-height: 44px;
+  padding: 0 0.875rem;
+  clip-path: none;
+  transform: translateY(-50%);
+  border: 1px solid var(--accent-line);
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+}
+
+.item-row-move[aria-disabled='true'] {
+  color: var(--text-muted);
 }
 
 .item-row-emoji {
@@ -954,7 +1056,8 @@ button {
   .badge {
     animation: none;
   }
-  .pager-track {
+  .pager-track,
+  .item-rows.reordering .item-row {
     transition: none;
   }
   .counter,

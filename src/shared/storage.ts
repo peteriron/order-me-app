@@ -1,5 +1,6 @@
 import type { PlacedRound } from '../history/history.ts'
 import { seedCatalog, type Catalog } from '../items/catalog.ts'
+import type { Pins } from '../items/pins.ts'
 import { emptyRound, type ComposingRound } from '../round/round.ts'
 import { DEFAULT_SETTINGS, type Settings } from '../settings/settings.ts'
 import type { Locale } from './i18n.ts'
@@ -16,6 +17,8 @@ export interface AppState {
   /** Placed Rounds, newest first. */
   history: PlacedRound[]
   settings: Settings
+  /** Pinned Items, in the Operator's order. */
+  pins: Pins
 }
 
 interface Seed {
@@ -39,11 +42,17 @@ interface StoredV2 extends Omit<StoredV1, 'version'> {
 }
 
 /** v3: adds settings (#11). */
-interface StoredV3 extends AppState {
+interface StoredV3 extends Omit<StoredV2, 'version'> {
   version: 3
+  settings: Settings
 }
 
-type Stored = StoredV1 | StoredV2 | StoredV3
+/** v4: adds Pinned Items (#29). */
+interface StoredV4 extends AppState {
+  version: 4
+}
+
+type Stored = StoredV1 | StoredV2 | StoredV3 | StoredV4
 
 /** Reads the saved app state, seeding and saving the starter Catalog on first launch. */
 export function loadAppState(store: KeyValueStore, seed: Seed): AppState {
@@ -55,6 +64,7 @@ export function loadAppState(store: KeyValueStore, seed: Seed): AppState {
     round: emptyRound(),
     history: [],
     settings: DEFAULT_SETTINGS,
+    pins: [],
   }
   saveAppState(store, fresh)
   return fresh
@@ -62,7 +72,7 @@ export function loadAppState(store: KeyValueStore, seed: Seed): AppState {
 
 /** Saves the app state. Failures (storage blocked or full) are swallowed: the app keeps working in memory. */
 export function saveAppState(store: KeyValueStore, state: AppState): void {
-  const stored: StoredV3 = { version: 3, ...state }
+  const stored: StoredV4 = { version: 4, ...state }
   try {
     store.setItem(KEY, JSON.stringify(stored))
   } catch {
@@ -73,11 +83,13 @@ export function saveAppState(store: KeyValueStore, state: AppState): void {
 function upgrade(saved: Stored): AppState {
   switch (saved.version) {
     case 1:
-      return { catalog: saved.catalog, round: saved.round, history: [], settings: DEFAULT_SETTINGS }
+      return { catalog: saved.catalog, round: saved.round, history: [], settings: DEFAULT_SETTINGS, pins: [] }
     case 2:
-      return { catalog: saved.catalog, round: saved.round, history: saved.history, settings: DEFAULT_SETTINGS }
+      return { catalog: saved.catalog, round: saved.round, history: saved.history, settings: DEFAULT_SETTINGS, pins: [] }
     case 3:
-      return { catalog: saved.catalog, round: saved.round, history: saved.history, settings: saved.settings }
+      return { catalog: saved.catalog, round: saved.round, history: saved.history, settings: saved.settings, pins: [] }
+    case 4:
+      return { catalog: saved.catalog, round: saved.round, history: saved.history, settings: saved.settings, pins: saved.pins }
   }
 }
 

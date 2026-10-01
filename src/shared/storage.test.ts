@@ -23,6 +23,7 @@ describe('app state storage', () => {
     expect(state.catalog).toHaveLength(21)
     expect(state.round.counts).toEqual({})
     expect(state.history).toEqual([])
+    expect(state.pins).toEqual([])
     // Language follows the phone; dark theme.
     expect(state.settings).toEqual({ language: 'system', theme: 'dark' })
   })
@@ -92,6 +93,24 @@ describe('app state storage', () => {
     const first = loadAppState(store, { locale: 'en', newId: ids() })
     saveAppState(store, { ...first, settings: { language: 'nl', theme: 'light' } })
     expect(loadAppState(store, { locale: 'en', newId: ids() }).settings).toEqual({ language: 'nl', theme: 'light' })
+  })
+
+  it('remembers Pinned Items and their order after a restart', () => {
+    const store = memoryStore()
+    const first = loadAppState(store, { locale: 'en', newId: ids() })
+    saveAppState(store, { ...first, pins: ['id-3', 'id-1'] })
+    expect(loadAppState(store, { locale: 'en', newId: ids() }).pins).toEqual(['id-3', 'id-1'])
+  })
+
+  it('upgrades a save from before pins existed: everything kept, nothing pinned', () => {
+    const store = memoryStore()
+    const catalog = [{ id: 'd', name: 'Duvel', category: 'drink', emoji: '🍺' }]
+    const history = [{ id: 'r1', placedAt: '2026-09-22T21:14:00.000Z', lines: [] }]
+    const settings = { language: 'nl', theme: 'light' }
+    store.setItem('order-me', JSON.stringify({ version: 3, catalog, round: { counts: { d: 1 } }, history, settings }))
+
+    const state = loadAppState(store, { locale: 'en', newId: ids() })
+    expect(state).toEqual({ catalog, round: { counts: { d: 1 } }, history, settings, pins: [] })
   })
 
   it('upgrades a save from before settings existed, keeping history', () => {

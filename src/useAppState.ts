@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { deletePlacedRound, markOrdered } from './history/history.ts'
 import { addToCatalog, deleteItem, editItem, type ItemDraft, type Sections } from './items/catalog.ts'
+import { movePin, pinsAfterEdit, togglePin } from './items/pins.ts'
 import { add, emptyRound, remove, type ComposingRound } from './round/round.ts'
 import type { ThemeSetting } from './settings/settings.ts'
 import type { LanguageSetting, Locale } from './shared/i18n.ts'
@@ -47,8 +48,12 @@ export function useAppState(seedLocale: Locale) {
           round: options.addToRound ? add(s.round, id) : s.round,
         }))
       },
-      updateItem: (itemId: string, draft: ItemDraft) => update((s) => ({ catalog: editItem(s.catalog, itemId, draft) })),
+      updateItem: (itemId: string, draft: ItemDraft) =>
+        update((s) => ({ catalog: editItem(s.catalog, itemId, draft), pins: pinsAfterEdit(s.pins, s.catalog, itemId, draft) })),
       removeFromCatalog: (itemId: string) => update((s) => deleteItem(s, itemId)),
+      togglePin: (itemId: string) => update((s) => ({ pins: togglePin(s.pins, itemId) })),
+      /** Moves a pinned Item to position `to` among its section's pinned Items. */
+      movePin: (itemId: string, to: number) => update((s) => ({ pins: movePin(s.pins, s.catalog, itemId, to) })),
       clearHistory: () => update(() => ({ history: [] })),
       setLanguage: (language: LanguageSetting) => update((s) => ({ settings: { ...s.settings, language } })),
       setTheme: (theme: ThemeSetting) => update((s) => ({ settings: { ...s.settings, theme } })),
