@@ -43,12 +43,12 @@ Swipe sideways between the three pages, or tap their names at the bottom of the 
 - **Items:** your drinks and snacks.
   - Tap a row to edit or delete that Item, or **Add Item** to create one.
   - Tap the pin on a row to pin it. Pinned Items come first; drag them by their handle (⠿) to change the order.
-  - **Share Items** shows the QR code, with **Save image** and **Copy link**.
+  - **Share** shows the QR code, with **Save image** and **Copy link**.
   - **Settings** are at the bottom of this page.
 
 ### Share your Items with a friend
 
-1. On the **Items** page, tap **Share Items**.
+1. On the **Items** page, tap **Share**.
 2. Your friend scans the QR code with their phone camera, or opens the link you copied to them.
 3. On a phone that has never used the app, it opens with your Items straight away. If they already have Items, they're asked whether to replace them. Their History is always kept.
 

@@ -130,7 +130,7 @@ Three dots, 6 px, with 11 px muted labels; the active one is an amber dot with a
 - Rows are grouped by category. In each section the **Pinned Items** come first, in the Operator's order, then the rest in Catalog order (the starter list's order, then Items as they were added). Popularity order applies only to the grid.
 - A pinned row starts with a drag handle: a 44 px wide column with a muted six-dot grip. Dragging the handle moves the row live among the section's pinned rows; while dragging, the row lifts onto `--surface-2` with a soft shadow and the grip turns `--accent`. The handle takes the whole gesture (`touch-action: none`), so it never scrolls the list or swipes the page.
 - For keyboard and screen-reader users, each pinned row also has "Move up" / "Move down" buttons ("Move Duvel up" / "Duvel omhoog"). They are visually hidden until focused, then appear as a pill over the handle. At the ends of the list they are marked unavailable rather than removed, so focus stays put.
-- "Add Item" (accent-filled) and "Share Items" (outline, with a QR glyph) sit side by side at the top.
+- "Add Item" (accent-filled) and "Share" (outline, with a QR glyph) sit side by side at the top.
 - Below the list is the **Settings** section: Language (System / Nederlands / English), Theme (Dark / Light / System) as segmented controls, then two danger text buttons: "Clear history" and "Reset app". Reset app asks first, with "Reset" as the confirm button. With no connection it changes nothing and shows the "No connection" toast.
 
 ### Item sheet (add / edit / "+ New")
@@ -142,11 +142,11 @@ A bottom sheet containing:
 
 Cancel discards all changes.
 
-### Share sheet (Share Items)
+### Share sheet
 A bottom sheet, like the Item sheet, containing:
-- The title "Share Items"
+- The title "Share"
 - The QR code, up to 280 px square, black on white in both themes (cameras read dark-on-light best), with rounded corners and crisp, unsmoothed modules
-- A muted hint under it: "Scan with a phone camera to open the app with these Items."
+- A muted hint under it: "Scan to open the page"
 - "Save image" and "Copy link" side by side as outline buttons, then a quiet "Done"
 
 Save image downloads `orderme-items.png` (the QR at 12 px per module, with a white margin). Copy link copies the link and shows the "Copied to clipboard" toast. When the Catalog is too big for a QR code that scans reliably (beyond QR version 20), the code is replaced by "Too many Items for a QR code that scans reliably. Copy the link instead." and Save image is disabled.
@@ -196,8 +196,8 @@ Short, friendly and practical, with no exclamation marks except in the empty sta
 | Reset offline | No connection. Resetting needs internet to load the newest version. | Geen verbinding. Om te resetten is internet nodig voor de nieuwste versie. |
 | Skipped on order again | {n} items no longer exist and were skipped | {n} items bestaan niet meer en zijn overgeslagen |
 | Copied (share fallback, Copy link) | Copied to clipboard | Gekopieerd |
-| Share Items | Share Items | Items delen |
-| Share sheet hint | Scan with a phone camera to open the app with these Items. | Scan met een telefooncamera om de app met deze items te openen. |
+| Share (Items page) | Share | Delen |
+| Share sheet hint | Scan to open the page | Scan om de pagina te openen |
 | QR too big | Too many Items for a QR code that scans reliably. Copy the link instead. | Te veel items voor een QR-code die vlot scant. Kopieer de link. |
 | Save image / Copy link / Done | Save image / Copy link / Done | Afbeelding bewaren / Link kopiëren / Klaar |
 | Replace Catalog confirm | Replace your {n} Items with the {m} shared Items? History is kept. | Je {n} items vervangen door de {m} gedeelde items? De geschiedenis blijft behouden. |

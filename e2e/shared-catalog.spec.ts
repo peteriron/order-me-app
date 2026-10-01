@@ -8,7 +8,7 @@ declare global {
 }
 
 const itemsPage = (page: Page) => page.getByRole('region', { name: 'Items' })
-const shareSheet = (page: Page) => page.getByRole('dialog', { name: 'Share Items' })
+const shareSheet = (page: Page) => page.getByRole('dialog', { name: 'Share', exact: true })
 const confirmDialog = (page: Page) => page.getByRole('alertdialog')
 
 async function goTo(page: Page, name: 'History' | 'Round' | 'Items') {
@@ -29,7 +29,7 @@ async function fakeClipboard(page: Page) {
 /** The share link for the Catalog the page holds now, taken from the share sheet's Copy link. */
 async function copyShareLink(page: Page): Promise<string> {
   await goTo(page, 'Items')
-  await itemsPage(page).getByRole('button', { name: 'Share Items' }).tap()
+  await itemsPage(page).getByRole('button', { name: 'Share', exact: true }).tap()
   await shareSheet(page).getByRole('button', { name: 'Copy link' }).tap()
   await shareSheet(page).getByRole('button', { name: 'Done' }).tap()
   return (await page.evaluate(() => window.copied)).at(-1)!
@@ -55,7 +55,7 @@ test.beforeEach(async ({ page }) => {
 
 test('the share sheet shows a QR code; Copy link copies the link and Save image downloads a PNG', async ({ page }) => {
   await goTo(page, 'Items')
-  await itemsPage(page).getByRole('button', { name: 'Share Items' }).tap()
+  await itemsPage(page).getByRole('button', { name: 'Share', exact: true }).tap()
   await expect(shareSheet(page).getByRole('img', { name: 'QR code with your 28 Items' })).toBeVisible()
 
   await shareSheet(page).getByRole('button', { name: 'Copy link' }).tap()
