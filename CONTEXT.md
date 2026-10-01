@@ -25,7 +25,7 @@ An Item the Operator has pinned on the Items page. Pinned Items come first in th
 _Avoid_: Favourite, starred
 
 **Shared Catalog** (v2):
-A copy of the Catalog (each Item's name, category and emoji, nothing else) carried in a link or QR code so a friend can start with the same Items. Opening one replaces the recipient's Catalog after a confirm; their History is kept.
+A copy of the Catalog (each Item's name, category and emoji, nothing else: no History, Round, settings or pins) carried in a link or QR code so a friend can start with the same Items. Opening one replaces the recipient's Catalog: straight away on a first launch, otherwise after a confirm. The replaced Catalog's Items get fresh ids, the composing Round is emptied and History is kept (ADR-0004).
 _Avoid_: Menu export, sync
 
 **Counter view**:

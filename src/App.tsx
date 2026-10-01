@@ -3,7 +3,9 @@ import { CounterView } from './counter/CounterView.tsx'
 import { HistoryPage } from './history/HistoryPage.tsx'
 import { ItemSheet } from './items/ItemSheet.tsx'
 import { ItemsPage } from './items/ItemsPage.tsx'
+import { ShareSheet } from './items/ShareSheet.tsx'
 import { catalogSections, type Item } from './items/catalog.ts'
+import { useSharedLink } from './items/useSharedLink.ts'
 import { RoundPage } from './round/RoundPage.tsx'
 import { useTileOrder } from './round/useTileOrder.ts'
 import { SettingsSection } from './settings/SettingsSection.tsx'
@@ -20,7 +22,7 @@ const ROUND_PAGE = 1
 
 /** The three swipe pages plus the overlays on top of them. Each feature wires its own handlers. */
 export function App() {
-  const { state, placements, actions, placeRound } = useAppState(detectLocale(navigator.language))
+  const { state, firstLaunch, placements, actions, placeRound } = useAppState(detectLocale(navigator.language))
   const locale = resolveLocale(state.settings.language, navigator.language)
   const t = messages[locale]
   useTheme(state.settings.theme)
@@ -30,6 +32,7 @@ export function App() {
   const [counterOpen, setCounterOpen] = useState(false)
   /** The Item sheet: `{}` to add a new Item, `{ item }` to edit one, `{ forRound }` from the + New tile. */
   const [sheet, setSheet] = useState<{ item?: Item; forRound?: boolean } | null>(null)
+  const [sharing, setSharing] = useState(false)
   const [toast, setToast] = useState<ToastMessage | null>(null)
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null)
   const overlays = useMemo<Overlays>(
@@ -37,6 +40,7 @@ export function App() {
     [],
   )
   const showButton = useRef<HTMLButtonElement>(null)
+  useSharedLink({ firstLaunch, catalogSize: state.catalog.length, t, actions, overlays })
 
   useEffect(() => {
     document.documentElement.lang = locale
@@ -48,6 +52,7 @@ export function App() {
     showButton.current?.focus()
   }, [])
   const closeSheet = useCallback(() => setSheet(null), [])
+  const closeSharing = useCallback(() => setSharing(false), [])
   const closeToast = useCallback(() => setToast(null), [])
   const closeConfirmation = useCallback(() => setConfirmation(null), [])
 
@@ -80,6 +85,7 @@ export function App() {
       t={t}
       actions={actions}
       onAdd={() => setSheet({})}
+      onShare={() => setSharing(true)}
       onEdit={(item) => setSheet({ item })}
     >
       <SettingsSection
@@ -94,7 +100,7 @@ export function App() {
 
   return (
     <>
-      <div className="shell" inert={counterOpen || sheet !== null || confirmation !== null}>
+      <div className="shell" inert={counterOpen || sheet !== null || sharing || confirmation !== null}>
         <Pager pages={pages} page={page} onPageChange={setPage} />
         <PageHint labels={[t.history, t.round, t.items]} page={page} navLabel={t.pages} onPageChange={setPage} />
       </div>
@@ -115,6 +121,12 @@ export function App() {
         // The sheet stays open under a delete confirmation, but must not take taps while it is.
         <div inert={confirmation !== null}>
           <ItemSheet {...sheet} t={t} actions={actions} overlays={overlays} onClose={closeSheet} />
+        </div>
+      )}
+
+      {sharing && (
+        <div inert={confirmation !== null}>
+          <ShareSheet catalog={state.catalog} t={t} overlays={overlays} onClose={closeSharing} />
         </div>
       )}
 

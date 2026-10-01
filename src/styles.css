@@ -818,6 +818,41 @@ button {
   color: var(--text-muted);
 }
 
+/* Add Item and Share Items, side by side at the top of the Items page. */
+.items-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.items-actions .btn {
+  flex: 1;
+}
+
+/* ---------- share sheet ---------- */
+/* The QR is black on white in both themes: cameras read dark-on-light best. */
+.share-qr {
+  width: min(280px, 100%);
+  aspect-ratio: 1;
+  align-self: center;
+  border-radius: 12px;
+  image-rendering: pixelated;
+}
+
+.share-hint {
+  margin: 0;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.share-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.share-actions .btn {
+  flex: 1;
+}
+
 /* ---------- item sheet ---------- */
 .sheet-scrim {
   position: fixed;

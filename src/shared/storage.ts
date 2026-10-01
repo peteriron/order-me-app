@@ -54,6 +54,11 @@ interface StoredV4 extends AppState {
 
 type Stored = StoredV1 | StoredV2 | StoredV3 | StoredV4
 
+/** True when nothing has been saved yet (or it can't be read): the next load is a first launch. */
+export function isFirstLaunch(store: KeyValueStore): boolean {
+  return read(store) === null
+}
+
 /** Reads the saved app state, seeding and saving the starter Catalog on first launch. */
 export function loadAppState(store: KeyValueStore, seed: Seed): AppState {
   const saved = read(store)

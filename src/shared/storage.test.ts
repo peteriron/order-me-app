@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { add, countOf } from '../round/round.ts'
-import { loadAppState, saveAppState, type KeyValueStore } from './storage.ts'
+import { isFirstLaunch, loadAppState, saveAppState, type KeyValueStore } from './storage.ts'
 
 /** In-memory stand-in for window.localStorage. */
 function memoryStore(): KeyValueStore & { data: Map<string, string> } {
@@ -26,6 +26,13 @@ describe('app state storage', () => {
     expect(state.pins).toEqual([])
     // Language follows the phone; dark theme.
     expect(state.settings).toEqual({ language: 'system', theme: 'dark' })
+  })
+
+  it('knows a first launch: nothing saved yet', () => {
+    const store = memoryStore()
+    expect(isFirstLaunch(store)).toBe(true)
+    loadAppState(store, { locale: 'en', newId: ids() })
+    expect(isFirstLaunch(store)).toBe(false)
   })
 
   it('seeds only once: a later launch in another language keeps the Operator’s Catalog', () => {
