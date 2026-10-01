@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { add, countOf } from '../round/round.ts'
-import { isFirstLaunch, loadAppState, saveAppState, type KeyValueStore } from './storage.ts'
+import { forgetAppState, isFirstLaunch, loadAppState, saveAppState, type KeyValueStore } from './storage.ts'
 
 /** In-memory stand-in for window.localStorage. */
 function memoryStore(): KeyValueStore & { data: Map<string, string> } {
@@ -9,6 +9,7 @@ function memoryStore(): KeyValueStore & { data: Map<string, string> } {
     data,
     getItem: (k) => data.get(k) ?? null,
     setItem: (k, v) => void data.set(k, v),
+    removeItem: (k) => void data.delete(k),
   }
 }
 
@@ -35,6 +36,17 @@ describe('app state storage', () => {
     expect(isFirstLaunch(store)).toBe(false)
   })
 
+  it('forgets only its own saved state, so the next launch is a first launch again', () => {
+    const store = memoryStore()
+    store.setItem('another-app', 'kept')
+    const first = loadAppState(store, { locale: 'en', newId: ids() })
+    saveAppState(store, { ...first, catalog: [], pins: ['x'] })
+    forgetAppState(store)
+    expect(isFirstLaunch(store)).toBe(true)
+    expect(loadAppState(store, { locale: 'en', newId: ids() }).catalog).toHaveLength(28)
+    expect(store.getItem('another-app')).toBe('kept')
+  })
+
   it('seeds only once: a later launch in another language keeps the Operator’s Catalog', () => {
     const store = memoryStore()
     loadAppState(store, { locale: 'nl', newId: ids() })
@@ -58,10 +70,12 @@ describe('app state storage', () => {
     const blocked: KeyValueStore = {
       getItem: () => { throw new DOMException('denied', 'SecurityError') },
       setItem: () => { throw new DOMException('denied', 'SecurityError') },
+      removeItem: () => { throw new DOMException('denied', 'SecurityError') },
     }
     const state = loadAppState(blocked, { locale: 'en', newId: ids() })
     expect(state.catalog).toHaveLength(28)
     expect(() => saveAppState(blocked, state)).not.toThrow()
+    expect(() => forgetAppState(blocked)).not.toThrow()
   })
 
   it('starts fresh when the saved data is unreadable', () => {

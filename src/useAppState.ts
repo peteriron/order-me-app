@@ -6,7 +6,15 @@ import { replaceCatalog } from './items/sharedCatalog.ts'
 import { add, emptyRound, remove, type ComposingRound } from './round/round.ts'
 import type { ThemeSetting } from './settings/settings.ts'
 import type { LanguageSetting, Locale } from './shared/i18n.ts'
-import { isFirstLaunch, loadAppState, saveAppState, type AppState, type KeyValueStore } from './shared/storage.ts'
+import { resetApp } from './settings/reset.ts'
+import {
+  forgetAppState,
+  isFirstLaunch,
+  loadAppState,
+  saveAppState,
+  type AppState,
+  type KeyValueStore,
+} from './shared/storage.ts'
 
 /** window.localStorage, or an in-memory stand-in when the browser refuses access (e.g. some private modes). */
 function browserStore(): KeyValueStore {
@@ -14,7 +22,11 @@ function browserStore(): KeyValueStore {
     return window.localStorage
   } catch {
     const data = new Map<string, string>()
-    return { getItem: (k) => data.get(k) ?? null, setItem: (k, v) => void data.set(k, v) }
+    return {
+      getItem: (k) => data.get(k) ?? null,
+      setItem: (k, v) => void data.set(k, v),
+      removeItem: (k) => void data.delete(k),
+    }
   }
 }
 
@@ -68,8 +80,22 @@ export function useAppState(seedLocale: Locale) {
       },
       setLanguage: (language: LanguageSetting) => update((s) => ({ settings: { ...s.settings, language } })),
       setTheme: (theme: ThemeSetting) => update((s) => ({ settings: { ...s.settings, theme } })),
+      /** Back to a first install, with the newest version (see resetApp). Resolves 'offline' when it couldn't. */
+      resetApp: () => {
+        const appUrl = new URL(import.meta.env.BASE_URL, location.href).href
+        return resetApp(
+          {
+            fetch: (url, init) => fetch(url, init),
+            caches: 'caches' in window ? caches : undefined,
+            serviceWorker: navigator.serviceWorker,
+            forgetAppState: () => forgetAppState(store),
+            reload: (url) => location.replace(url),
+          },
+          appUrl,
+        )
+      },
     }
-  }, [])
+  }, [store])
 
   /** Places the composing Round and returns a function that undoes exactly that placement. */
   const placeRound = (sections: Sections) => {
