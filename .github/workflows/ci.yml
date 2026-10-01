@@ -22,12 +22,7 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e -- --trace=retain-on-failure
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: test-results
-          path: test-results
+      - run: npm run test:e2e
 
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
