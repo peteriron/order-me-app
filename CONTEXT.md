@@ -29,7 +29,7 @@ A copy of the Catalog (each Item's name, category and emoji, nothing else: no Hi
 _Avoid_: Menu export, sync
 
 **Counter view**:
-The full-screen, large-type presentation of the composing Round that the Operator reads from or shows to the bartender; the screen stays awake while it is open, and it is where a Round is marked as ordered.
+The large-type presentation of the composing Round that the Operator reads from or shows to the bartender, shown on the **Show** page (a swipe page between Round and Items, ADR-0005); the screen stays awake while that page is on screen, and it is where a Round is marked as ordered.
 _Avoid_: Summary, review screen, receipt
 
 **Operator**:

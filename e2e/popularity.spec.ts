@@ -25,7 +25,7 @@ const firstDrinks = (page: Page) =>
     .allTextContents()
     .then((names) => names.slice(0, 4))
 
-const counterView = (page: Page) => page.getByRole('dialog', { name: 'Round for the counter' })
+const showPage = (page: Page) => page.getByRole('region', { name: 'Round for the counter' })
 
 test.beforeEach(async ({ page }) => {
   await page.goto('./')
@@ -45,7 +45,7 @@ test('most ordered first; tiles hold still while composing, and reorder on place
   expect(await firstDrinks(page)).toEqual(['Rosé wine', 'Mint tea', 'Cola', 'Cola Zero'])
 
   await page.getByRole('region', { name: 'Round total' }).getByRole('button', { name: 'Show' }).tap()
-  await counterView(page).getByRole('button', { name: 'Mark as ordered' }).tap()
+  await showPage(page).getByRole('button', { name: 'Mark as ordered' }).tap()
   // Mint tea and Rosé wine now tie on two Rounds each, so the Catalog order decides: Mint tea is listed first.
   await expect.poll(() => firstDrinks(page)).toEqual(['Mint tea', 'Rosé wine', 'Cola', 'Cola Zero'])
 

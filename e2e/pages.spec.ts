@@ -17,7 +17,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto('./')
 })
 
-test('swiping right from Round shows History, swiping left shows Items', async ({ page }) => {
+test('swiping right from Round shows History; swiping left shows Show, then Items', async ({ page }) => {
   const { x, y } = middle(page)
   await touchDrag(page, { x: 40, y }, { x: width(page) - 40, y })
   await expectOnPage(page, 'History', 'History')
@@ -26,20 +26,31 @@ test('swiping right from Round shows History, swiping left shows Items', async (
   await expectOnPage(page, 'This round is on me', 'Round')
 
   await touchDrag(page, { x: x + 150, y }, { x: x - 150, y })
+  await expectOnPage(page, 'Round for the counter', 'Show')
+
+  await touchDrag(page, { x: x + 150, y }, { x: x - 150, y })
   await expectOnPage(page, 'Items', 'Items')
 })
 
 test('a quick flick changes page even when it is short', async ({ page }) => {
   const { x, y } = middle(page)
   await touchDrag(page, { x: x + 30, y }, { x: x - 40, y }, { steps: 4, durationMs: 40 })
-  await expectOnPage(page, 'Items', 'Items')
+  await expectOnPage(page, 'Round for the counter', 'Show')
 })
 
 test('a quick flick counts even after the finger rested first', async ({ page }) => {
   // Speed is judged at release, not averaged from touch-down: a pause before flicking is normal.
   const { x, y } = middle(page)
   await touchDrag(page, { x: x + 30, y }, { x: x - 40, y }, { steps: 4, durationMs: 40, holdMs: 400 })
-  await expectOnPage(page, 'Items', 'Items')
+  await expectOnPage(page, 'Round for the counter', 'Show')
+})
+
+test('a second swipe right away, while the pages still slide, counts too', async ({ page }) => {
+  const { y } = middle(page)
+  await touchDrag(page, { x: width(page) - 40, y }, { x: 40, y })
+  // No waiting for the slide to settle: under the finger is the outgoing page, already inert.
+  await touchDrag(page, { x: 40, y }, { x: width(page) - 40, y })
+  await expectOnPage(page, 'This round is on me', 'Round')
 })
 
 test('a short, slow drag snaps back to the same page', async ({ page }) => {
@@ -50,6 +61,8 @@ test('a short, slow drag snaps back to the same page', async ({ page }) => {
 
 test('there is no page beyond History or Items', async ({ page }) => {
   const { y } = middle(page)
+  await touchDrag(page, { x: width(page) - 40, y }, { x: 40, y })
+  await expectOnPage(page, 'Round for the counter', 'Show')
   await touchDrag(page, { x: width(page) - 40, y }, { x: 40, y })
   await expectOnPage(page, 'Items', 'Items')
   await touchDrag(page, { x: width(page) - 40, y }, { x: 40, y })

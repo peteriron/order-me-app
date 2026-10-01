@@ -34,6 +34,7 @@ export interface Messages {
   show: string
   counterTitle: string
   backToRound: string
+  showEmpty: string
   addOne: (name: string) => string
   total: string
   share: string
@@ -116,6 +117,7 @@ export const messages: Record<Locale, Messages> = {
     show: 'Show',
     counterTitle: 'Round for the counter',
     backToRound: 'Back to Round',
+    showEmpty: 'Nothing in this Round yet. Tap drinks on the Round page.',
     addOne: (name) => `Add one ${name}`,
     total: 'Total',
     share: 'Share',
@@ -198,6 +200,7 @@ export const messages: Record<Locale, Messages> = {
     show: 'Toon',
     counterTitle: 'Rondje voor de toog',
     backToRound: 'Terug naar rondje',
+    showEmpty: 'Nog niets in dit rondje. Tik drankjes aan op de pagina Rondje.',
     addOne: (name) => `Eén ${name} meer`,
     total: 'Totaal',
     share: 'Delen',
