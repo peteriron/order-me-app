@@ -64,6 +64,16 @@ export interface Messages {
   editItem: string
   editNamed: (name: string) => string
   pinNamed: (name: string) => string
+  shareItems: string
+  shareItemsHint: string
+  qrAlt: (n: number) => string
+  tooBigForQr: string
+  saveImage: string
+  copyLink: string
+  done: string
+  replaceCatalogConfirm: (current: number, shared: number) => string
+  replace: string
+  badShareLink: string
   moveUp: (name: string) => string
   moveDown: (name: string) => string
   name: string
@@ -133,6 +143,16 @@ export const messages: Record<Locale, Messages> = {
     editItem: 'Edit Item',
     editNamed: (name) => `Edit ${name}`,
     pinNamed: (name) => `Pin ${name}`,
+    shareItems: 'Share Items',
+    shareItemsHint: 'Scan with a phone camera to open the app with these Items.',
+    qrAlt: (n) => `QR code with your ${n} Items`,
+    tooBigForQr: 'Too many Items for a QR code that scans reliably. Copy the link instead.',
+    saveImage: 'Save image',
+    copyLink: 'Copy link',
+    done: 'Done',
+    replaceCatalogConfirm: (current, shared) => `Replace your ${current} Items with the ${shared} shared Items? History is kept.`,
+    replace: 'Replace',
+    badShareLink: 'That share link couldn’t be read',
     moveUp: (name) => `Move ${name} up`,
     moveDown: (name) => `Move ${name} down`,
     name: 'Name',
@@ -200,6 +220,17 @@ export const messages: Record<Locale, Messages> = {
     editItem: 'Item bewerken',
     editNamed: (name) => `${name} bewerken`,
     pinNamed: (name) => `${name} vastzetten`,
+    shareItems: 'Items delen',
+    shareItemsHint: 'Scan met een telefooncamera om de app met deze items te openen.',
+    qrAlt: (n) => `QR-code met je ${n} items`,
+    tooBigForQr: 'Te veel items voor een QR-code die vlot scant. Kopieer de link.',
+    saveImage: 'Afbeelding bewaren',
+    copyLink: 'Link kopiëren',
+    done: 'Klaar',
+    replaceCatalogConfirm: (current, shared) =>
+      `Je ${current} items vervangen door de ${shared} gedeelde items? De geschiedenis blijft behouden.`,
+    replace: 'Vervangen',
+    badShareLink: 'Die deellink kon niet gelezen worden',
     moveUp: (name) => `${name} omhoog`,
     moveDown: (name) => `${name} omlaag`,
     name: 'Naam',

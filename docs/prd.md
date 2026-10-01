@@ -77,6 +77,13 @@ A phone app, installed from the browser to the home screen, that works offline i
 53. As an Operator, I want to drag my pinned Items into the order I like, with Move up / Move down when I use a keyboard or screen reader, so that the grid matches how my group orders.
 54. As an Operator, I want pinning, unpinning and reordering to show on the grid right away, so that I see the effect of a deliberate choice immediately.
 
+### Sharing the Catalog (v2)
+
+55. As an Operator, I want to show my Items as a QR code, so that a friend who scans it opens the app with the same drinks and snacks.
+56. As an Operator, I want to save that QR code as an image and copy it as a link, so that I can print it or post it in the group chat.
+57. As a friend opening a shared link for the first time, I want to start with the shared Items straight away, so that there's nothing to set up.
+58. As a friend who already has Items, I want to be asked before they're replaced, and to keep my History either way, so that a link never wipes my setup by surprise.
+
 ### Navigation, install & robustness
 
 46. As an Operator, I want a subtle footer hint (dots with small labels) showing that History and Items exist on either side, so that the swipe navigation is discoverable; tapping a label also navigates.
@@ -106,6 +113,12 @@ A phone app, installed from the browser to the home screen, that works offline i
   togglePin(pins, itemId) / movePin(pins, catalog, itemId, to) / pinsAfterEdit(pins, catalog, itemId, draft)
   pinnedFirst(items, pins) -> Item[]
 
+  // items/sharedCatalog.ts (v2)
+  encodeCatalog(catalog) -> Promise<string>                       // fragment payload: name, category, emoji only
+  decodeCatalog(payload) -> Promise<ItemDraft[] | null>           // all or nothing
+  shareLink(appUrl, payload) / sharedPayload(hash)
+  replaceCatalog(items, newId) -> { catalog, round, pins }        // fresh ids, empty Round, no pins; History kept
+
   // round/round.ts
   type ComposingRound = { counts: Record<ItemId, number> };       // count > 0 only
   add(round, itemId) / remove(round, itemId) / totalOf(round) / roundLines(round, sections)
@@ -128,6 +141,8 @@ A phone app, installed from the browser to the home screen, that works offline i
 
   React state lives in one hook (`src/useAppState.ts`), which returns a stable `actions` object. Each feature receives those actions and the shared overlays (confirm, toast) and wires its own handlers, so `App.tsx` only composes pages and overlays.
 - **Pinned Items** (v2, `items/pins.ts`): pins are one ordered list of Item ids; a section's pin order is that list filtered to its Items. Pinned Items come first in their section on both the grid and the Items page; the rest follow Popularity on the grid and A–Z on the Items page. Pin changes apply to the grid at once, while Popularity still only recomputes at app start, place and undo-place. Deleting an Item drops its pin; a pinned Item that changes category stays pinned, last among the other section's pins; new Items start unpinned. Pins are saved with the app state (storage v4, upgraded from v3 with no pins) and aren't part of a Shared Catalog, so an imported Catalog arrives unpinned.
+- **Shared Catalog** (v2, `items/sharedCatalog.ts`, ADR-0004): the Items page's "Share Items" sheet shows the Catalog as a QR code (via `lean-qr`, the only runtime dependency), with Save image and Copy link. The link is the app's normal address with the Catalog in the fragment (`#items=`), so it never reaches a server: one line per Item (category letter, emoji, tab, name), deflated, base64url. Only name, category and emoji travel. The 21-Item starter Catalog gives a link of about 330 bytes. Beyond QR version 20 the sheet offers Copy link only. Opening a link replaces the Catalog silently on a first launch, otherwise after a confirm; the shared Items get fresh ids, the composing Round is emptied, pins are dropped and History is kept. The fragment is cleared at once, and a link that can't be read in full is ignored with a toast.
+  - **Known limitation (accepted):** on iPhone, scanned links open in Safari, and a Home Screen app keeps its storage separate from Safari, so a friend who already installed the app doesn't receive the Items there. It works on Android and in any browser. See ADR-0004 for sources.
 - **Popularity:** The score is the number of placed Rounds in the last 90 days that contain the Item (a count of *appearances*, not quantity, so one big round doesn't dominate). The grid order is computed when the app starts and after each `place`, then held fixed for the rest of the composing session. Undoing a place recomputes it. Items with no score go last in their section, alphabetically (locale-aware compare).
 - **Place / Undo:** `place` appends to history and resets the composing Round. Undo within 5 s removes that placed Round and restores the previous composing Round exactly.
 - **Order again:** Always replaces the composing Round (no prompt, no undo) and navigates to the Round page. Lines whose `itemId` is no longer in the Catalog are skipped, and a toast reports the number skipped.
@@ -166,7 +181,7 @@ A phone app, installed from the browser to the home screen, that works offline i
 - Any integration with the venue's systems.
 - Multiple simultaneous composing Rounds / named drafts.
 - Accounts, cloud sync, multi-device, sharing a live Round with friends.
-- Backup / restore of History. (Sharing the Catalog is in v2.)
+- Backup / restore of History. (Sharing the Catalog is in v2, and carries the Items only.)
 - Hiding/archiving Items (delete only).
 - Free manual ordering of every tile. v2 has Pinned Items instead.
 - Languages other than Dutch and English.

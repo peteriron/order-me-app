@@ -2,10 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { deletePlacedRound, markOrdered } from './history/history.ts'
 import { addToCatalog, deleteItem, editItem, type ItemDraft, type Sections } from './items/catalog.ts'
 import { movePin, pinsAfterEdit, togglePin } from './items/pins.ts'
+import { replaceCatalog } from './items/sharedCatalog.ts'
 import { add, emptyRound, remove, type ComposingRound } from './round/round.ts'
 import type { ThemeSetting } from './settings/settings.ts'
 import type { LanguageSetting, Locale } from './shared/i18n.ts'
-import { loadAppState, saveAppState, type AppState, type KeyValueStore } from './shared/storage.ts'
+import { isFirstLaunch, loadAppState, saveAppState, type AppState, type KeyValueStore } from './shared/storage.ts'
 
 /** window.localStorage, or an in-memory stand-in when the browser refuses access (e.g. some private modes). */
 function browserStore(): KeyValueStore {
@@ -20,6 +21,8 @@ function browserStore(): KeyValueStore {
 /** `seedLocale` only matters on first launch, when the starter Catalog is created. */
 export function useAppState(seedLocale: Locale) {
   const [store] = useState(browserStore)
+  /** Read before the first load saves the starter Catalog: a shared link opened now replaces it without asking. */
+  const [firstLaunch] = useState(() => isFirstLaunch(store))
   const [state, setState] = useState<AppState>(() =>
     loadAppState(store, { locale: seedLocale, newId: () => crypto.randomUUID() }),
   )
@@ -27,7 +30,10 @@ export function useAppState(seedLocale: Locale) {
   // Save on every change so a killed tab or locked phone loses nothing.
   useEffect(() => saveAppState(store, state), [store, state])
 
-  /** Goes up on every place and undo-place: the moments the tile order is recomputed (see useTileOrder). */
+  /**
+   * Goes up on every place and undo-place, and when a Shared Catalog replaces the Catalog: the moments the tile
+   * order is recomputed (see useTileOrder).
+   */
   const [placements, setPlacements] = useState(0)
 
   // Every action goes through setState's updater, so the object never changes and features can hold on to it.
@@ -55,6 +61,11 @@ export function useAppState(seedLocale: Locale) {
       /** Moves a pinned Item to position `to` among its section's pinned Items. */
       movePin: (itemId: string, to: number) => update((s) => ({ pins: movePin(s.pins, s.catalog, itemId, to) })),
       clearHistory: () => update(() => ({ history: [] })),
+      /** Replaces the Catalog with a Shared Catalog: fresh ids, empty Round, no pins, History kept. */
+      replaceCatalog: (items: ItemDraft[]) => {
+        update(() => replaceCatalog(items, () => crypto.randomUUID()))
+        setPlacements((n) => n + 1)
+      },
       setLanguage: (language: LanguageSetting) => update((s) => ({ settings: { ...s.settings, language } })),
       setTheme: (theme: ThemeSetting) => update((s) => ({ settings: { ...s.settings, theme } })),
     }
@@ -72,7 +83,7 @@ export function useAppState(seedLocale: Locale) {
     }
   }
 
-  return { state, placements, actions, placeRound }
+  return { state, firstLaunch, placements, actions, placeRound }
 }
 
 export type AppActions = ReturnType<typeof useAppState>['actions']

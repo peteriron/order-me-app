@@ -13,6 +13,7 @@ interface ItemsPageProps {
   t: Messages
   actions: Pick<AppActions, 'togglePin' | 'movePin'>
   onAdd: () => void
+  onShare: () => void
   onEdit: (item: Item) => void
   /** The Settings section, shown below the Catalog. */
   children?: ReactNode
@@ -38,7 +39,7 @@ interface Drag {
  * The Operator's Catalog: every Item by category, each row opening the edit sheet and pinning the Item. Pinned Items
  * come first and are reordered by dragging their handle, or with Move up / Move down for keyboard and screen readers.
  */
-export function ItemsPage({ sections, pins, count, t, actions, onAdd, onEdit, children }: ItemsPageProps) {
+export function ItemsPage({ sections, pins, count, t, actions, onAdd, onShare, onEdit, children }: ItemsPageProps) {
   const pinned = new Set(pins)
   const [drag, setDrag] = useState<Drag | null>(null)
 
@@ -180,12 +181,20 @@ export function ItemsPage({ sections, pins, count, t, actions, onAdd, onEdit, ch
         </h1>
         <span className="page-sub">{t.catalogCount(count)}</span>
       </header>
-      <button type="button" className="btn btn-primary btn-block" onClick={onAdd}>
-        <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
-          <path d="M12 5v14M5 12h14" />
-        </svg>
-        {t.addItem}
-      </button>
+      <div className="items-actions">
+        <button type="button" className="btn btn-primary" onClick={onAdd}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          {t.addItem}
+        </button>
+        <button type="button" className="btn btn-outline" onClick={onShare}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+            <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2" />
+          </svg>
+          {t.shareItems}
+        </button>
+      </div>
       {section('drink', t.drinks)}
       {section('snack', t.snacks)}
       {children}
