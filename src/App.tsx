@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { CounterView } from './counter/CounterView.tsx'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ShowPage } from './counter/ShowPage.tsx'
 import { HistoryPage } from './history/HistoryPage.tsx'
 import { ItemSheet } from './items/ItemSheet.tsx'
 import { ItemsPage } from './items/ItemsPage.tsx'
@@ -19,8 +19,9 @@ import type { Overlays } from './shared/ui/overlays.ts'
 import { useAppState } from './useAppState.ts'
 
 const ROUND_PAGE = 1
+const SHOW_PAGE = 2
 
-/** The three swipe pages plus the overlays on top of them. Each feature wires its own handlers. */
+/** The four swipe pages plus the overlays on top of them. Each feature wires its own handlers. */
 export function App() {
   const { state, firstLaunch, placements, actions, placeRound } = useAppState(detectLocale(navigator.language))
   const locale = resolveLocale(state.settings.language, navigator.language)
@@ -29,7 +30,6 @@ export function App() {
   const sections = useTileOrder(state.catalog, state.pins, state.history, placements)
 
   const [page, setPage] = useState(ROUND_PAGE)
-  const [counterOpen, setCounterOpen] = useState(false)
   /** The Item sheet: `{}` to add a new Item, `{ item }` to edit one, `{ forRound }` from the + New tile. */
   const [sheet, setSheet] = useState<{ item?: Item; forRound?: boolean } | null>(null)
   const [sharing, setSharing] = useState(false)
@@ -39,7 +39,6 @@ export function App() {
     () => ({ confirm: setConfirmation, notify: (text, action) => setToast({ id: Date.now(), text, action }) }),
     [],
   )
-  const showButton = useRef<HTMLButtonElement>(null)
   useSharedLink({ firstLaunch, catalogSize: state.catalog.length, t, actions, overlays })
 
   useEffect(() => {
@@ -47,10 +46,6 @@ export function App() {
     document.title = t.appName
   }, [locale, t])
 
-  const closeCounter = useCallback(() => {
-    setCounterOpen(false)
-    showButton.current?.focus()
-  }, [])
   const closeSheet = useCallback(() => setSheet(null), [])
   const closeSharing = useCallback(() => setSharing(false), [])
   const closeToast = useCallback(() => setToast(null), [])
@@ -73,9 +68,19 @@ export function App() {
       round={state.round}
       t={t}
       actions={actions}
-      onShow={() => setCounterOpen(true)}
+      onShow={() => setPage(SHOW_PAGE)}
       onNew={() => setSheet({ forRound: true })}
-      showRef={showButton}
+    />,
+    <ShowPage
+      key="show"
+      round={state.round}
+      sections={sections}
+      active={page === SHOW_PAGE}
+      t={t}
+      actions={actions}
+      onPlace={placeRound}
+      overlays={overlays}
+      onGoToRound={() => setPage(ROUND_PAGE)}
     />,
     <ItemsPage
       key="items"
@@ -100,22 +105,10 @@ export function App() {
 
   return (
     <>
-      <div className="shell" inert={counterOpen || sheet !== null || sharing || confirmation !== null}>
+      <div className="shell" inert={sheet !== null || sharing || confirmation !== null}>
         <Pager pages={pages} page={page} onPageChange={setPage} />
-        <PageHint labels={[t.history, t.round, t.items]} page={page} navLabel={t.pages} onPageChange={setPage} />
+        <PageHint labels={[t.history, t.round, t.show, t.items]} page={page} navLabel={t.pages} onPageChange={setPage} />
       </div>
-
-      {counterOpen && (
-        <CounterView
-          round={state.round}
-          sections={sections}
-          t={t}
-          actions={actions}
-          onPlace={placeRound}
-          overlays={overlays}
-          onClose={closeCounter}
-        />
-      )}
 
       {sheet && (
         // The sheet stays open under a delete confirmation, but must not take taps while it is.

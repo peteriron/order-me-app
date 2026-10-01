@@ -20,7 +20,7 @@ async function waitForServiceWorker(page: Page) {
 /** Uses the app for a while: places a Round, starts another, pins an Item, deletes one and picks the light theme. */
 async function useTheApp(page: Page) {
   await page.getByRole('button', { name: /^Duvel(,|$)/ }).tap()
-  await page.getByRole('button', { name: 'Show' }).tap()
+  await page.getByRole('region', { name: 'Round total' }).getByRole('button', { name: 'Show' }).tap()
   await page.getByRole('button', { name: 'Mark as ordered' }).tap()
   await page.getByRole('button', { name: /^Cola(,|$)/ }).tap()
   await goTo(page, 'Items')

@@ -9,7 +9,7 @@ It's a web app you install on your home screen. It works offline, so bad bar Wi-
 ## What it does
 
 - **Tap to count.** Big tiles for every drink and snack; each tap adds one, and a small − takes one off. The Round is saved on every tap, so locking the phone or closing the app loses nothing.
-- **Counter view.** One tap shows the whole Round in large type ("3 × 🍺 Duvel") with the total, and keeps the screen awake while you read it out. Counts can still be fixed there, and Share sends the order as plain text to a chat.
+- **Show page.** One tap or swipe shows the whole Round in large type ("3 × 🍺 Duvel") with the total, and keeps the screen awake while you read it out. Counts can still be fixed there, and Share sends the order as plain text to a chat.
 - **History.** Placed Rounds are kept, grouped by day. "Order again" repeats last week's Round in one tap.
 - **Your own Items.** Add, rename or delete drinks and snacks, each with an emoji. It starts with a list of common Belgian bar drinks.
 - **Order that suits you.** The drinks your group orders most move to the front over time, but never while you're tapping. Pin your favourites to keep them first, in the order you drag them into.

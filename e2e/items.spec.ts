@@ -95,7 +95,7 @@ test('renaming an Item keeps its count, and a new category moves its tile', asyn
 test('deleting an Item asks first, takes it out of the Round, and leaves history alone', async ({ page }) => {
   // Place a Round with Chips, then start composing another one with Chips in it.
   await tapTiles(page, 'Chips')
-  await page.getByRole('button', { name: 'Show' }).tap()
+  await page.getByRole('region', { name: 'Round total' }).getByRole('button', { name: 'Show' }).tap()
   await page.getByRole('button', { name: 'Mark as ordered' }).tap()
   await tapTiles(page, 'Chips', 'Cola')
 

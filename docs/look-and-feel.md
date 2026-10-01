@@ -89,12 +89,12 @@ Same size as other tiles, with a dashed `--border` outline, a large "+" and the 
 ```
         History   ●  Round  ○  Items
 ```
-Three dots, 6 px, with 11 px muted labels; the active one is an amber dot with a `--text` label. The labels are tappable (44 px hit height). The hint disappears in the Counter view.
+Four dots (History, Round, Show, Items), 6 px, with 11 px muted labels; the active one is an amber dot with a `--text` label. The labels are tappable (44 px hit height). The hint stays visible on the Show page.
 
-### Counter view (full screen)
+### Show page (Counter view)
 ```
 ┌────────────────────────────────────────┐
-│ ←                         Share   Clear│
+│ Round for the counter           Share  │
 │                                        │
 │  3 ×  🍺 Duvel                 [−][+]  │
 │  2 ×  🥤 Cola                  [−][+]  │
@@ -108,10 +108,12 @@ Three dots, 6 px, with 11 px muted labels; the active one is an amber dot with a
 │ └────────────────────────────────────┘ │
 └────────────────────────────────────────┘
 ```
-- It slides up from the bottom (it's a mode, not a page) over `--bg`. The count column is accent-coloured with tabular numerals.
+- The third swipe page (ADR-0005), on `--bg`, titled "Round for the counter". The count column is accent-coloured with tabular numerals.
+- No Back or Clear: swipe or use the footer to go back; Clear lives on the Round page.
 - −/+ buttons are 44 px, `--surface-2`, and visually quieter than the line text, since the bartender is reading the text.
-- "Mark as ordered" is full width, 56 px, accent fill.
-- Wake lock is active while open. There's no visible indicator unless it fails, and then nothing is shown either (silent fallback).
+- "Mark as ordered" is full width, 56 px, accent fill, and stays at the bottom of the page (sticky) while a long Round scrolls. It slides back to Round with the Undo toast.
+- Empty Round: the muted text "Nothing in this Round yet. Tap drinks on the Round page." with an outline "Back to Round" button, centred; no Share or Mark as ordered.
+- Wake lock is active while Show is the page on screen. There's no visible indicator unless it fails, and then nothing is shown either (silent fallback).
 
 ### History card
 ```
@@ -163,7 +165,7 @@ Bottom-centred above the bottom bar, `--surface-2`, 48 px tall, with an optional
 | Tile tap | scale 0.94 → 1, 80/160 ms, ease-out spring |
 | Badge change | pop 0.8 → 1.1 → 1, 200 ms |
 | Page swipe | follows the finger 1:1, snaps in 250 ms `cubic-bezier(.2,.8,.2,1)` |
-| Counter view | slide up 280 ms; slide down to dismiss |
+| Show page | slides in like any page (250 ms) |
 | Toast | fade + rise 8 px, 180 ms |
 
 With `prefers-reduced-motion: reduce`, drop the scale, pop and slide effects and use 120 ms opacity fades. Haptics stay.
@@ -177,6 +179,7 @@ Short, friendly and practical, with no exclamation marks except in the empty sta
 | App name (home screen, manifest) | OrderMe | OrderMe |
 | Heading and page title | This round is on me | Dit rondje is van mij |
 | Empty Round hint | Tap a drink to start | Tik op een drankje om te starten |
+| Show page, empty Round | Nothing in this Round yet. Tap drinks on the Round page. | Nog niets in dit rondje. Tik drankjes aan op de pagina Rondje. |
 | Show | Show | Toon |
 | Clear | Clear | Wissen |
 | Items count | {n} items | {n} items |

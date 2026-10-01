@@ -44,21 +44,21 @@ async function fakePhone(page: Page, share: 'ok' | 'cancel' | 'none') {
   }, share)
 }
 
-const counterView = (page: Page) => page.getByRole('dialog', { name: 'Round for the counter' })
+const showPage = (page: Page) => page.getByRole('region', { name: 'Round for the counter' })
 
 async function composeAndShow(page: Page) {
   for (const name of ['Duvel', 'Duvel', 'Chips', 'Cola']) {
     await page.getByRole('button', { name: new RegExp(`^${name}(,|$)`) }).tap()
   }
   await page.getByRole('region', { name: 'Round total' }).getByRole('button', { name: 'Show' }).tap()
-  await expect(counterView(page)).toBeVisible()
+  await expect(showPage(page).getByRole('listitem').first()).toBeInViewport()
 }
 
 test('Share sends the Round as plain text through the share sheet', async ({ page }) => {
   await fakePhone(page, 'ok')
   await page.goto('./')
   await composeAndShow(page)
-  await counterView(page).getByRole('button', { name: 'Share' }).tap()
+  await showPage(page).getByRole('button', { name: 'Share' }).tap()
 
   await expect.poll(() => page.evaluate(() => window.shared)).toEqual(['1× Cola\n2× Duvel\n1× Chips\nTotal: 4'])
   expect(await page.evaluate(() => window.copied)).toEqual([])
@@ -69,13 +69,13 @@ test('without a share sheet, Share copies the text and says so', async ({ page }
   await fakePhone(page, 'none')
   await page.goto('./')
   await composeAndShow(page)
-  await counterView(page).getByRole('button', { name: 'Share' }).tap()
+  await showPage(page).getByRole('button', { name: 'Share' }).tap()
 
   await expect(page.getByRole('status')).toHaveText('Copied to clipboard')
   expect(await page.evaluate(() => window.copied)).toEqual(['1× Cola\n2× Duvel\n1× Chips\nTotal: 4'])
 })
 
-test('the screen stays awake while the Counter view is open, and may sleep once it closes', async ({ page }) => {
+test('the screen stays awake while the Show page is on screen, and may sleep once you swipe away', async ({ page }) => {
   await fakePhone(page, 'ok')
   await page.goto('./')
   expect(await page.evaluate(() => window.wakeLocks.length)).toBe(0)
@@ -83,6 +83,6 @@ test('the screen stays awake while the Counter view is open, and may sleep once 
   await composeAndShow(page)
   await expect.poll(() => page.evaluate(() => window.wakeLocks)).toEqual([{ released: false }])
 
-  await counterView(page).getByRole('button', { name: 'Back to Round' }).tap()
+  await page.getByRole('navigation', { name: 'Pages' }).getByRole('button', { name: 'Round' }).tap()
   await expect.poll(() => page.evaluate(() => window.wakeLocks)).toEqual([{ released: true }])
 })

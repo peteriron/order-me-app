@@ -60,7 +60,7 @@ test('System follows the phone’s light/dark preference live', async ({ page })
 
 test('Clear history asks first, empties history but not the Round or Catalog, then is disabled', async ({ page }) => {
   await page.getByRole('button', { name: /^Duvel(,|$)/ }).tap()
-  await page.getByRole('button', { name: 'Show' }).tap()
+  await page.getByRole('region', { name: 'Round total' }).getByRole('button', { name: 'Show' }).tap()
   await page.getByRole('button', { name: 'Mark as ordered' }).tap()
   await page.getByRole('button', { name: /^Cola(,|$)/ }).tap()
 

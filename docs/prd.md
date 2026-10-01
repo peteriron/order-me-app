@@ -10,7 +10,7 @@ When it's my turn to get a round, I stand at the table while five friends shout 
 
 ## Solution
 
-A phone app, installed from the browser to the home screen, that works offline in a noisy, dim bar. The Operator taps big tiles (one tap = one more of that Item) while friends call out requests, then opens a full-screen Counter view with large "3 × Duvel" lines to read out or show to the bartender, and marks the Round as ordered. Past Rounds are kept so "the same as last time" is one tap. The most-ordered Items float to the top of their section over time, but never move while you are tapping.
+A phone app, installed from the browser to the home screen, that works offline in a noisy, dim bar. The Operator taps big tiles (one tap = one more of that Item) while friends call out requests, then swipes to the Counter view (the Show page) with large "3 × Duvel" lines to read out or show to the bartender, and marks the Round as ordered. Past Rounds are kept so "the same as last time" is one tap. The most-ordered Items float to the top of their section over time, but never move while you are tapping.
 
 ## User Stories
 
@@ -34,17 +34,18 @@ A phone app, installed from the browser to the home screen, that works offline i
 
 ### Counter view
 
-16. As an Operator, I want a full-screen Counter view that lists the Round as large "3 × 🍺 Duvel" lines, so that I can read it out or turn the phone to the bartender.
+16. As an Operator, I want a Counter view (the Show page, one swipe from the grid) that lists the Round as large "3 × 🍺 Duvel" lines, so that I can read it out or turn the phone to the bartender.
 17. As an Operator, I want those lines grouped drinks first, then snacks, in the same order as the grid, so that the list matches my mental picture.
 18. As an Operator, I want the total number of Items at the bottom, so that the bartender and I can double-check the count.
 19. As an Operator, I want −/+ controls on each line of the Counter view, so that I can fix a count at the counter when a friend changes their mind.
-20. As an Operator, I want the screen to stay awake while the Counter view is open, so that it doesn't go dark while the bartender is reading it.
+20. As an Operator, I want the screen to stay awake while the Show page is on screen, so that it doesn't go dark while the bartender is reading it.
 21. As an Operator, I want a "Share" button that sends the Round as plain text ("3× Duvel … Total: 5") through the phone's share sheet, so that I can send it to the group chat or to someone else going to the counter.
 22. As an Operator, I want Share to copy the text to the clipboard when the phone has no share sheet, so that it always works.
 23. As an Operator, I want a "Mark as ordered" button in the Counter view, so that I place the Round when I'm done at the counter.
 24. As an Operator, I want to land back on an empty grid after marking a Round as ordered, so that I'm ready for the next Round.
 25. As an Operator, I want a 5-second "Round placed · Undo" toast after marking as ordered, so that I can recover if I tapped it too early.
-26. As an Operator, I want a "Clear" action and a way back to the grid from the Counter view, so that I can abandon or keep editing without placing.
+26. As an Operator, I want to get back to the grid from the Show page by swiping or with the footer, so that I can keep editing without placing. (Clearing the Round happens on the Round page.)
+26a. As an Operator, I want the Show page to say so when the Round is empty, with a way back to the grid, so that it's never a blank screen.
 
 ### History
 
@@ -150,7 +151,7 @@ A phone app, installed from the browser to the home screen, that works offline i
 - **Order again:** Always replaces the composing Round (no prompt, no undo) and navigates to the Round page. Lines whose `itemId` is no longer in the Catalog are skipped, and a toast reports the number skipped.
 - **Clear Round:** Instant, with no confirm and no undo (explicit decision).
 - **Delete Item:** Needs a confirm dialog. It also removes the Item from the composing Round. History is untouched.
-- **Counter view:** A full-screen overlay/route opened from the bottom bar. It uses the Screen Wake Lock API while open, re-acquired on `visibilitychange`, and does nothing if unsupported. Share uses the Web Share API with a clipboard fallback. Share text is plain, one line per Item as `"{count}× {name}"`, followed by `"Total: {n}"` / `"Totaal: {n}"` (no emoji, no timestamp).
+- **Counter view** (ADR-0005): the Show page, the third swipe page, reached by swiping or the Round bar's Show button. It uses the Screen Wake Lock API while it is the page on screen, re-acquired on `visibilitychange`, and does nothing if unsupported. Share uses the Web Share API with a clipboard fallback. Share text is plain, one line per Item as `"{count}× {name}"`, followed by `"Total: {n}"` / `"Totaal: {n}"` (no emoji, no timestamp).
 - **Navigation:** Three horizontally swipeable pages, History ← Round → Items (ADR-0003). The Round page is the default. Swipes need a threshold of about 25% of the width or a fling velocity, and a mostly-horizontal angle. The footer has a tappable page indicator.
 - **i18n:** NL and EN UI strings in a small message dictionary. The locale comes from `navigator.language` (`nl*` → NL, else EN), with an override stored in settings. The starter Catalog is seeded once, in the detected locale, on first launch.
 - **Starter Catalog:** The list below is seeded on first launch, in this order, which is also the order the grid and the Items page start with. EN names are shown first; the NL name is in brackets where it differs.

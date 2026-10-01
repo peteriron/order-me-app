@@ -7,16 +7,19 @@ import type { AppActions } from '../useAppState.ts'
 import { shareOrCopy, shareText } from './share.ts'
 import { browserHost, keepScreenAwake } from './wakeLock.ts'
 
-interface CounterViewProps {
+interface ShowPageProps {
   round: ComposingRound
   /** The grid's tile order, so lines read in the same order as the tiles. */
   sections: Sections
+  /** True while this is the page on screen: the screen is kept awake only then. */
+  active: boolean
   t: Messages
-  actions: Pick<AppActions, 'addToRound' | 'removeFromRound' | 'clearRound'>
+  actions: Pick<AppActions, 'addToRound' | 'removeFromRound'>
   /** Places the Round and returns its Undo (see useAppState). */
   onPlace: (sections: Sections) => () => void
   overlays: Overlays
-  onClose: () => void
+  /** Slides to the Round page: from the empty state, and after Mark as ordered. */
+  onGoToRound: () => void
 }
 
 /** Smallest size a name may shrink to before it is allowed to break mid-word. */
@@ -37,11 +40,13 @@ function fitName(el: HTMLElement) {
   if (el.scrollWidth > el.clientWidth) el.style.overflowWrap = 'anywhere'
 }
 
-/** Full-screen, large-type Round to read out or show to the bartender, and the place to mark it as ordered. */
-export function CounterView({ round, sections, t, actions, onPlace, overlays, onClose }: CounterViewProps) {
+/**
+ * The Show page (ADR-0005): the Round in large type to read out or show to the bartender, and the place to mark it
+ * as ordered. A swipe page between Round and Items; Clear lives on the Round page only.
+ */
+export function ShowPage({ round, sections, active, t, actions, onPlace, overlays, onGoToRound }: ShowPageProps) {
   const lines = roundLines(round, sections)
   const total = totalOf(round)
-  const backRef = useRef<HTMLButtonElement>(null)
   const bodyRef = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => {
@@ -51,28 +56,12 @@ export function CounterView({ round, sections, t, actions, onPlace, overlays, on
     return () => window.removeEventListener('resize', fitAll)
   }, [lines])
 
-  // The screen stays on while the bartender reads it.
-  useEffect(() => keepScreenAwake(browserHost()), [])
+  // The screen stays on while the bartender reads it, and may sleep once the Operator swipes away.
+  useEffect(() => (active ? keepScreenAwake(browserHost()) : undefined), [active])
 
-  useEffect(() => {
-    backRef.current?.focus()
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
-
-  const removeOne = (itemId: string) => {
-    // Nothing is left to show once the last Item is gone.
-    if (total === 1) onClose()
-    actions.removeFromRound(itemId)
-  }
-  const clear = () => {
-    onClose()
-    actions.clearRound()
-  }
   const markOrdered = () => {
     const undo = onPlace(sections)
-    onClose()
+    onGoToRound()
     overlays.notify(t.roundPlaced, { label: t.undo, run: undo })
   }
   const share = async () => {
@@ -91,11 +80,11 @@ export function CounterView({ round, sections, t, actions, onPlace, overlays, on
             <span className="counter-what">
               {/* Non-breaking space keeps the emoji on the name's line; long names hyphenate instead. */}
               <span aria-hidden="true">{item.emoji}</span>
-              {'\u00a0'}
+              {' '}
               {item.name}
             </span>
             <span className="counter-controls">
-              <button type="button" aria-label={t.removeOne(item.name)} onClick={() => removeOne(item.id)}>
+              <button type="button" aria-label={t.removeOne(item.name)} onClick={() => actions.removeFromRound(item.id)}>
                 −
               </button>
               <button type="button" aria-label={t.addOne(item.name)} onClick={() => actions.addToRound(item.id)}>
@@ -109,52 +98,57 @@ export function CounterView({ round, sections, t, actions, onPlace, overlays, on
   const hasSnacks = lines.some((l) => l.item.category === 'snack')
 
   return (
-    <div className="counter" role="dialog" aria-modal="true" aria-labelledby="counter-title">
-      <h1 id="counter-title" className="visually-hidden">
-        {t.counterTitle}
-      </h1>
-      <div className="counter-top">
-        <button ref={backRef} type="button" className="icon-btn" aria-label={t.backToRound} onClick={onClose}>
-          <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </button>
-        <div className="counter-actions">
+    <section className="page show-page" aria-labelledby="show-title">
+      <header className="page-head">
+        <h1 className="page-title" id="show-title">
+          {t.counterTitle}
+        </h1>
+        {total > 0 && (
           <button type="button" className="btn btn-quiet" onClick={share}>
             <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
               <path d="M12 15V3M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
             </svg>
             {t.share}
           </button>
-          <button type="button" className="btn btn-quiet" onClick={clear}>
-            {t.clear}
+        )}
+      </header>
+
+      {total === 0 ? (
+        <div className="show-empty">
+          <p>{t.showEmpty}</p>
+          <button type="button" className="btn btn-outline" onClick={onGoToRound}>
+            {t.backToRound}
           </button>
         </div>
-      </div>
+      ) : (
+        <>
+          <div className="counter-body" ref={bodyRef}>
+            {list('drink')}
+            {hasSnacks && (
+              <>
+                <h2 className="section-label counter-divider">
+                  <span className="dot dot-snack" aria-hidden="true" />
+                  {t.snacks}
+                </h2>
+                {list('snack')}
+              </>
+            )}
+            <p className="counter-total">
+              <span>{t.total}</span>
+              <span data-testid="counter-total">{total}</span>
+            </p>
+          </div>
 
-      <div className="counter-body" ref={bodyRef}>
-        {list('drink')}
-        {hasSnacks && (
-          <>
-            <h2 className="section-label counter-divider">
-              <span className="dot dot-snack" aria-hidden="true" />
-              {t.snacks}
-            </h2>
-            {list('snack')}
-          </>
-        )}
-        <p className="counter-total">
-          <span>{t.total}</span>
-          <span data-testid="counter-total">{total}</span>
-        </p>
-      </div>
-
-      <button type="button" className="btn btn-primary btn-big" onClick={markOrdered}>
-        <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
-          <path d="M5 12l5 5 9-10" />
-        </svg>
-        {t.markOrdered}
-      </button>
-    </div>
+          <div className="show-bar">
+            <button type="button" className="btn btn-primary btn-big btn-block" onClick={markOrdered}>
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+                <path d="M5 12l5 5 9-10" />
+              </svg>
+              {t.markOrdered}
+            </button>
+          </div>
+        </>
+      )}
+    </section>
   )
 }

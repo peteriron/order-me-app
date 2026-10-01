@@ -1,4 +1,3 @@
-import type { Ref } from 'react'
 import type { Sections } from '../items/catalog.ts'
 import type { Messages } from '../shared/i18n.ts'
 import { CategorySection } from '../shared/ui/CategorySection.tsx'
@@ -14,10 +13,9 @@ interface RoundPageProps {
   actions: Pick<AppActions, 'addToRound' | 'removeFromRound' | 'clearRound'>
   onShow: () => void
   onNew: () => void
-  showRef?: Ref<HTMLButtonElement>
 }
 
-export function RoundPage({ sections, round, t, actions, onShow, onNew, showRef }: RoundPageProps) {
+export function RoundPage({ sections, round, t, actions, onShow, onNew }: RoundPageProps) {
   const section = (category: keyof Sections, heading: string) => (
     <CategorySection category={category} heading={heading} idPrefix="round">
       <div className="grid">
@@ -57,7 +55,7 @@ export function RoundPage({ sections, round, t, actions, onShow, onNew, showRef 
         {section('drink', t.drinks)}
         {section('snack', t.snacks)}
       </div>
-      <RoundBar total={totalOf(round)} t={t} onClear={actions.clearRound} onShow={onShow} showRef={showRef} />
+      <RoundBar total={totalOf(round)} t={t} onClear={actions.clearRound} onShow={onShow} />
     </>
   )
 }

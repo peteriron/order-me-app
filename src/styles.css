@@ -72,6 +72,9 @@ body,
      every page sideways. clip forbids scrolling outright (hidden stays as a fallback for older browsers). */
   overflow: hidden;
   overflow: clip;
+  /* Same as each page: while the track slides, the finger can land on a page that is already inert, and the touch
+     then goes to the pager itself. Without this the browser would take a quick second swipe as its own pan. */
+  touch-action: pan-y pinch-zoom;
 }
 
 .pager-track {
@@ -482,19 +485,40 @@ button {
   color: var(--text-muted);
 }
 
-/* ---------- counter view: full screen, read at arm's length ---------- */
-.counter {
-  position: fixed;
-  inset: 0;
-  z-index: 20;
-  max-width: 440px;
-  margin: 0 auto;
-  padding: calc(0.5rem + env(safe-area-inset-top, 0px)) 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
+/* ---------- show page: the Round read at arm's length (ADR-0005) ---------- */
+/* At least a screen tall, so Mark as ordered sits at the bottom even for a short Round. */
+.show-page {
+  min-height: 100%;
+  padding-bottom: 0;
+  gap: 0.75rem;
+}
+
+.counter-body {
+  flex: 1;
+}
+
+/* Mark as ordered stays in reach while a long Round scrolls. */
+.show-bar {
+  position: sticky;
+  bottom: 0;
+  padding: 0.75rem 0 1rem;
+  background: var(--bg);
+}
+
+.show-empty {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  background: var(--bg);
-  animation: slide-up 280ms var(--ease-out);
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.show-empty p {
+  margin: 0;
+  max-width: 24ch;
 }
 
 @keyframes slide-up {
@@ -504,23 +528,6 @@ button {
   to {
     transform: none;
   }
-}
-
-.counter-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.counter-actions {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.counter-body {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
 }
 
 .counter-lines {
@@ -1095,7 +1102,6 @@ button {
   .item-rows.reordering .item-row {
     transition: none;
   }
-  .counter,
   .sheet,
   .toast {
     animation: fade-in 120ms linear;
