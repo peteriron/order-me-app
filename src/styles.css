@@ -818,7 +818,7 @@ button {
   color: var(--text-muted);
 }
 
-/* Add Item and Share Items, side by side at the top of the Items page. */
+/* Add Item and Share, side by side at the top of the Items page. */
 .items-actions {
   display: flex;
   gap: 0.5rem;
