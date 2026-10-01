@@ -47,7 +47,7 @@ test('pinning moves an Item to the front on the Items page and the Round page, a
 test('dragging a pinned Item’s handle reorders it, without swiping the page', async ({ page }) => {
   page.on('console', (m) => console.log('PAGE', m.text()))
   await page.evaluate(() => {
-    for (const type of ['touchstart', 'touchend', 'touchcancel', 'pointerdown', 'pointerup', 'pointercancel', 'lostpointercapture', 'click']) {
+    for (const type of ['touchstart', 'touchend', 'touchcancel', 'pointerdown', 'pointerup', 'pointercancel', 'lostpointercapture', 'click', 'contextmenu']) {
       document.addEventListener(type, (e) => console.log(type, (e as PointerEvent).pointerId ?? '', (e.target as Element).className || (e.target as Element).tagName, (e.target as Element).textContent?.slice(0, 20), 'touches' in e ? (e as TouchEvent).touches.length : ''), true)
     }
   })
@@ -70,6 +70,7 @@ test('dragging a pinned Item’s handle reorders it, without swiping the page', 
   await expect(listedDrinks(page).nth(1)).toHaveText(/Beer/)
   await expect(listedDrinks(page).nth(2)).toHaveText(/Cola/)
 
+  await page.waitForTimeout(800)
   console.log('--- tapping Round')
   await goTo(page, 'Round')
   await page.waitForTimeout(500)
