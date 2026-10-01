@@ -82,6 +82,25 @@ describe('tile order on the Round page', () => {
     expect(sections).toEqual(catalogSections(catalog, 'en'))
   })
 
+  describe('with Pinned Items', () => {
+    const order = popularityOrder(catalog, history, 'en', now)
+
+    it('puts pinned Items first in the Operator’s order, then the rest by Popularity', () => {
+      const sections = gridSections(catalog, order, ['water', 'beer'])
+      expect(names(sections.drink)).toEqual(['Water', 'Beer', 'Duvel', 'Cola', 'Tea'])
+    })
+
+    it('keeps pins per section', () => {
+      const sections = gridSections(catalog, order, ['chips', 'tea'])
+      expect(names(sections.drink)).toEqual(['Tea', 'Duvel', 'Cola', 'Beer', 'Water'])
+      expect(names(sections.snack)).toEqual(['Chips', 'Nuts'])
+    })
+
+    it('puts an unpinned Item back in its Popularity place', () => {
+      expect(names(gridSections(catalog, order, []).drink)).toEqual(['Duvel', 'Cola', 'Tea', 'Beer', 'Water'])
+    })
+  })
+
   describe('held fixed while a Round is being composed', () => {
     const order = popularityOrder(catalog, history, 'en', now)
 
@@ -105,7 +124,7 @@ describe('tile order on the Round page', () => {
     })
 
     it('drops deleted Items and keeps the rest where they were', () => {
-      const { catalog: smaller } = deleteItem({ catalog, round: emptyRound() }, 'cola')
+      const { catalog: smaller } = deleteItem({ catalog, round: emptyRound(), pins: [] }, 'cola')
       expect(names(gridSections(smaller, order).drink)).toEqual(['Duvel', 'Tea', 'Beer', 'Water'])
     })
 

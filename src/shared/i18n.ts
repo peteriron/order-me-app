@@ -63,6 +63,9 @@ export interface Messages {
   addToRound: string
   editItem: string
   editNamed: (name: string) => string
+  pinNamed: (name: string) => string
+  moveUp: (name: string) => string
+  moveDown: (name: string) => string
   name: string
   namePlaceholder: string
   category: string
@@ -129,6 +132,9 @@ export const messages: Record<Locale, Messages> = {
     addToRound: 'Add to Round',
     editItem: 'Edit Item',
     editNamed: (name) => `Edit ${name}`,
+    pinNamed: (name) => `Pin ${name}`,
+    moveUp: (name) => `Move ${name} up`,
+    moveDown: (name) => `Move ${name} down`,
     name: 'Name',
     namePlaceholder: 'e.g. Kriek',
     category: 'Category',
@@ -193,6 +199,9 @@ export const messages: Record<Locale, Messages> = {
     addToRound: 'Aan rondje toevoegen',
     editItem: 'Item bewerken',
     editNamed: (name) => `${name} bewerken`,
+    pinNamed: (name) => `${name} vastzetten`,
+    moveUp: (name) => `${name} omhoog`,
+    moveDown: (name) => `${name} omlaag`,
     name: 'Naam',
     namePlaceholder: 'bv. Kriek',
     category: 'Categorie',

@@ -30,7 +30,7 @@ describe('starter Catalog', () => {
   })
 })
 
-describe('Catalog sections (Items page: always A–Z)', () => {
+describe('Catalog sections (Items page: pinned first, then A–Z)', () => {
   const item = (id: string, name: string, category: Item['category']): Item => ({ id, name, category, emoji: '🍺' })
 
   it('splits the Catalog into Drinks and Snacks, each A–Z', () => {
@@ -44,6 +44,19 @@ describe('Catalog sections (Items page: always A–Z)', () => {
     const sections = catalogSections(catalog, 'en')
     expect(sections.drink.map((i) => i.name)).toEqual(['Beer', 'Red wine', 'Rosé'])
     expect(sections.snack.map((i) => i.name)).toEqual(['Chips', 'Nuts'])
+  })
+
+  it('lists pinned Items first, in the Operator’s order, then the rest A–Z', () => {
+    const catalog = [
+      item('cola', 'Cola', 'drink'),
+      item('duvel', 'Duvel', 'drink'),
+      item('beer', 'Beer', 'drink'),
+      item('bitterballen', 'Bitterballen', 'snack'),
+      item('chips', 'Chips', 'snack'),
+    ]
+    const sections = catalogSections(catalog, 'en', ['duvel', 'chips'])
+    expect(sections.drink.map((i) => i.name)).toEqual(['Duvel', 'Beer', 'Cola'])
+    expect(sections.snack.map((i) => i.name)).toEqual(['Chips', 'Bitterballen'])
   })
 
   it('sorts accented names where a reader expects them, not by code point', () => {
@@ -108,7 +121,7 @@ describe('editing the Catalog', () => {
 
   it('deleting an Item also takes it out of the Round being composed', () => {
     const round = add(add(add(emptyRound(), 'duvel'), 'duvel'), 'chips')
-    const next = deleteItem({ catalog: [duvel, chips], round }, 'duvel')
+    const next = deleteItem({ catalog: [duvel, chips], round, pins: [] }, 'duvel')
     expect(next.catalog).toEqual([chips])
     expect(next.round.counts).toEqual({ chips: 1 })
   })
