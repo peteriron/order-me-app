@@ -161,23 +161,23 @@ Short, friendly and practical, with no exclamation marks except in the empty sta
 
 | Key | EN | NL |
 |---|---|---|
-| App name | This round is for me | Deze ronde is voor mij |
-| Short name | OrderMe | OrderMe |
+| App name (home screen, manifest) | OrderMe | OrderMe |
+| Heading and page title | This round is on me | Dit rondje is van mij |
 | Empty Round hint | Tap a drink to start | Tik op een drankje om te starten |
 | Show | Show | Toon |
 | Clear | Clear | Wissen |
 | Items count | {n} items | {n} items |
 | Mark as ordered | Mark as ordered | Besteld |
-| Round placed toast | Round placed | Ronde geplaatst |
+| Round placed toast | Round placed | Rondje geplaatst |
 | Undo | Undo | Ongedaan maken |
 | Share | Share | Delen |
 | Total | Total | Totaal |
 | Order again | Order again | Opnieuw bestellen |
-| History / Round / Items | History / Round / Items | Geschiedenis / Ronde / Items |
+| History / Round / Items | History / Round / Items | Geschiedenis / Rondje / Items |
 | New | New | Nieuw |
 | Drinks / Snacks | Drinks / Snacks | Dranken / Snacks |
 | Delete Item confirm | Delete "{name}"? History keeps it. | "{name}" verwijderen? De geschiedenis blijft behouden. |
-| Clear history confirm | Delete all past Rounds? | Alle vorige rondes verwijderen? |
+| Clear history confirm | Delete all past Rounds? | Alle vorige rondjes verwijderen? |
 | Skipped on order again | {n} items no longer exist and were skipped | {n} items bestaan niet meer en zijn overgeslagen |
 | Copied (share fallback) | Copied to clipboard | Gekopieerd |
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { detectLocale, formattingLocale, resolveLocale } from './i18n.ts'
+import { detectLocale, formattingLocale, messages, resolveLocale } from './i18n.ts'
 
 describe('app language', () => {
   it('is Dutch for any Dutch-speaking region and English otherwise', () => {
@@ -38,5 +38,23 @@ describe('language setting', () => {
   it('a chosen language wins over the phone', () => {
     expect(resolveLocale('nl', 'en-GB')).toBe('nl')
     expect(resolveLocale('en', 'nl-BE')).toBe('en')
+  })
+})
+
+describe('heading', () => {
+  it('says the round is on me, in both languages', () => {
+    expect(messages.en.appName).toBe('This round is on me')
+    expect(messages.nl.appName).toBe('Dit rondje is van mij')
+  })
+})
+
+describe('Dutch copy', () => {
+  it('speaks of a "rondje", never a "ronde"', () => {
+    const copy = Object.values(messages.nl)
+      .map((m) => (typeof m === 'function' ? `${m('x', 1)} ${m('x', 2)}` : m))
+      .join(' ')
+    expect(copy).not.toMatch(/\brondes?\b/i)
+    expect(messages.nl.roundsCount(1)).toBe('1 rondje')
+    expect(messages.nl.roundsCount(2)).toBe('2 rondjes')
   })
 })

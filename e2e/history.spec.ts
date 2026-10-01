@@ -138,7 +138,7 @@ test('Order again replaces the Round being composed and lands on the grid with t
 
   await historyPage(page).getByRole('article').getByRole('button', { name: 'Order again' }).tap()
 
-  await expect(page.getByRole('heading', { name: 'This round is for me', level: 1 })).toBeInViewport()
+  await expect(page.getByRole('heading', { name: 'This round is on me', level: 1 })).toBeInViewport()
   await expect(page.getByRole('button', { name: 'Duvel, 3 in round' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Chips, 2 in round' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Cola', exact: true })).toBeVisible()

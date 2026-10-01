@@ -23,7 +23,7 @@ test.beforeEach(async ({ page }) => {
 
 test('has a web app manifest for installing on the home screen', async ({ page }) => {
   expect(await manifest(page)).toMatchObject({
-    name: 'This round is for me',
+    name: 'OrderMe',
     short_name: 'OrderMe',
     display: 'standalone',
     orientation: 'portrait',
@@ -72,7 +72,7 @@ test('Chrome finds and parses the manifest without errors, and a service worker 
 
   expect(url).toMatch(/\/order-me-app\/manifest\.webmanifest$/)
   expect(errors).toEqual([])
-  expect(JSON.parse(data!)).toMatchObject({ name: 'This round is for me', display: 'standalone' })
+  expect(JSON.parse(data!)).toMatchObject({ name: 'OrderMe', display: 'standalone' })
   expect(await page.evaluate(() => navigator.serviceWorker.controller?.scriptURL)).toMatch(/\/order-me-app\/sw\.js$/)
 })
 
@@ -81,7 +81,7 @@ test('after the first visit it loads and works with no network', async ({ page, 
   await context.setOffline(true)
   await page.reload()
 
-  await expect(page.getByRole('heading', { name: 'This round is for me' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'This round is on me' })).toBeVisible()
   await page.getByRole('button', { name: /^Duvel/ }).tap()
   await expect(page.getByRole('button', { name: 'Duvel, 1 in round' })).toBeVisible()
   await context.setOffline(false)
