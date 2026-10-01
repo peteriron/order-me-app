@@ -42,7 +42,7 @@ test('swiping right from Round shows History, swiping left shows Items', async (
   await expectOnPage(page, 'History', 'History')
 
   await touchDrag(page, { x: width(page) - 40, y }, { x: 40, y })
-  await expectOnPage(page, 'This round is for me', 'Round')
+  await expectOnPage(page, 'This round is on me', 'Round')
 
   await touchDrag(page, { x: x + 150, y }, { x: x - 150, y })
   await expectOnPage(page, 'Items', 'Items')
@@ -64,7 +64,7 @@ test('a quick flick counts even after the finger rested first', async ({ page })
 test('a short, slow drag snaps back to the same page', async ({ page }) => {
   const { x, y } = middle(page)
   await touchDrag(page, { x, y }, { x: x - 60, y }, { steps: 12, durationMs: 700 })
-  await expectOnPage(page, 'This round is for me', 'Round')
+  await expectOnPage(page, 'This round is on me', 'Round')
 })
 
 test('there is no page beyond History or Items', async ({ page }) => {
@@ -81,7 +81,7 @@ test('a slightly sideways tap on a tile adds it and stays on Round', async ({ pa
   await touchDrag(page, start, { x: start.x + 8, y: start.y + 3 }, { steps: 2, durationMs: 60 })
 
   await expect(page.getByRole('button', { name: 'Duvel, 1 in round' })).toBeVisible()
-  await expectOnPage(page, 'This round is for me', 'Round')
+  await expectOnPage(page, 'This round is on me', 'Round')
 })
 
 test('scrolling the grid vertically never changes page', async ({ page }) => {
@@ -96,14 +96,14 @@ test('scrolling the grid vertically never changes page', async ({ page }) => {
 })
 
 test('opens on the Round page, and footer labels navigate between pages', async ({ page }) => {
-  await expectOnPage(page, 'This round is for me', 'Round')
+  await expectOnPage(page, 'This round is on me', 'Round')
   const footer = page.getByRole('navigation', { name: 'Pages' })
   await footer.getByRole('button', { name: 'History' }).tap()
   await expectOnPage(page, 'History', 'History')
   await footer.getByRole('button', { name: 'Items' }).tap()
   await expectOnPage(page, 'Items', 'Items')
   await footer.getByRole('button', { name: 'Round' }).tap()
-  await expectOnPage(page, 'This round is for me', 'Round')
+  await expectOnPage(page, 'This round is on me', 'Round')
 })
 
 test('pages that are off screen are hidden from assistive tech', async ({ page }) => {
@@ -115,7 +115,7 @@ test('pages stay aligned when something off screen is scrolled into view', async
   // Focus moves, screen readers and find-in-page all scroll things into view; that must never shift the pager.
   // The Items page sits to the right of Round, so it is the one the browser *can* scroll towards.
   await page.evaluate(() => document.querySelectorAll('.pager-page')[2].querySelector('h1')!.scrollIntoView())
-  await expectOnPage(page, 'This round is for me', 'Round')
+  await expectOnPage(page, 'This round is on me', 'Round')
 
   await page.getByRole('navigation', { name: 'Pages' }).getByRole('button', { name: 'History' }).tap()
   await expectOnPage(page, 'History', 'History')

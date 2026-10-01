@@ -20,7 +20,7 @@ export default defineConfig({
       includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
       manifest: {
         id: BASE,
-        name: 'This round is for me',
+        name: 'OrderMe',
         short_name: 'OrderMe',
         description: "Collect your friends' drink and snack requests and read the Round out at the counter.",
         lang: 'en',

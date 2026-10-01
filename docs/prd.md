@@ -1,4 +1,4 @@
-# PRD — order-me-app ("This round is for me")
+# PRD — OrderMe ("This round is on me")
 
 v1 is built and shipped. The [v2 scope](#v2-scope) is at the end.
 

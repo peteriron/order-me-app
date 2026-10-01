@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 test('tapping tiles builds a Round that survives a reload', async ({ page }) => {
   await page.goto('./')
-  await expect(page.getByRole('heading', { name: 'This round is for me' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'This round is on me' })).toBeVisible()
 
   const duvel = page.getByRole('button', { name: /^Duvel/ })
   await duvel.tap()
@@ -22,7 +22,7 @@ test.describe('on a Dutch phone', () => {
 
   test('the starter Catalog and headings are in Dutch', async ({ page }) => {
     await page.goto('./')
-    await expect(page.getByRole('heading', { name: 'Deze ronde is voor mij' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Dit rondje is van mij' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Dranken' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Plat water' })).toBeVisible()
   })
