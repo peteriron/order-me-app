@@ -42,7 +42,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('a Round marked as ordered shows up under Today with its time, total and summary', async ({ page }) => {
-  for (const name of ['Duvel', 'Duvel', 'Cola']) await page.getByRole('button', { name: new RegExp(`^${name}`) }).tap()
+  for (const name of ['Duvel', 'Duvel', 'Cola']) await page.getByRole('button', { name: new RegExp(`^${name}(,|$)`) }).tap()
   await page.getByRole('button', { name: 'Show' }).tap()
   await page.getByRole('button', { name: 'Mark as ordered' }).tap()
   await goToHistory(page)
@@ -66,7 +66,7 @@ test('groups Rounds by day, newest first: Today, Yesterday, then the date', asyn
   await seedHistory(page, [
     { daysAgo: 0, time: [0, 30], lines: [['Duvel', 1]] },
     { daysAgo: 1, time: [22, 15], lines: [['Cola', 2]] },
-    { daysAgo: 1, time: [20, 5], lines: [['Beer', 4]] },
+    { daysAgo: 1, time: [20, 5], lines: [['Lager', 4]] },
     { daysAgo: 5, time: [21, 0], lines: [['Red wine', 2]] },
   ])
   await goToHistory(page)
@@ -132,7 +132,7 @@ test('a deleted Round is gone for good, and an empty history says so', async ({ 
 })
 
 test('Order again replaces the Round being composed and lands on the grid with the counts', async ({ page }) => {
-  await page.getByRole('button', { name: /^Cola/ }).tap()
+  await page.getByRole('button', { name: /^Cola(,|$)/ }).tap()
   await seedHistory(page, [{ daysAgo: 1, time: [21, 0], lines: [['Duvel', 3], ['Chips', 2]] }])
   await goToHistory(page)
 

@@ -1,7 +1,6 @@
 import type { PlacedRound } from '../history/history.ts'
 import type { Catalog, Category, Item, Sections } from '../items/catalog.ts'
 import { pinnedFirst, type Pins } from '../items/pins.ts'
-import type { Locale } from '../shared/i18n.ts'
 
 /**
  * Tiles on the Round page: Pinned Items first in the Operator's order, then the rest in an order frozen by
@@ -37,12 +36,13 @@ export function popularity(history: PlacedRound[], now: Date): Record<string, nu
 }
 
 /**
- * The Catalog's Item ids, most popular first, ties A–Z in the Operator's language, never-ordered Items last A–Z.
- * Computed at app start and after place / undo-place only, then held fixed for `gridSections`.
+ * The Catalog's Item ids, most popular first; ties, and Items never ordered, keep their Catalog order (the starter
+ * list's order, then Items as they were added). Computed at app start and after place / undo-place only, then held
+ * fixed for `gridSections`.
  */
-export function popularityOrder(catalog: Catalog, history: PlacedRound[], locale: Locale, now: Date): string[] {
+export function popularityOrder(catalog: Catalog, history: PlacedRound[], now: Date): string[] {
   const scores = popularity(history, now)
-  const byName = new Intl.Collator(locale).compare
   const score = (item: Item) => scores[item.id] ?? 0
-  return [...catalog].sort((a, b) => score(b) - score(a) || byName(a.name, b.name)).map((item) => item.id)
+  // Array.prototype.sort is stable, so equal scores stay in Catalog order.
+  return [...catalog].sort((a, b) => score(b) - score(a)).map((item) => item.id)
 }

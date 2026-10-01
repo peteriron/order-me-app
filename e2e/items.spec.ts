@@ -9,22 +9,22 @@ async function goTo(page: Page, name: 'History' | 'Round' | 'Items') {
 }
 
 async function tapTiles(page: Page, ...names: string[]) {
-  for (const name of names) await page.getByRole('button', { name: new RegExp(`^${name}`) }).tap()
+  for (const name of names) await page.getByRole('button', { name: new RegExp(`^${name}(,|$)`) }).tap()
 }
 
 test.beforeEach(async ({ page }) => {
   await page.goto('./')
 })
 
-test('lists every Item A–Z under Drinks and Snacks, with Add Item at the top', async ({ page }) => {
+test('lists every Item in Catalog order under Drinks and Snacks, with Add Item at the top', async ({ page }) => {
   await goTo(page, 'Items')
   await expect(itemsPage(page).getByRole('heading', { name: 'Items', level: 1 })).toBeInViewport()
-  await expect(itemsPage(page)).toContainText('21 in your Catalog')
+  await expect(itemsPage(page)).toContainText('28 in your Catalog')
   await expect(itemsPage(page).getByRole('button', { name: 'Add Item' })).toBeVisible()
 
   const snacks = itemsPage(page).getByRole('region', { name: 'Snacks' }).getByRole('button', { name: /^Edit / })
-  await expect(snacks).toHaveText([/Bitterballen/, /Cheese/, /Chips/, /Nuts/])
-  await expect(itemsPage(page).getByRole('region', { name: 'Drinks' }).getByRole('button', { name: /^Edit / })).toHaveCount(17)
+  await expect(snacks).toHaveText([/Chips/, /Nuts/, /Cheese/, /Bitterballen/])
+  await expect(itemsPage(page).getByRole('region', { name: 'Drinks' }).getByRole('button', { name: /^Edit / })).toHaveCount(24)
 })
 
 test('adds an Item that appears in the Catalog and as a tile, and survives a reload', async ({ page }) => {
@@ -51,7 +51,7 @@ test('will not add an Item without a name', async ({ page }) => {
   await sheet(page).getByRole('button', { name: 'Add', exact: true }).tap()
 
   await expect(sheet(page)).toContainText('Give the Item a name')
-  await expect(itemsPage(page)).toContainText('21 in your Catalog')
+  await expect(itemsPage(page)).toContainText('28 in your Catalog')
 })
 
 test('a typed emoji can be used instead of one from the picker', async ({ page }) => {
@@ -109,10 +109,10 @@ test('deleting an Item asks first, takes it out of the Round, and leaves history
   await expect(confirm).toHaveCount(0)
   await expect(sheet(page)).toHaveCount(0)
   await expect(itemsPage(page).getByRole('button', { name: 'Edit Chips' })).toHaveCount(0)
-  await expect(itemsPage(page)).toContainText('20 in your Catalog')
+  await expect(itemsPage(page)).toContainText('27 in your Catalog')
 
   await goTo(page, 'Round')
-  await expect(page.getByRole('button', { name: /^Chips/ })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /^Chips(,|$)/ })).toHaveCount(0)
   await expect(roundBar(page)).toContainText('1 item')
 
   await goTo(page, 'History')
@@ -160,9 +160,9 @@ test.describe('the + New tile on the Round page', () => {
     await sheet(page).getByLabel('Name').fill('Kriek')
     await sheet(page).getByRole('button', { name: 'Cancel' }).tap()
 
-    await expect(page.getByRole('button', { name: /^Kriek/ })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /^Kriek(,|$)/ })).toHaveCount(0)
     await expect(roundBar(page)).toContainText('Tap a drink to start')
     await goTo(page, 'Items')
-    await expect(itemsPage(page)).toContainText('21 in your Catalog')
+    await expect(itemsPage(page)).toContainText('28 in your Catalog')
   })
 })

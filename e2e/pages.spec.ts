@@ -57,7 +57,7 @@ test('there is no page beyond History or Items', async ({ page }) => {
 })
 
 test('a slightly sideways tap on a tile adds it and stays on Round', async ({ page }) => {
-  const box = (await page.getByRole('button', { name: /^Duvel/ }).boundingBox())!
+  const box = (await page.getByRole('button', { name: /^Duvel(,|$)/ }).boundingBox())!
   const start = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
   await touchDrag(page, start, { x: start.x + 8, y: start.y + 3 }, { steps: 2, durationMs: 60 })
 

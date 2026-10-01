@@ -56,7 +56,7 @@ test.beforeEach(async ({ page }) => {
 test('the share sheet shows a QR code; Copy link copies the link and Save image downloads a PNG', async ({ page }) => {
   await goTo(page, 'Items')
   await itemsPage(page).getByRole('button', { name: 'Share Items' }).tap()
-  await expect(shareSheet(page).getByRole('img', { name: 'QR code with your 21 Items' })).toBeVisible()
+  await expect(shareSheet(page).getByRole('img', { name: 'QR code with your 28 Items' })).toBeVisible()
 
   await shareSheet(page).getByRole('button', { name: 'Copy link' }).tap()
   await expect(page.getByRole('status').filter({ hasText: 'Copied to clipboard' })).toBeVisible()
@@ -77,7 +77,7 @@ test('a phone opening the link for the first time starts with the shared Items, 
   const friend = await freshPhone(browser)
   await friend.goto(link)
   await goTo(friend, 'Items')
-  await expect(itemsPage(friend)).toContainText('22 in your Catalog')
+  await expect(itemsPage(friend)).toContainText('29 in your Catalog')
   await expect(itemsPage(friend).getByRole('button', { name: 'Edit Kriek' })).toBeVisible()
   await expect(confirmDialog(friend)).toHaveCount(0)
   expect(new URL(friend.url()).hash).toBe('')
@@ -94,16 +94,16 @@ test('with Items of their own, the friend is asked: Cancel keeps them, Replace t
   // Opening the link anew: Cancel changes nothing.
   await page.goto('about:blank')
   await page.goto(link)
-  await expect(confirmDialog(page)).toContainText('Replace your 22 Items with the 21 shared Items? History is kept.')
+  await expect(confirmDialog(page)).toContainText('Replace your 29 Items with the 28 shared Items? History is kept.')
   expect(new URL(page.url()).hash).toBe('')
   await confirmDialog(page).getByRole('button', { name: 'Cancel' }).tap()
   await goTo(page, 'Items')
-  await expect(itemsPage(page)).toContainText('22 in your Catalog')
+  await expect(itemsPage(page)).toContainText('29 in your Catalog')
 
   // Pasted into the open app (only the fragment changes): Replace takes the shared Items.
   await page.goto(link)
   await confirmDialog(page).getByRole('button', { name: 'Replace' }).tap()
-  await expect(itemsPage(page)).toContainText('21 in your Catalog')
+  await expect(itemsPage(page)).toContainText('28 in your Catalog')
   await expect(itemsPage(page).getByRole('button', { name: 'Edit Kriek' })).toHaveCount(0)
   expect(new URL(page.url()).hash).toBe('')
 })
@@ -113,5 +113,5 @@ test('a broken link is ignored with a short note', async ({ page }) => {
   await expect(page.getByRole('status').filter({ hasText: 'That share link couldn’t be read' })).toBeVisible()
   expect(new URL(page.url()).hash).toBe('')
   await goTo(page, 'Items')
-  await expect(itemsPage(page)).toContainText('21 in your Catalog')
+  await expect(itemsPage(page)).toContainText('28 in your Catalog')
 })

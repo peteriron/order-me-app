@@ -26,7 +26,7 @@ export function App() {
   const locale = resolveLocale(state.settings.language, navigator.language)
   const t = messages[locale]
   useTheme(state.settings.theme)
-  const sections = useTileOrder(state.catalog, state.pins, state.history, locale, placements)
+  const sections = useTileOrder(state.catalog, state.pins, state.history, placements)
 
   const [page, setPage] = useState(ROUND_PAGE)
   const [counterOpen, setCounterOpen] = useState(false)
@@ -79,7 +79,7 @@ export function App() {
     />,
     <ItemsPage
       key="items"
-      sections={catalogSections(state.catalog, locale, state.pins)}
+      sections={catalogSections(state.catalog, state.pins)}
       pins={state.pins}
       count={state.catalog.length}
       t={t}

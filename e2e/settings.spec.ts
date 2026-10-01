@@ -59,10 +59,10 @@ test('System follows the phone’s light/dark preference live', async ({ page })
 })
 
 test('Clear history asks first, empties history but not the Round or Catalog, then is disabled', async ({ page }) => {
-  await page.getByRole('button', { name: /^Duvel/ }).tap()
+  await page.getByRole('button', { name: /^Duvel(,|$)/ }).tap()
   await page.getByRole('button', { name: 'Show' }).tap()
   await page.getByRole('button', { name: 'Mark as ordered' }).tap()
-  await page.getByRole('button', { name: /^Cola/ }).tap()
+  await page.getByRole('button', { name: /^Cola(,|$)/ }).tap()
 
   await openSettings(page)
   await page.getByRole('button', { name: 'Clear history' }).tap()
@@ -70,7 +70,7 @@ test('Clear history asks first, empties history but not the Round or Catalog, th
   await confirm.getByRole('button', { name: 'Clear history' }).tap()
   await expect(confirm).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Clear history' })).toBeDisabled()
-  await expect(page.getByRole('region', { name: 'Items' })).toContainText('21 in your Catalog')
+  await expect(page.getByRole('region', { name: 'Items' })).toContainText('28 in your Catalog')
 
   await openSettings(page, 'History')
   await expect(page.getByRole('region', { name: 'History' })).toContainText('No Rounds yet')

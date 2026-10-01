@@ -58,55 +58,48 @@ describe('tile order on the Round page', () => {
   const catalog = [water, tea, duvel, cola, beer, nuts, chips]
   const history = [round('r1', ['duvel', 'nuts']), round('r2', ['duvel', 'tea']), round('r3', ['cola'])]
 
-  it('puts the most popular Items first in each section, ties A–Z, never-ordered last A–Z', () => {
-    const sections = gridSections(catalog, popularityOrder(catalog, history, 'en', now))
-    expect(names(sections.drink)).toEqual(['Duvel', 'Cola', 'Tea', 'Beer', 'Water'])
+  it('puts the most popular Items first in each section; ties and never-ordered Items keep Catalog order', () => {
+    const sections = gridSections(catalog, popularityOrder(catalog, history, now))
+    expect(names(sections.drink)).toEqual(['Duvel', 'Tea', 'Cola', 'Water', 'Beer'])
     expect(names(sections.snack)).toEqual(['Nuts', 'Chips'])
-  })
-
-  it('breaks ties in the Operator’s language, not by code point', () => {
-    const eclair = item('eclair', 'Éclair')
-    const zwarte = item('zwarte', 'Zwarte koffie')
-    const order = popularityOrder([zwarte, eclair], [round('r1', ['zwarte', 'eclair'])], 'nl', now)
-    expect(names(gridSections([zwarte, eclair], order).drink)).toEqual(['Éclair', 'Zwarte koffie'])
   })
 
   it('keeps the score of a renamed Item, since placed lines point at its id', () => {
     const renamed = { ...duvel, name: 'Aardbeienbier' }
-    const order = popularityOrder([renamed, cola], history, 'en', now)
-    expect(names(gridSections([renamed, cola], order).drink)).toEqual(['Aardbeienbier', 'Cola'])
+    const order = popularityOrder([renamed, cola], history, now)
+    expect(names(gridSections([cola, renamed], order).drink)).toEqual(['Aardbeienbier', 'Cola'])
   })
 
-  it('is all A–Z when nothing has been placed yet', () => {
-    const sections = gridSections(catalog, popularityOrder(catalog, [], 'en', now))
-    expect(sections).toEqual(catalogSections(catalog, 'en'))
+  it('is the Catalog order, like the Items page, when nothing has been placed yet', () => {
+    const sections = gridSections(catalog, popularityOrder(catalog, [], now))
+    expect(sections).toEqual(catalogSections(catalog))
   })
 
   describe('with Pinned Items', () => {
-    const order = popularityOrder(catalog, history, 'en', now)
+    const order = popularityOrder(catalog, history, now)
 
     it('puts pinned Items first in the Operator’s order, then the rest by Popularity', () => {
       const sections = gridSections(catalog, order, ['water', 'beer'])
-      expect(names(sections.drink)).toEqual(['Water', 'Beer', 'Duvel', 'Cola', 'Tea'])
+      expect(names(sections.drink)).toEqual(['Water', 'Beer', 'Duvel', 'Tea', 'Cola'])
     })
 
     it('keeps pins per section', () => {
       const sections = gridSections(catalog, order, ['chips', 'tea'])
-      expect(names(sections.drink)).toEqual(['Tea', 'Duvel', 'Cola', 'Beer', 'Water'])
+      expect(names(sections.drink)).toEqual(['Tea', 'Duvel', 'Cola', 'Water', 'Beer'])
       expect(names(sections.snack)).toEqual(['Chips', 'Nuts'])
     })
 
     it('puts an unpinned Item back in its Popularity place', () => {
-      expect(names(gridSections(catalog, order, []).drink)).toEqual(['Duvel', 'Cola', 'Tea', 'Beer', 'Water'])
+      expect(names(gridSections(catalog, order, []).drink)).toEqual(['Duvel', 'Tea', 'Cola', 'Water', 'Beer'])
     })
   })
 
   describe('held fixed while a Round is being composed', () => {
-    const order = popularityOrder(catalog, history, 'en', now)
+    const order = popularityOrder(catalog, history, now)
 
     it('does not move a renamed Item', () => {
       const edited = editItem(catalog, 'beer', { name: 'Allagash', category: 'drink', emoji: '🍺' })
-      expect(names(gridSections(edited, order).drink)).toEqual(['Duvel', 'Cola', 'Tea', 'Allagash', 'Water'])
+      expect(names(gridSections(edited, order).drink)).toEqual(['Duvel', 'Tea', 'Cola', 'Water', 'Allagash'])
     })
 
     it('puts newly added Items at the end of their section, in the order they were added', () => {
@@ -114,10 +107,10 @@ describe('tile order on the Round page', () => {
       grown = addToCatalog(grown, { name: 'Apple juice', category: 'drink', emoji: '🧃' }, 'apple')
       expect(names(gridSections(grown, order).drink)).toEqual([
         'Duvel',
-        'Cola',
         'Tea',
-        'Beer',
+        'Cola',
         'Water',
+        'Beer',
         'Zero',
         'Apple juice',
       ])
@@ -125,12 +118,12 @@ describe('tile order on the Round page', () => {
 
     it('drops deleted Items and keeps the rest where they were', () => {
       const { catalog: smaller } = deleteItem({ catalog, round: emptyRound(), pins: [] }, 'cola')
-      expect(names(gridSections(smaller, order).drink)).toEqual(['Duvel', 'Tea', 'Beer', 'Water'])
+      expect(names(gridSections(smaller, order).drink)).toEqual(['Duvel', 'Tea', 'Water', 'Beer'])
     })
 
     it('moves an Item that changes category into the other section by its score', () => {
       const moved = editItem(catalog, 'tea', { name: 'Tea', category: 'snack', emoji: '🍵' })
-      expect(names(gridSections(moved, order).snack)).toEqual(['Nuts', 'Tea', 'Chips'])
+      expect(names(gridSections(moved, order).snack)).toEqual(['Tea', 'Nuts', 'Chips'])
     })
   })
 })

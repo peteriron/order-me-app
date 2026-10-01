@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import type { PlacedRound } from '../history/history.ts'
 import type { Catalog, Sections } from '../items/catalog.ts'
 import type { Pins } from '../items/pins.ts'
-import type { Locale } from '../shared/i18n.ts'
 import { gridSections, popularityOrder } from './tileOrder.ts'
 
 /**
@@ -14,10 +13,9 @@ export function useTileOrder(
   catalog: Catalog,
   pins: Pins,
   history: PlacedRound[],
-  locale: Locale,
   placements: number,
 ): Sections {
-  const rank = () => ({ placements, order: popularityOrder(catalog, history, locale, new Date()) })
+  const rank = () => ({ placements, order: popularityOrder(catalog, history, new Date()) })
   const [ranked, setRanked] = useState(rank)
   // Recompute during render rather than in an effect, so the old order is never painted after a placement.
   if (ranked.placements !== placements) setRanked(rank())

@@ -15,24 +15,32 @@ export type Catalog = Item[]
 
 type SeedRow = [emoji: string, category: Category, en: string, nl: string]
 
+/** In the order the grid starts with, grouped: soft drinks, beer, hot drinks, wine, mixed drinks; then snacks. */
 const STARTER: SeedRow[] = [
-  ['🍺', 'drink', 'Beer', 'Bier'],
-  ['🍺', 'drink', 'Duvel', 'Duvel'],
-  ['🍺', 'drink', '0.0 Beer', '0.0 Bier'],
   ['🥤', 'drink', 'Cola', 'Cola'],
-  ['💧', 'drink', 'Still water', 'Plat water'],
-  ['🫧', 'drink', 'Sparkling water', 'Bruiswater'],
-  ['☕', 'drink', 'Coffee', 'Koffie'],
-  ['☕', 'drink', 'Decaf', 'Deca'],
-  ['🍵', 'drink', 'Tea', 'Thee'],
+  ['🥤', 'drink', 'Cola Zero', 'Cola Zero'],
+  ['💧', 'drink', 'Still water', 'Water plat'],
+  ['🫧', 'drink', 'Sparkling water', 'Water bruis'],
   ['🍊', 'drink', 'Fanta', 'Fanta'],
+  ['🍋', 'drink', 'Sprite', 'Sprite'],
   ['🧋', 'drink', 'Ice Tea', 'Ice Tea'],
   ['🧃', 'drink', 'Juice', 'Fruitsap'],
-  ['🥂', 'drink', 'Cava', 'Cava'],
+  ['🍋', 'drink', 'Gini', 'Gini'],
+  ['🫧', 'drink', 'Tönissteiner', 'Tönissteiner'],
+  ['🍺', 'drink', 'Lager', 'Pils'],
+  ['🍺', 'drink', 'Lager 0.0', 'Pils 0,0'],
+  ['🍺', 'drink', 'Duvel', 'Duvel'],
+  ['🍻', 'drink', 'Specialty beer', 'Speciaalbier'],
+  ['☕', 'drink', 'Coffee', 'Koffie'],
+  ['☕', 'drink', 'Decaf', 'Deca'],
+  ['🍵', 'drink', 'Mint tea', 'Muntthee'],
   ['🥂', 'drink', 'White wine', 'Witte wijn'],
-  ['🍷', 'drink', 'Rosé', 'Rosé'],
   ['🍷', 'drink', 'Red wine', 'Rode wijn'],
-  ['🥃', 'drink', 'Liquor', 'Sterke drank'],
+  ['🍷', 'drink', 'Rosé wine', 'Rosé wijn'],
+  ['🍊', 'drink', 'Aperol Spritz', 'Aperol Spritz'],
+  ['🍾', 'drink', 'Cava', 'Cava'],
+  ['🍸', 'drink', 'Gin & tonic', 'Gin-tonic'],
+  ['🍹', 'drink', 'Mocktail', 'Mocktail'],
   ['🥔', 'snack', 'Chips', 'Chips'],
   ['🥜', 'snack', 'Nuts', 'Nootjes'],
   ['🧀', 'snack', 'Cheese', 'Kaasblokjes'],
@@ -51,12 +59,14 @@ export function seedCatalog(locale: Locale, newId: () => string): Catalog {
 
 export type Sections = Record<Category, Item[]>
 
-/** The Catalog as the Items page lists it: Drinks then Snacks, each with its Pinned Items first, then A–Z. */
-export function catalogSections(catalog: Catalog, locale: Locale, pins: Pins = []): Sections {
-  const byName = new Intl.Collator(locale).compare
+/**
+ * The Catalog as the Items page lists it: Drinks then Snacks, each with its Pinned Items first, then the rest in
+ * Catalog order (the starter list's order, then Items as they were added).
+ */
+export function catalogSections(catalog: Catalog, pins: Pins = []): Sections {
   const section = (category: Category) =>
     pinnedFirst(
-      catalog.filter((i) => i.category === category).sort((a, b) => byName(a.name, b.name)),
+      catalog.filter((i) => i.category === category),
       pins,
     )
   return { drink: section('drink'), snack: section('snack') }

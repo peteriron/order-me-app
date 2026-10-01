@@ -33,22 +33,22 @@ test.beforeEach(async ({ page }) => {
 
 test('most ordered first; tiles hold still while composing, and reorder on place and on Undo', async ({ page }) => {
   await seedHistory(page, [
-    { daysAgo: 1, items: ['Tea'] },
-    { daysAgo: 2, items: ['Tea'] },
-    { daysAgo: 3, items: ['Rosé'] },
+    { daysAgo: 1, items: ['Rosé wine'] },
+    { daysAgo: 2, items: ['Rosé wine'] },
+    { daysAgo: 3, items: ['Mint tea'] },
     // Too old to count.
     { daysAgo: 120, items: ['Red wine', 'Red wine'] },
   ])
-  expect(await firstDrinks(page)).toEqual(['Tea', 'Rosé', '0.0 Beer', 'Beer'])
+  expect(await firstDrinks(page)).toEqual(['Rosé wine', 'Mint tea', 'Cola', 'Cola Zero'])
 
-  for (let n = 0; n < 3; n++) await page.getByRole('button', { name: /^Rosé/ }).tap()
-  expect(await firstDrinks(page)).toEqual(['Tea', 'Rosé', '0.0 Beer', 'Beer'])
+  for (let n = 0; n < 3; n++) await page.getByRole('button', { name: /^Mint tea(,|$)/ }).tap()
+  expect(await firstDrinks(page)).toEqual(['Rosé wine', 'Mint tea', 'Cola', 'Cola Zero'])
 
   await page.getByRole('region', { name: 'Round total' }).getByRole('button', { name: 'Show' }).tap()
   await counterView(page).getByRole('button', { name: 'Mark as ordered' }).tap()
-  // Rosé and Tea now tie on two Rounds each, so A–Z decides.
-  await expect.poll(() => firstDrinks(page)).toEqual(['Rosé', 'Tea', '0.0 Beer', 'Beer'])
+  // Mint tea and Rosé wine now tie on two Rounds each, so the Catalog order decides: Mint tea is listed first.
+  await expect.poll(() => firstDrinks(page)).toEqual(['Mint tea', 'Rosé wine', 'Cola', 'Cola Zero'])
 
   await page.getByRole('status').getByRole('button', { name: 'Undo' }).tap()
-  await expect.poll(() => firstDrinks(page)).toEqual(['Tea', 'Rosé', '0.0 Beer', 'Beer'])
+  await expect.poll(() => firstDrinks(page)).toEqual(['Rosé wine', 'Mint tea', 'Cola', 'Cola Zero'])
 })
