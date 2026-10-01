@@ -184,3 +184,13 @@ Short, friendly and practical, with no exclamation marks except in the empty sta
 ## App icon
 
 An amber rounded square with a dark tray holding two glasses in line style, and no text. It must read at 48 px, and the maskable version keeps the artwork inside the central 80% safe zone.
+
+The polish adds depth without changing the drawing:
+
+- The amber runs from a light top (`#ffc145`) to a deeper bottom (`#ec8a0c`), with a soft cream glow behind the glasses.
+- The pint holds beer, golden to deep amber, under a cream foam head that spills over the rim.
+- The wine glass holds red wine in the lower part of the bowl.
+- Each glass has a white highlight streak on its left side, and the tray catches a faint line of light on its top edge.
+- A soft, blurred shadow sits under the tray.
+
+The dark line art stays at full weight, so the silhouette reads the same at 48 px. `assets/icon.svg` is the source. `node scripts/render-icons.mjs` regenerates every size from it, plus the SVG favicon.

@@ -1,6 +1,7 @@
-// Renders assets/icon.svg into the PNG icons the manifest and iOS need, using Playwright's Chromium.
+// Renders assets/icon.svg into the PNG icons the manifest and iOS need, using Playwright's Chromium,
+// and copies it as the SVG favicon.
 // Run after changing the icon: node scripts/render-icons.mjs
-import { readFileSync } from 'node:fs'
+import { copyFileSync, readFileSync } from 'node:fs'
 import { chromium } from '@playwright/test'
 
 const svg = readFileSync(new URL('../assets/icon.svg', import.meta.url), 'utf8')
@@ -25,3 +26,6 @@ for (const { file, size, svg: source } of outputs) {
   console.log(`public/icons/${file} (${size}×${size})`)
 }
 await browser.close()
+
+copyFileSync(new URL('../assets/icon.svg', import.meta.url), new URL('../public/icons/icon.svg', import.meta.url))
+console.log('public/icons/icon.svg')
