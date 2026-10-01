@@ -96,6 +96,10 @@ export interface Messages {
   light: string
   clearHistory: string
   clearHistoryConfirm: string
+  resetApp: string
+  resetAppConfirm: string
+  reset: string
+  resetOffline: string
 }
 
 export const messages: Record<Locale, Messages> = {
@@ -175,6 +179,11 @@ export const messages: Record<Locale, Messages> = {
     light: 'Light',
     clearHistory: 'Clear history',
     clearHistoryConfirm: 'Delete all past Rounds?',
+    resetApp: 'Reset app',
+    resetAppConfirm:
+      'Reset the app to how it was first installed? This deletes your Items, pins, the Round, all History and your settings, and loads the newest version.',
+    reset: 'Reset',
+    resetOffline: 'No connection. Resetting needs internet to load the newest version.',
   },
   nl: {
     appName: 'Dit rondje is van mij',
@@ -253,5 +262,10 @@ export const messages: Record<Locale, Messages> = {
     light: 'Licht',
     clearHistory: 'Geschiedenis wissen',
     clearHistoryConfirm: 'Alle vorige rondjes verwijderen?',
+    resetApp: 'App resetten',
+    resetAppConfirm:
+      'De app terugzetten zoals bij de installatie? Je items, vastgezette items, het rondje, de hele geschiedenis en je instellingen worden gewist, en de nieuwste versie wordt geladen.',
+    reset: 'Resetten',
+    resetOffline: 'Geen verbinding. Om te resetten is internet nodig voor de nieuwste versie.',
   },
 }

@@ -9,6 +9,7 @@ import type { Locale } from './i18n.ts'
 export interface KeyValueStore {
   getItem(key: string): string | null
   setItem(key: string, value: string): void
+  removeItem(key: string): void
 }
 
 export interface AppState {
@@ -57,6 +58,15 @@ type Stored = StoredV1 | StoredV2 | StoredV3 | StoredV4
 /** True when nothing has been saved yet (or it can't be read): the next load is a first launch. */
 export function isFirstLaunch(store: KeyValueStore): boolean {
   return read(store) === null
+}
+
+/** Deletes the saved app state, so the next load is a first launch again. Only this app's key: the origin is shared. */
+export function forgetAppState(store: KeyValueStore): void {
+  try {
+    store.removeItem(KEY)
+  } catch {
+    // Storage blocked: there was nothing saved to forget.
+  }
 }
 
 /** Reads the saved app state, seeding and saving the starter Catalog on first launch. */

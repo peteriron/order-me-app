@@ -7,7 +7,7 @@ interface SettingsSectionProps {
   settings: Settings
   hasHistory: boolean
   t: Messages
-  actions: Pick<AppActions, 'setLanguage' | 'setTheme' | 'clearHistory'>
+  actions: Pick<AppActions, 'setLanguage' | 'setTheme' | 'clearHistory' | 'resetApp'>
   overlays: Overlays
 }
 
@@ -15,6 +15,16 @@ interface SettingsSectionProps {
 export function SettingsSection({ settings, hasHistory, t, actions, overlays }: SettingsSectionProps) {
   const confirmClearHistory = () =>
     overlays.confirm({ text: t.clearHistoryConfirm, confirmLabel: t.clearHistory, onConfirm: actions.clearHistory })
+
+  const confirmReset = () =>
+    overlays.confirm({
+      text: t.resetAppConfirm,
+      confirmLabel: t.reset,
+      onConfirm: async () => {
+        // On success the page reloads; only a failed connection check comes back here.
+        if ((await actions.resetApp()) === 'offline') overlays.notify(t.resetOffline)
+      },
+    })
 
   // Each language is named in itself, so it can be found whatever the app is currently showing.
   const languages: [LanguageSetting, string][] = [
@@ -66,6 +76,9 @@ export function SettingsSection({ settings, hasHistory, t, actions, overlays }: 
 
       <button type="button" className="btn btn-danger-text settings-clear" disabled={!hasHistory} onClick={confirmClearHistory}>
         {t.clearHistory}
+      </button>
+      <button type="button" className="btn btn-danger-text settings-clear" onClick={confirmReset}>
+        {t.resetApp}
       </button>
     </section>
   )
