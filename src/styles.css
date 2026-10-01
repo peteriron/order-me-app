@@ -728,6 +728,15 @@ button {
   fill: currentColor;
 }
 
+/* While a pinned row is dragged, the rows it passes slide out of its way; the dragged row follows the finger. */
+.item-rows.reordering .item-row {
+  transition: transform 150ms var(--ease-out);
+}
+
+.item-rows.reordering .item-row.dragging {
+  transition: none;
+}
+
 .item-row.dragging {
   z-index: 1;
   background: var(--surface-2);
@@ -1047,7 +1056,8 @@ button {
   .badge {
     animation: none;
   }
-  .pager-track {
+  .pager-track,
+  .item-rows.reordering .item-row {
     transition: none;
   }
   .counter,

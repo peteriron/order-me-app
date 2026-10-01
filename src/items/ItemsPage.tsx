@@ -1,4 +1,4 @@
-import { useRef, useState, type PointerEvent, type ReactNode } from 'react'
+import { useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react'
 import type { Messages } from '../shared/i18n.ts'
 import { CategorySection } from '../shared/ui/CategorySection.tsx'
 import type { AppActions } from '../useAppState.ts'
@@ -18,38 +18,75 @@ interface ItemsPageProps {
   children?: ReactNode
 }
 
+/** A pinned row being dragged by its handle. */
+interface Drag {
+  itemId: string
+  category: Category
+  pointerId: number
+  startY: number
+  /** Where the row started and where it would land now, among its section's pinned rows. */
+  from: number
+  to: number
+  /** How far the finger has moved since touching down. */
+  dy: number
+  /** The pinned rows' vertical midpoints and the dragged row's height, measured at the start. */
+  mids: number[]
+  height: number
+}
+
 /**
  * The Operator's Catalog: every Item by category, each row opening the edit sheet and pinning the Item. Pinned Items
  * come first and are reordered by dragging their handle, or with Move up / Move down for keyboard and screen readers.
  */
 export function ItemsPage({ sections, pins, count, t, actions, onAdd, onEdit, children }: ItemsPageProps) {
   const pinned = new Set(pins)
-  const drag = useRef<{ itemId: string; pointerId: number } | null>(null)
-  const [dragging, setDragging] = useState<string | null>(null)
+  const [drag, setDrag] = useState<Drag | null>(null)
 
-  const startDrag = (e: PointerEvent<HTMLElement>, itemId: string) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return
+  const startDrag = (e: PointerEvent<HTMLElement>, item: Item, index: number) => {
+    if (drag || (e.pointerType === 'mouse' && e.button !== 0)) return
     // The handle's drag belongs to the list: keep the Pager from reading it as a page swipe (ADR-0003).
     e.stopPropagation()
     e.currentTarget.setPointerCapture(e.pointerId)
-    drag.current = { itemId, pointerId: e.pointerId }
-    setDragging(itemId)
+    const rows = [...(e.currentTarget.closest('.item-rows')?.querySelectorAll<HTMLElement>('[data-pinned]') ?? [])]
+    const rects = rows.map((row) => row.getBoundingClientRect())
+    setDrag({
+      itemId: item.id,
+      category: item.category,
+      pointerId: e.pointerId,
+      startY: e.clientY,
+      from: index,
+      to: index,
+      dy: 0,
+      mids: rects.map((rect) => rect.top + rect.height / 2),
+      height: rects[index]?.height ?? 0,
+    })
   }
 
-  /** Moves the dragged Item to the pinned row under the finger, live, so the list always shows where it will land. */
+  /**
+   * Slides the dragged row with the finger and the rows it passes out of its way. The DOM order stays put until the
+   * finger lifts: moving the node under a finger mid-gesture can end the touch (iOS Safari stops sending its events).
+   */
   const followDrag = (e: PointerEvent<HTMLElement>) => {
-    const d = drag.current
-    if (!d || d.pointerId !== e.pointerId) return
-    const rows = [...(e.currentTarget.closest('.item-rows')?.querySelectorAll<HTMLElement>('[data-pinned]') ?? [])]
-    const under = rows.findIndex((row) => e.clientY < row.getBoundingClientRect().bottom)
-    const to = under === -1 ? rows.length - 1 : under
-    if (rows[to]?.dataset.itemId !== d.itemId) actions.movePin(d.itemId, to)
+    if (drag?.pointerId !== e.pointerId) return
+    const dy = e.clientY - drag.startY
+    const centre = drag.mids[drag.from]! + dy
+    const to = drag.mids.filter((mid, i) => i !== drag.from && mid < centre).length
+    setDrag({ ...drag, dy, to })
   }
 
   const endDrag = (e: PointerEvent<HTMLElement>) => {
-    if (drag.current?.pointerId !== e.pointerId) return
-    drag.current = null
-    setDragging(null)
+    if (drag?.pointerId !== e.pointerId) return
+    setDrag(null)
+    if (e.type === 'pointerup' && drag.to !== drag.from) actions.movePin(drag.itemId, drag.to)
+  }
+
+  /** How far a pinned row is shifted while another row is dragged past it, or the dragged row itself follows. */
+  const dragShift = (item: Item, index: number): CSSProperties | undefined => {
+    if (!drag || drag.category !== item.category) return undefined
+    if (item.id === drag.itemId) return { transform: `translateY(${drag.dy}px)` }
+    if (drag.from < index && index <= drag.to) return { transform: `translateY(${-drag.height}px)` }
+    if (drag.to <= index && index < drag.from) return { transform: `translateY(${drag.height}px)` }
+    return undefined
   }
 
   const row = (item: Item, index: number, pinnedCount: number) => {
@@ -60,16 +97,16 @@ export function ItemsPage({ sections, pins, count, t, actions, onAdd, onEdit, ch
     return (
       <div
         key={item.id}
-        className={`item-row${isPinned ? ' pinned' : ''}${dragging === item.id ? ' dragging' : ''}`}
-        data-item-id={item.id}
+        className={`item-row${isPinned ? ' pinned' : ''}${drag?.itemId === item.id ? ' dragging' : ''}`}
         data-pinned={isPinned || undefined}
+        style={isPinned ? dragShift(item, index) : undefined}
       >
         {isPinned && (
           // Pointer-only; the Move buttons below are the keyboard and screen-reader way to reorder.
           <span
             className="item-row-handle"
             aria-hidden="true"
-            onPointerDown={(e) => startDrag(e, item.id)}
+            onPointerDown={(e) => startDrag(e, item, index)}
             onPointerMove={followDrag}
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
@@ -128,7 +165,9 @@ export function ItemsPage({ sections, pins, count, t, actions, onAdd, onEdit, ch
     const pinnedCount = items.filter((i) => pinned.has(i.id)).length
     return (
       <CategorySection category={category} heading={heading} idPrefix="items">
-        <div className="item-rows">{items.map((item, index) => row(item, index, pinnedCount))}</div>
+        <div className={drag?.category === category ? 'item-rows reordering' : 'item-rows'}>
+          {items.map((item, index) => row(item, index, pinnedCount))}
+        </div>
       </CategorySection>
     )
   }
