@@ -82,7 +82,7 @@ test('after the first visit it loads and works with no network', async ({ page, 
   await page.reload()
 
   await expect(page.getByRole('heading', { name: 'This round is on me' })).toBeVisible()
-  await page.getByRole('button', { name: /^Duvel/ }).tap()
+  await page.getByRole('button', { name: /^Duvel(,|$)/ }).tap()
   await expect(page.getByRole('button', { name: 'Duvel, 1 in round' })).toBeVisible()
   await context.setOffline(false)
 })

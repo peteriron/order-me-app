@@ -11,7 +11,7 @@ describe('marking a Round as ordered', () => {
   const composed = add(add(add(emptyRound(), 'duvel'), 'duvel'), 'chips')
 
   it('adds a placed Round to history with a snapshot of each line, and empties the composing Round', () => {
-    const { next } = markOrdered({ round: composed, history: [] }, catalogSections(catalog, 'en'), meta)
+    const { next } = markOrdered({ round: composed, history: [] }, catalogSections(catalog), meta)
 
     expect(totalOf(next.round)).toBe(0)
     expect(next.history).toEqual([
@@ -28,13 +28,13 @@ describe('marking a Round as ordered', () => {
 
   it('puts the newest placed Round first', () => {
     const older = { id: 'round-0', placedAt: '2026-09-21T20:00:00.000Z', lines: [] }
-    const { next } = markOrdered({ round: composed, history: [older] }, catalogSections(catalog, 'en'), meta)
+    const { next } = markOrdered({ round: composed, history: [older] }, catalogSections(catalog), meta)
     expect(next.history.map((r) => r.id)).toEqual(['round-1', 'round-0'])
   })
 
   it('keeps what was ordered even when the Item is edited in place afterwards', () => {
     const editable: Item = { ...duvel }
-    const { next } = markOrdered({ round: composed, history: [] }, catalogSections([editable, chips], 'en'), meta)
+    const { next } = markOrdered({ round: composed, history: [] }, catalogSections([editable, chips]), meta)
     editable.name = 'Duvel Tripel Hop'
     editable.emoji = '🍻'
     expect(next.history[0].lines[0]).toMatchObject({ itemId: 'duvel', name: 'Duvel', emoji: '🍺' })
@@ -42,7 +42,7 @@ describe('marking a Round as ordered', () => {
 
   it('undo takes the Round back out of history and restores what was being composed', () => {
     const before = { round: composed, history: [] }
-    const { next, undo } = markOrdered(before, catalogSections(catalog, 'en'), meta)
+    const { next, undo } = markOrdered(before, catalogSections(catalog), meta)
     expect(undo(next)).toEqual(before)
   })
 })

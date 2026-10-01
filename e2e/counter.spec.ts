@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 async function tapTiles(page: Page, ...names: string[]) {
-  for (const name of names) await page.getByRole('button', { name: new RegExp(`^${name}`) }).tap()
+  for (const name of names) await page.getByRole('button', { name: new RegExp(`^${name}(,|$)`) }).tap()
 }
 
 const counterView = (page: Page) => page.getByRole('dialog', { name: 'Round for the counter' })

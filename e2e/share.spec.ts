@@ -48,7 +48,7 @@ const counterView = (page: Page) => page.getByRole('dialog', { name: 'Round for 
 
 async function composeAndShow(page: Page) {
   for (const name of ['Duvel', 'Duvel', 'Chips', 'Cola']) {
-    await page.getByRole('button', { name: new RegExp(`^${name}`) }).tap()
+    await page.getByRole('button', { name: new RegExp(`^${name}(,|$)`) }).tap()
   }
   await page.getByRole('region', { name: 'Round total' }).getByRole('button', { name: 'Show' }).tap()
   await expect(counterView(page)).toBeVisible()

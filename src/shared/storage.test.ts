@@ -20,7 +20,7 @@ const ids = () => {
 describe('app state storage', () => {
   it('first launch: the starter Catalog, an empty Round, no history, default settings', () => {
     const state = loadAppState(memoryStore(), { locale: 'en', newId: ids() })
-    expect(state.catalog).toHaveLength(21)
+    expect(state.catalog).toHaveLength(28)
     expect(state.round.counts).toEqual({})
     expect(state.history).toEqual([])
     expect(state.pins).toEqual([])
@@ -39,7 +39,7 @@ describe('app state storage', () => {
     const store = memoryStore()
     loadAppState(store, { locale: 'nl', newId: ids() })
     const again = loadAppState(store, { locale: 'en', newId: ids() })
-    expect(again.catalog.map((i) => i.name)).toContain('Plat water')
+    expect(again.catalog.map((i) => i.name)).toContain('Water plat')
     expect(again.catalog.map((i) => i.name)).not.toContain('Still water')
   })
 
@@ -60,7 +60,7 @@ describe('app state storage', () => {
       setItem: () => { throw new DOMException('denied', 'SecurityError') },
     }
     const state = loadAppState(blocked, { locale: 'en', newId: ids() })
-    expect(state.catalog).toHaveLength(21)
+    expect(state.catalog).toHaveLength(28)
     expect(() => saveAppState(blocked, state)).not.toThrow()
   })
 
@@ -68,7 +68,7 @@ describe('app state storage', () => {
     const store = memoryStore()
     store.setItem('order-me', '{not json')
     const state = loadAppState(store, { locale: 'en', newId: ids() })
-    expect(state.catalog).toHaveLength(21)
+    expect(state.catalog).toHaveLength(28)
   })
 
   it('restores placed Rounds after a restart', () => {

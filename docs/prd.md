@@ -125,7 +125,7 @@ A phone app, installed from the browser to the home screen, that works offline i
 
   // round/tileOrder.ts
   popularity(history, now) -> Record<ItemId, number>              // last 90 days, via PlacedLine.itemId
-  popularityOrder(catalog, history, locale, now) -> ItemId[]      // pop desc, then A–Z; frozen
+  popularityOrder(catalog, history, now) -> ItemId[]              // pop desc, ties in Catalog order; frozen
   gridSections(catalog, order, pins) -> { drink: Item[], snack: Item[] }   // pinned first, then frozen order
 
   // history/history.ts
@@ -140,10 +140,10 @@ A phone app, installed from the browser to the home screen, that works offline i
   ```
 
   React state lives in one hook (`src/useAppState.ts`), which returns a stable `actions` object. Each feature receives those actions and the shared overlays (confirm, toast) and wires its own handlers, so `App.tsx` only composes pages and overlays.
-- **Pinned Items** (v2, `items/pins.ts`): pins are one ordered list of Item ids; a section's pin order is that list filtered to its Items. Pinned Items come first in their section on both the grid and the Items page; the rest follow Popularity on the grid and A–Z on the Items page. Pin changes apply to the grid at once, while Popularity still only recomputes at app start, place and undo-place. Deleting an Item drops its pin; a pinned Item that changes category stays pinned, last among the other section's pins; new Items start unpinned. Pins are saved with the app state (storage v4, upgraded from v3 with no pins) and aren't part of a Shared Catalog, so an imported Catalog arrives unpinned.
-- **Shared Catalog** (v2, `items/sharedCatalog.ts`, ADR-0004): the Items page's "Share Items" sheet shows the Catalog as a QR code (via `lean-qr`, the only runtime dependency), with Save image and Copy link. The link is the app's normal address with the Catalog in the fragment (`#items=`), so it never reaches a server: one line per Item (category letter, emoji, tab, name), deflated, base64url. Only name, category and emoji travel. The 21-Item starter Catalog gives a link of about 330 bytes. Beyond QR version 20 the sheet offers Copy link only. Opening a link replaces the Catalog silently on a first launch, otherwise after a confirm; the shared Items get fresh ids, the composing Round is emptied, pins are dropped and History is kept. The fragment is cleared at once, and a link that can't be read in full is ignored with a toast.
+- **Pinned Items** (v2, `items/pins.ts`): pins are one ordered list of Item ids; a section's pin order is that list filtered to its Items. Pinned Items come first in their section on both the grid and the Items page; the rest follow Popularity on the grid and Catalog order on the Items page. Pin changes apply to the grid at once, while Popularity still only recomputes at app start, place and undo-place. Deleting an Item drops its pin; a pinned Item that changes category stays pinned, last among the other section's pins; new Items start unpinned. Pins are saved with the app state (storage v4, upgraded from v3 with no pins) and aren't part of a Shared Catalog, so an imported Catalog arrives unpinned.
+- **Shared Catalog** (v2, `items/sharedCatalog.ts`, ADR-0004): the Items page's "Share Items" sheet shows the Catalog as a QR code (via `lean-qr`, the only runtime dependency), with Save image and Copy link. The link is the app's normal address with the Catalog in the fragment (`#items=`), so it never reaches a server: one line per Item (category letter, emoji, tab, name), deflated, base64url. Only name, category and emoji travel. The 28-Item starter Catalog gives a link of about 420 bytes. Beyond QR version 20 the sheet offers Copy link only. Opening a link replaces the Catalog silently on a first launch, otherwise after a confirm; the shared Items get fresh ids, the composing Round is emptied, pins are dropped and History is kept. The fragment is cleared at once, and a link that can't be read in full is ignored with a toast.
   - **Known limitation (accepted):** on iPhone, scanned links open in Safari, and a Home Screen app keeps its storage separate from Safari, so a friend who already installed the app doesn't receive the Items there. It works on Android and in any browser. See ADR-0004 for sources.
-- **Popularity:** The score is the number of placed Rounds in the last 90 days that contain the Item (a count of *appearances*, not quantity, so one big round doesn't dominate). The grid order is computed when the app starts and after each `place`, then held fixed for the rest of the composing session. Undoing a place recomputes it. Items with no score go last in their section, alphabetically (locale-aware compare).
+- **Popularity:** The score is the number of placed Rounds in the last 90 days that contain the Item (a count of *appearances*, not quantity, so one big round doesn't dominate). The grid order is computed when the app starts and after each `place`, then held fixed for the rest of the composing session. Undoing a place recomputes it. Ties, and Items with no score, keep their Catalog order: the starter list's order, then Items in the order they were added.
 - **Place / Undo:** `place` appends to history and resets the composing Round. Undo within 5 s removes that placed Round and restores the previous composing Round exactly.
 - **Order again:** Always replaces the composing Round (no prompt, no undo) and navigates to the Round page. Lines whose `itemId` is no longer in the Catalog are skipped, and a toast reports the number skipped.
 - **Clear Round:** Instant, with no confirm and no undo (explicit decision).
@@ -151,8 +151,13 @@ A phone app, installed from the browser to the home screen, that works offline i
 - **Counter view:** A full-screen overlay/route opened from the bottom bar. It uses the Screen Wake Lock API while open, re-acquired on `visibilitychange`, and does nothing if unsupported. Share uses the Web Share API with a clipboard fallback. Share text is plain, one line per Item as `"{count}× {name}"`, followed by `"Total: {n}"` / `"Totaal: {n}"` (no emoji, no timestamp).
 - **Navigation:** Three horizontally swipeable pages, History ← Round → Items (ADR-0003). The Round page is the default. Swipes need a threshold of about 25% of the width or a fling velocity, and a mostly-horizontal angle. The footer has a tappable page indicator.
 - **i18n:** NL and EN UI strings in a small message dictionary. The locale comes from `navigator.language` (`nl*` → NL, else EN), with an override stored in settings. The starter Catalog is seeded once, in the detected locale, on first launch.
-- **Starter Catalog:** The list below is seeded on first launch. EN names are shown first; the NL name is in brackets where it differs.
-  - **Drinks:** 🍺 Beer (Bier), 🍺 Duvel, 🍺 0.0 Beer (0.0 Bier), 🥤 Cola, 💧 Still water (Plat water), 🫧 Sparkling water (Bruiswater), ☕ Coffee (Koffie), ☕ Decaf (Deca), 🍵 Tea (Thee), 🍊 Fanta, 🧋 Ice Tea, 🧃 Juice (Fruitsap), 🥂 Cava, 🥂 White wine (Witte wijn), 🍷 Rosé, 🍷 Red wine (Rode wijn), 🥃 Liquor (Sterke drank).
+- **Starter Catalog:** The list below is seeded on first launch, in this order, which is also the order the grid and the Items page start with. EN names are shown first; the NL name is in brackets where it differs.
+  - **Drinks:**
+    - soft drinks: 🥤 Cola, 🥤 Cola Zero, 💧 Still water (Water plat), 🫧 Sparkling water (Water bruis), 🍊 Fanta, 🍋 Sprite, 🧋 Ice Tea, 🧃 Juice (Fruitsap), 🍋 Gini, 🫧 Tönissteiner
+    - beer: 🍺 Lager (Pils), 🍺 Lager 0.0 (Pils 0,0), 🍺 Duvel, 🍻 Specialty beer (Speciaalbier)
+    - hot drinks: ☕ Coffee (Koffie), ☕ Decaf (Deca), 🍵 Mint tea (Muntthee)
+    - wine: 🥂 White wine (Witte wijn), 🍷 Red wine (Rode wijn), 🍷 Rosé wine (Rosé wijn)
+    - mixed drinks: 🍊 Aperol Spritz, 🍾 Cava, 🍸 Gin & tonic (Gin-tonic), 🍹 Mocktail
   - **Snacks:** 🥔 Chips, 🥜 Nuts (Nootjes), 🧀 Cheese (Kaasblokjes), 🧆 Bitterballen.
 - **Theme:** Dark by default. Settings offers Dark / Light / System. Tokens are defined in look-and-feel.md.
 
@@ -165,7 +170,7 @@ A phone app, installed from the browser to the home screen, that works offline i
   - order-again replaces and skips deleted Items
   - deleting an Item strips it from the composing Round
   - popularity counts appearances in the 90-day window, and a renamed Item keeps its score
-  - grid order ties break A–Z
+  - grid order ties keep Catalog order
   - share text in NL and EN
 - **Secondary seam: the storage module.** Round-trip each aggregate, schema-version handling, and a first-launch seed that happens exactly once.
 - **A few end-to-end smoke tests** (Playwright, on a mobile viewport):

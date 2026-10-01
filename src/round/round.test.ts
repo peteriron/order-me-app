@@ -46,13 +46,13 @@ describe('Round lines for the Counter view', () => {
   const duvel: Item = { id: 'duvel', name: 'Duvel', category: 'drink', emoji: '🍺' }
   const cola: Item = { id: 'cola', name: 'Cola', category: 'drink', emoji: '🥤' }
   const chips: Item = { id: 'chips', name: 'Chips', category: 'snack', emoji: '🥔' }
-  const sections = catalogSections([chips, duvel, cola], 'en')
+  const sections = catalogSections([chips, duvel, cola])
 
   it('lists drinks then snacks, in grid order, with their counts', () => {
     const round = add(add(add(add(emptyRound(), 'chips'), 'duvel'), 'duvel'), 'cola')
     expect(roundLines(round, sections).map((l) => [l.item.name, l.count])).toEqual([
-      ['Cola', 1],
       ['Duvel', 2],
+      ['Cola', 1],
       ['Chips', 1],
     ])
   })

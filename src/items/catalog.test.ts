@@ -9,31 +9,48 @@ const sequentialIds = () => {
 
 
 describe('starter Catalog', () => {
-  it('seeds 17 drinks and 4 snacks in English', () => {
-    const catalog = seedCatalog('en', sequentialIds())
-    expect(catalog.filter((i) => i.category === 'drink')).toHaveLength(17)
-    expect(catalog.filter((i) => i.category === 'snack')).toHaveLength(4)
-    expect(catalog.map((i) => i.name)).toContain('Still water')
-    expect(catalog.find((i) => i.name === 'Bitterballen')).toMatchObject({ category: 'snack', emoji: '🧆' })
+  const drinks = (locale: 'en' | 'nl') =>
+    seedCatalog(locale, sequentialIds())
+      .filter((i) => i.category === 'drink')
+      .map((i) => `${i.emoji} ${i.name}`)
+
+  it('seeds the drinks in the order the grid starts with, in Dutch', () => {
+    expect(drinks('nl')).toEqual([
+      '🥤 Cola', '🥤 Cola Zero', '💧 Water plat', '🫧 Water bruis', '🍊 Fanta', '🍋 Sprite', '🧋 Ice Tea',
+      '🧃 Fruitsap', '🍋 Gini', '🫧 Tönissteiner',
+      '🍺 Pils', '🍺 Pils 0,0', '🍺 Duvel', '🍻 Speciaalbier',
+      '☕ Koffie', '☕ Deca', '🍵 Muntthee',
+      '🥂 Witte wijn', '🍷 Rode wijn', '🍷 Rosé wijn',
+      '🍊 Aperol Spritz', '🍾 Cava', '🍸 Gin-tonic', '🍹 Mocktail',
+    ])
   })
 
-  it('seeds Dutch names when the device is Dutch', () => {
-    const names = seedCatalog('nl', sequentialIds()).map((i) => i.name)
-    expect(names).toContain('Plat water')
-    expect(names).toContain('Deca')
-    expect(names).not.toContain('Still water')
+  it('seeds the same drinks in English', () => {
+    expect(drinks('en')).toEqual([
+      '🥤 Cola', '🥤 Cola Zero', '💧 Still water', '🫧 Sparkling water', '🍊 Fanta', '🍋 Sprite', '🧋 Ice Tea',
+      '🧃 Juice', '🍋 Gini', '🫧 Tönissteiner',
+      '🍺 Lager', '🍺 Lager 0.0', '🍺 Duvel', '🍻 Specialty beer',
+      '☕ Coffee', '☕ Decaf', '🍵 Mint tea',
+      '🥂 White wine', '🍷 Red wine', '🍷 Rosé wine',
+      '🍊 Aperol Spritz', '🍾 Cava', '🍸 Gin & tonic', '🍹 Mocktail',
+    ])
+  })
+
+  it('seeds four snacks', () => {
+    const snacks = seedCatalog('en', sequentialIds()).filter((i) => i.category === 'snack')
+    expect(snacks.map((i) => i.name)).toEqual(['Chips', 'Nuts', 'Cheese', 'Bitterballen'])
   })
 
   it('gives every Item its own id, even when names repeat across languages', () => {
     const ids = seedCatalog('en', sequentialIds()).map((i) => i.id)
-    expect(new Set(ids).size).toBe(21)
+    expect(new Set(ids).size).toBe(28)
   })
 })
 
-describe('Catalog sections (Items page: pinned first, then A–Z)', () => {
+describe('Catalog sections (Items page: pinned first, then Catalog order)', () => {
   const item = (id: string, name: string, category: Item['category']): Item => ({ id, name, category, emoji: '🍺' })
 
-  it('splits the Catalog into Drinks and Snacks, each A–Z', () => {
+  it('splits the Catalog into Drinks and Snacks, each in Catalog order', () => {
     const catalog = [
       item('1', 'Rosé', 'drink'),
       item('2', 'Nuts', 'snack'),
@@ -41,12 +58,12 @@ describe('Catalog sections (Items page: pinned first, then A–Z)', () => {
       item('4', 'Chips', 'snack'),
       item('5', 'Red wine', 'drink'),
     ]
-    const sections = catalogSections(catalog, 'en')
-    expect(sections.drink.map((i) => i.name)).toEqual(['Beer', 'Red wine', 'Rosé'])
-    expect(sections.snack.map((i) => i.name)).toEqual(['Chips', 'Nuts'])
+    const sections = catalogSections(catalog)
+    expect(sections.drink.map((i) => i.name)).toEqual(['Rosé', 'Beer', 'Red wine'])
+    expect(sections.snack.map((i) => i.name)).toEqual(['Nuts', 'Chips'])
   })
 
-  it('lists pinned Items first, in the Operator’s order, then the rest A–Z', () => {
+  it('lists pinned Items first, in the Operator’s order, then the rest in Catalog order', () => {
     const catalog = [
       item('cola', 'Cola', 'drink'),
       item('duvel', 'Duvel', 'drink'),
@@ -54,14 +71,9 @@ describe('Catalog sections (Items page: pinned first, then A–Z)', () => {
       item('bitterballen', 'Bitterballen', 'snack'),
       item('chips', 'Chips', 'snack'),
     ]
-    const sections = catalogSections(catalog, 'en', ['duvel', 'chips'])
-    expect(sections.drink.map((i) => i.name)).toEqual(['Duvel', 'Beer', 'Cola'])
+    const sections = catalogSections(catalog, ['duvel', 'chips'])
+    expect(sections.drink.map((i) => i.name)).toEqual(['Duvel', 'Cola', 'Beer'])
     expect(sections.snack.map((i) => i.name)).toEqual(['Chips', 'Bitterballen'])
-  })
-
-  it('sorts accented names where a reader expects them, not by code point', () => {
-    const catalog = [item('1', 'Zwarte koffie', 'drink'), item('2', 'Éclair', 'drink')]
-    expect(catalogSections(catalog, 'nl').drink.map((i) => i.name)).toEqual(['Éclair', 'Zwarte koffie'])
   })
 })
 
@@ -107,16 +119,16 @@ describe('editing the Catalog', () => {
     const catalog = editItem([duvel, chips], 'duvel', { name: 'Duvel 666', category: 'drink', emoji: '🍺' })
 
     expect(catalog.find((i) => i.id === 'duvel')?.name).toBe('Duvel 666')
-    expect(roundLines(round, catalogSections(catalog, 'en'))).toEqual([
+    expect(roundLines(round, catalogSections(catalog))).toEqual([
       { item: { id: 'duvel', name: 'Duvel 666', category: 'drink', emoji: '🍺' }, count: 2 },
     ])
   })
 
   it('moving an Item to the other category moves its tile to that section', () => {
     const catalog = editItem([duvel, chips], 'duvel', { ...duvel, category: 'snack' })
-    const sections = catalogSections(catalog, 'en')
+    const sections = catalogSections(catalog)
     expect(sections.drink).toEqual([])
-    expect(sections.snack.map((i) => i.id)).toEqual(['chips', 'duvel'])
+    expect(sections.snack.map((i) => i.id)).toEqual(['duvel', 'chips'])
   })
 
   it('deleting an Item also takes it out of the Round being composed', () => {
