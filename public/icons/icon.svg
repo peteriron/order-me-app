@@ -4,16 +4,59 @@
   scripts/render-icons.mjs renders the PNGs in public/icons from this file; `full-bleed` drops the corner rounding.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect id="bg" width="512" height="512" rx="112" fill="#f5a524"/>
+  <defs>
+    <linearGradient id="amber" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffc145"/>
+      <stop offset="1" stop-color="#ec8a0c"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="256" cy="236" r="190" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff2c2" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#fff2c2" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="beer" x1="0" y1="198" x2="0" y2="326" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffd05a"/>
+      <stop offset="1" stop-color="#c46400"/>
+    </linearGradient>
+    <linearGradient id="wine" x1="0" y1="196" x2="0" y2="252" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#b8283c"/>
+      <stop offset="1" stop-color="#6e0f1f"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-200%" width="140%" height="500%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <clipPath id="bowl">
+      <path d="M284 152 H364 C364 216 348 250 324 252 C300 250 284 216 284 152 Z"/>
+    </clipPath>
+  </defs>
+
+  <rect id="bg" width="512" height="512" rx="112" fill="url(#amber)"/>
+  <rect width="512" height="512" fill="url(#glow)"/>
+  <!-- soft shadow under the tray -->
+  <ellipse cx="256" cy="368" rx="146" ry="12" fill="#6b3a00" opacity=".45" filter="url(#soft)"/>
+
+  <!-- pint: beer and the foam inside the glass -->
+  <path d="M163 198 H247 L240 326 H170 Z" fill="url(#beer)"/>
+  <path d="M158 152 H252 L249 198 H161 Z" fill="#fff6e2"/>
+  <!-- wine in the bowl -->
+  <rect x="280" y="196" width="90" height="60" fill="url(#wine)" clip-path="url(#bowl)"/>
+
+  <!-- highlights on the glasses -->
+  <g fill="none" stroke="#fff" stroke-linecap="round" opacity=".6">
+    <path d="M182 214 L187 304" stroke-width="9"/>
+    <path d="M300 166 C300 196 304 214 312 228" stroke-width="8"/>
+  </g>
+
   <g fill="none" stroke="#1a1204" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
-    <!-- pint glass, with a beer line below the foam -->
-    <path d="M158 152 H252 L240 326 H170 Z"/>
+    <!-- pint glass, with a beer line below the foam, and the foam head spilling over the rim -->
+    <path d="M252 152 L240 326 H170 L158 152"/>
     <path d="M163 198 H247"/>
+    <path d="M158 158 C146 136 170 122 188 132 C198 116 228 116 234 132 C252 124 266 142 252 158" fill="#fff6e2"/>
     <!-- wine glass: bowl, stem, foot -->
     <path d="M284 152 H364 C364 216 348 250 324 252 C300 250 284 216 284 152 Z"/>
     <path d="M324 252 V322"/>
     <path d="M294 326 H354"/>
   </g>
-  <!-- the tray -->
+  <!-- the tray, catching a little light on its top edge -->
   <rect x="116" y="336" width="280" height="26" rx="13" fill="#1a1204"/>
+  <path d="M130 341 H382" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".18"/>
 </svg>
