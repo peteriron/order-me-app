@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { deletePlacedRound, markOrdered } from './history/history.ts'
 import { addToCatalog, deleteItem, editItem, type ItemDraft, type Sections } from './items/catalog.ts'
 import { movePin, pinsAfterEdit, togglePin } from './items/pins.ts'
-import { replaceCatalog } from './items/sharedCatalog.ts'
+import { replaceCatalog, type SharedItem } from './items/sharedCatalog.ts'
 import { add, emptyRound, remove, type ComposingRound } from './round/round.ts'
 import type { ThemeSetting } from './settings/settings.ts'
 import type { LanguageSetting, Locale } from './shared/i18n.ts'
@@ -74,7 +74,7 @@ export function useAppState(seedLocale: Locale) {
       movePin: (itemId: string, to: number) => update((s) => ({ pins: movePin(s.pins, s.catalog, itemId, to) })),
       clearHistory: () => update(() => ({ history: [] })),
       /** Replaces the Catalog with a Shared Catalog: fresh ids, empty Round, no pins, History kept. */
-      replaceCatalog: (items: ItemDraft[]) => {
+      replaceCatalog: (items: SharedItem[]) => {
         update(() => replaceCatalog(items, () => crypto.randomUUID()))
         setPlacements((n) => n + 1)
       },
