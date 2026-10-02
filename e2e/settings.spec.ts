@@ -14,14 +14,15 @@ test.beforeEach(async ({ page }) => {
   await page.goto('./')
 })
 
-test('switching to Dutch changes the app text at once but never renames Catalog Items, and sticks', async ({ page }) => {
+test('switching to Dutch changes the app text and the starter Items at once, and sticks', async ({ page }) => {
   await openSettings(page)
   await setting(page, 'Language', 'Nederlands').check()
 
   await expect(page.getByRole('navigation').getByRole('button', { name: 'Geschiedenis' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Instellingen' })).toBeVisible()
-  // The Catalog was seeded in English on this (English) phone and stays that way.
-  await expect(page.getByRole('button', { name: 'Still water bewerken' })).toBeAttached()
+  // The Catalog was seeded in English on this phone; its starter Items follow the language now.
+  await expect(page.getByRole('button', { name: 'Water plat bewerken' })).toBeAttached()
+  await expect(page.getByRole('button', { name: 'Still water bewerken' })).toHaveCount(0)
 
   await page.reload()
   await openSettings(page, 'Instellingen')
@@ -29,6 +30,26 @@ test('switching to Dutch changes the app text at once but never renames Catalog 
 
   await setting(page, 'Taal', 'Systeem').check()
   await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible()
+})
+
+test('starter Items follow the language on the Round page; an added or renamed Item stays as typed', async ({ page }) => {
+  await openSettings(page)
+  const items = page.getByRole('region', { name: 'Items' })
+  // An Item of the Operator's own, and a starter Item renamed.
+  await items.getByRole('button', { name: 'Add Item' }).tap()
+  await page.getByRole('dialog').getByLabel('Name').fill('Kriek')
+  await page.getByRole('dialog').getByRole('button', { name: 'Add', exact: true }).tap()
+  await items.getByRole('button', { name: 'Edit Cola Zero' }).tap()
+  await page.getByRole('dialog').getByLabel('Name').fill('Coke Zero')
+  await page.getByRole('dialog').getByRole('button', { name: 'Save' }).tap()
+
+  await setting(page, 'Language', 'Nederlands').check()
+  await page.getByRole('navigation').getByRole('button', { name: 'Rondje' }).tap()
+  const drinks = page.getByRole('region', { name: 'Dranken' })
+  await expect(drinks.getByRole('button', { name: 'Water plat', exact: true })).toBeVisible()
+  await expect(drinks.getByRole('button', { name: 'Pils', exact: true })).toBeVisible()
+  await expect(drinks.getByRole('button', { name: 'Coke Zero', exact: true })).toBeVisible()
+  await expect(drinks.getByRole('button', { name: 'Kriek', exact: true })).toBeVisible()
 })
 
 test('dark is the default, even when the phone prefers light', async ({ page }) => {

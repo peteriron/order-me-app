@@ -5,6 +5,7 @@ import { ItemSheet } from './items/ItemSheet.tsx'
 import { ItemsPage } from './items/ItemsPage.tsx'
 import { ShareSheet } from './items/ShareSheet.tsx'
 import { catalogSections, type Item } from './items/catalog.ts'
+import { localizeCatalog } from './items/starter.ts'
 import { useSharedLink } from './items/useSharedLink.ts'
 import { RoundPage } from './round/RoundPage.tsx'
 import { useTileOrder } from './round/useTileOrder.ts'
@@ -28,7 +29,9 @@ export function App() {
   const locale = resolveLocale(state.settings.language, navigator.language)
   const t = messages[locale]
   useTheme(state.settings.theme)
-  const sections = useTileOrder(state.catalog, state.pins, state.history, placements)
+  /** The Catalog as shown: starter Items named in the app's language. Everything on screen, placed or shared uses it. */
+  const catalog = useMemo(() => localizeCatalog(state.catalog, locale), [state.catalog, locale])
+  const sections = useTileOrder(catalog, state.pins, state.history, placements)
 
   const [page, setPage] = useState(ROUND_PAGE)
   /** The Item sheet: `{}` to add a new Item, `{ item }` to edit one, `{ forRound }` from the + New tile. */
@@ -40,7 +43,7 @@ export function App() {
     () => ({ confirm: setConfirmation, notify: (text, action) => setToast({ id: Date.now(), text, action }) }),
     [],
   )
-  useSharedLink({ firstLaunch, catalogSize: state.catalog.length, t, actions, overlays })
+  useSharedLink({ firstLaunch, catalogSize: catalog.length, t, actions, overlays })
 
   useEffect(() => {
     document.documentElement.lang = locale
@@ -56,7 +59,7 @@ export function App() {
     <HistoryPage
       key="history"
       history={state.history}
-      catalog={state.catalog}
+      catalog={catalog}
       dateLocale={formattingLocale(locale, navigator.language)}
       t={t}
       actions={actions}
@@ -85,9 +88,9 @@ export function App() {
     />,
     <ItemsPage
       key="items"
-      sections={catalogSections(state.catalog, state.pins)}
+      sections={catalogSections(catalog, state.pins)}
       pins={state.pins}
-      count={state.catalog.length}
+      count={catalog.length}
       t={t}
       actions={actions}
       onAdd={() => setSheet({})}
@@ -130,7 +133,7 @@ export function App() {
 
       {sharing && (
         <div inert={confirmation !== null}>
-          <ShareSheet catalog={state.catalog} t={t} overlays={overlays} onClose={closeSharing} />
+          <ShareSheet catalog={catalog} t={t} overlays={overlays} onClose={closeSharing} />
         </div>
       )}
 
