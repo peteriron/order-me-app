@@ -44,6 +44,29 @@ const pairs: [foreground: string, background: string, minimum: number][] = [
   ['snack', 'bg', MARK],
 ]
 
+/** `--name: rgb(r g b / a)` from a token block, laid over an opaque background: the colour the eye actually sees. */
+function blended(selector: string, name: string, over: string): string {
+  const start = css.indexOf(`${selector} {`)
+  const block = css.slice(start, css.indexOf('}', start))
+  const match = block.match(new RegExp(`--${name}:\\s*rgb\\((\\d+) (\\d+) (\\d+) / ([\\d.]+)\\)`))
+  if (!match) throw new Error(`No rgb() token --${name} in ${selector}`)
+  const [r, g, b, alpha] = match.slice(1).map(Number)
+  const base = [1, 3, 5].map((i) => parseInt(over.slice(i, i + 2), 16))
+  return `#${[r, g, b].map((c, i) => Math.round(c * alpha + base[i] * (1 - alpha)).toString(16).padStart(2, '0')).join('')}`
+}
+
+describe.each([
+  ['dark', ':root'],
+  ['light', ":root[data-theme='light']"],
+])('%s theme: the active tab', (_theme, selector) => {
+  const palette = { ...tokens(':root'), ...tokens(selector) }
+  // The tab bar sits on --surface; the active tab tints it with --accent-soft and labels it in --accent.
+  it('labels the active tab in --accent on --accent-soft over --surface, at 4.5:1', () => {
+    const tint = blended(selector, 'accent-soft', palette.surface)
+    expect(contrast(palette.accent, tint)).toBeGreaterThanOrEqual(TEXT)
+  })
+})
+
 describe.each([
   ['dark', ':root'],
   ['light', ":root[data-theme='light']"],

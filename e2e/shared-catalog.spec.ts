@@ -11,7 +11,7 @@ const itemsPage = (page: Page) => page.getByRole('region', { name: 'Items' })
 const shareSheet = (page: Page) => page.getByRole('dialog', { name: 'Share', exact: true })
 const confirmDialog = (page: Page) => page.getByRole('alertdialog')
 
-async function goTo(page: Page, name: 'History' | 'Round' | 'Items') {
+async function goTo(page: Page, name: 'History' | 'Round' | 'Settings') {
   await page.getByRole('navigation', { name: 'Pages' }).getByRole('button', { name }).tap()
 }
 
@@ -28,7 +28,7 @@ async function fakeClipboard(page: Page) {
 
 /** The share link for the Catalog the page holds now, taken from the share sheet's Copy link. */
 async function copyShareLink(page: Page): Promise<string> {
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await itemsPage(page).getByRole('button', { name: 'Share', exact: true }).tap()
   await shareSheet(page).getByRole('button', { name: 'Copy link' }).tap()
   await shareSheet(page).getByRole('button', { name: 'Done' }).tap()
@@ -36,7 +36,7 @@ async function copyShareLink(page: Page): Promise<string> {
 }
 
 async function addItem(page: Page, name: string) {
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await itemsPage(page).getByRole('button', { name: 'Add Item' }).tap()
   await page.getByRole('dialog').getByLabel('Name').fill(name)
   await page.getByRole('dialog').getByRole('button', { name: 'Add', exact: true }).tap()
@@ -54,7 +54,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('the share sheet shows a QR code; Copy link copies the link and Save image downloads a PNG', async ({ page }) => {
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await itemsPage(page).getByRole('button', { name: 'Share', exact: true }).tap()
   await expect(shareSheet(page).getByRole('img', { name: 'QR code with your 28 Items' })).toBeVisible()
 
@@ -76,7 +76,7 @@ test('a phone opening the link for the first time starts with the shared Items, 
 
   const friend = await freshPhone(browser)
   await friend.goto(link)
-  await goTo(friend, 'Items')
+  await goTo(friend, 'Settings')
   await expect(itemsPage(friend)).toContainText('29 in your Catalog')
   await expect(itemsPage(friend).getByRole('button', { name: 'Edit Kriek' })).toBeVisible()
   await expect(confirmDialog(friend)).toHaveCount(0)
@@ -97,7 +97,7 @@ test('with Items of their own, the friend is asked: Cancel keeps them, Replace t
   await expect(confirmDialog(page)).toContainText('Replace your 29 Items with the 28 shared Items? History is kept.')
   expect(new URL(page.url()).hash).toBe('')
   await confirmDialog(page).getByRole('button', { name: 'Cancel' }).tap()
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await expect(itemsPage(page)).toContainText('29 in your Catalog')
 
   // Pasted into the open app (only the fragment changes): Replace takes the shared Items.
@@ -112,6 +112,6 @@ test('a broken link is ignored with a short note', async ({ page }) => {
   await page.goto('./#items=broken')
   await expect(page.getByRole('status').filter({ hasText: 'That share link couldn’t be read' })).toBeVisible()
   expect(new URL(page.url()).hash).toBe('')
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await expect(itemsPage(page)).toContainText('28 in your Catalog')
 })

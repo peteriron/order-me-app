@@ -36,8 +36,9 @@ interface Drag {
 }
 
 /**
- * The Operator's Catalog: every Item by category, each row opening the edit sheet and pinning the Item. Pinned Items
- * come first and are reordered by dragging their handle, or with Move up / Move down for keyboard and screen readers.
+ * The Settings page: first the Operator's Catalog (the Items section), every Item by category, each row opening the
+ * edit sheet and pinning the Item; then the general settings passed in as children. Pinned Items come first and are
+ * reordered by dragging their handle, or with Move up / Move down for keyboard and screen readers.
  */
 export function ItemsPage({ sections, pins, count, t, actions, onAdd, onShare, onEdit, children }: ItemsPageProps) {
   const pinned = new Set(pins)
@@ -174,29 +175,34 @@ export function ItemsPage({ sections, pins, count, t, actions, onAdd, onShare, o
   }
 
   return (
-    <section className="page" aria-labelledby="items-title">
-      <header className="page-head">
-        <h1 className="page-title" id="items-title">
-          {t.items}
-        </h1>
-        <span className="page-sub">{t.catalogCount(count)}</span>
-      </header>
-      <div className="items-actions">
-        <button type="button" className="btn btn-primary" onClick={onAdd}>
-          <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          {t.addItem}
-        </button>
-        <button type="button" className="btn btn-outline" onClick={onShare}>
-          <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
-            <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2" />
-          </svg>
-          {t.shareItems}
-        </button>
-      </div>
-      {section('drink', t.drinks)}
-      {section('snack', t.snacks)}
+    <section className="page" aria-labelledby="settings-page-title">
+      <h1 className="page-title" id="settings-page-title">
+        {t.settings}
+      </h1>
+      <section className="items-section" aria-labelledby="items-title">
+        <header className="page-head">
+          <h2 className="section-title" id="items-title">
+            {t.items}
+          </h2>
+          <span className="page-sub">{t.catalogCount(count)}</span>
+        </header>
+        <div className="items-actions">
+          <button type="button" className="btn btn-primary" onClick={onAdd}>
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            {t.addItem}
+          </button>
+          <button type="button" className="btn btn-outline" onClick={onShare}>
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+              <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2" />
+            </svg>
+            {t.shareItems}
+          </button>
+        </div>
+        {section('drink', t.drinks)}
+        {section('snack', t.snacks)}
+      </section>
       {children}
     </section>
   )

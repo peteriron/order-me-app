@@ -8,7 +8,7 @@ const listedDrinks = (page: Page) => itemsDrinks(page).getByRole('button', { nam
 /** The tiles in the Round page's Drinks section, in grid order (nothing is in the Round, so every button is a tile). */
 const drinkTiles = (page: Page) => page.getByRole('region', { name: 'Drinks' }).getByRole('button')
 
-async function goTo(page: Page, name: 'History' | 'Round' | 'Items') {
+async function goTo(page: Page, name: 'History' | 'Round' | 'Settings') {
   await page.getByRole('navigation', { name: 'Pages' }).getByRole('button', { name }).tap()
 }
 
@@ -23,7 +23,7 @@ test.beforeEach(async ({ page }) => {
 test('pinning moves an Item to the front on the Items page and the Round page, and survives a reload', async ({ page }) => {
   await expect(drinkTiles(page).first()).toHaveText(/^🥤Cola$/)
 
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await pin(page, 'Red wine', 'Mint tea')
   await expect(itemsDrinks(page).getByRole('button', { name: 'Pin Mint tea' })).toHaveAttribute('aria-pressed', 'true')
   await expect(listedDrinks(page).nth(0)).toHaveText(/Red wine/)
@@ -38,14 +38,14 @@ test('pinning moves an Item to the front on the Items page and the Round page, a
   await expect(drinkTiles(page).nth(0)).toHaveText(/Red wine/)
   await expect(drinkTiles(page).nth(1)).toHaveText(/Mint tea/)
 
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await itemsDrinks(page).getByRole('button', { name: 'Pin Red wine' }).tap()
   await goTo(page, 'Round')
   await expect(drinkTiles(page).nth(0)).toHaveText(/Mint tea/)
 })
 
 test('dragging a pinned Item’s handle reorders it, without swiping the page', async ({ page }) => {
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await pin(page, 'Lager', 'Cola', 'Mint tea')
 
   const handle = itemsDrinks(page).locator('.item-row', { has: page.getByRole('button', { name: 'Edit Mint tea' }) }).locator('.item-row-handle')
@@ -59,7 +59,7 @@ test('dragging a pinned Item’s handle reorders it, without swiping the page', 
     { steps: 16, durationMs: 400 },
   )
 
-  await expect(page.getByRole('heading', { name: 'Items', level: 1 })).toBeInViewport({ ratio: 1 })
+  await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeInViewport({ ratio: 1 })
   await expect(listedDrinks(page).nth(0)).toHaveText(/Mint tea/)
   await expect(listedDrinks(page).nth(1)).toHaveText(/Lager/)
   await expect(listedDrinks(page).nth(2)).toHaveText(/Cola/)
@@ -74,7 +74,7 @@ test('dragging a pinned Item’s handle reorders it, without swiping the page', 
 })
 
 test('Move up and Move down reorder pinned Items from the keyboard', async ({ page }) => {
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await pin(page, 'Lager', 'Cola', 'Mint tea')
 
   const moveMintTeaUp = itemsDrinks(page).getByRole('button', { name: 'Move Mint tea up' })

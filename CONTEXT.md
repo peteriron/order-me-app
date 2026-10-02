@@ -21,7 +21,7 @@ How often an Item appeared in `placed` Rounds over roughly the last 90 days. It 
 _Avoid_: Favourites, ranking
 
 **Pinned Item** (v2):
-An Item the Operator has pinned on the Items page. Pinned Items come first in their section, in the order the Operator drags them into; unpinned Items follow by Popularity. Pins belong to the Operator's device and are never part of a Shared Catalog.
+An Item the Operator has pinned in the Items section of the Settings page. Pinned Items come first in their section, in the order the Operator drags them into; unpinned Items follow by Popularity. Pins belong to the Operator's device and are never part of a Shared Catalog.
 _Avoid_: Favourite, starred
 
 **Shared Catalog** (v2):

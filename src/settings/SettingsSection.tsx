@@ -41,7 +41,7 @@ export function SettingsSection({ settings, hasHistory, t, actions, overlays }: 
   return (
     <section className="section settings" aria-labelledby="settings-title">
       <h2 className="section-label" id="settings-title">
-        {t.settings}
+        {t.general}
       </h2>
 
       <fieldset className="field">

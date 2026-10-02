@@ -35,20 +35,21 @@ It's a web app you install on your home screen. It works offline, so bad bar Wi-
 
 ### Move around
 
-Swipe sideways between the three pages, or tap their names at the bottom of the screen:
+Swipe sideways between the four pages, or tap their tabs at the bottom of the screen. The page you're on is highlighted in amber.
 
-**History** ← **Round** → **Items**
+**History** ← **Round** → **Show** → **Settings**
 
 - **History:** past Rounds by day. **Order again** puts a past Round back on the grid, and the bin icon deletes one.
-- **Items:** your drinks and snacks.
+- **Show:** the Round in large type, to read out at the counter. Fix counts with − and +, **Share** it as text, and **Mark as ordered** when it's done.
+- **Settings:** first your **Items** (drinks and snacks), then the general settings.
   - Tap a row to edit or delete that Item, or **Add Item** to create one.
   - Tap the pin on a row to pin it. Pinned Items come first; drag them by their handle (⠿) to change the order.
   - **Share** shows the QR code, with **Save image** and **Copy link**.
-  - **Settings** are at the bottom of this page.
+  - **General**, at the bottom: language, theme, Clear history and Reset app.
 
 ### Share your Items with a friend
 
-1. On the **Items** page, tap **Share**.
+1. On the **Settings** page, tap **Share** in the Items section.
 2. Your friend scans the QR code with their phone camera, or opens the link you copied to them.
 3. On a phone that has never used the app, it opens with your Items straight away. If they already have Items, they're asked whether to replace them. Their History is always kept.
 
@@ -58,7 +59,7 @@ Only the Items travel: not your History, Round, pins or settings.
 
 ### Start fresh
 
-In **Settings** at the bottom of the Items page:
+In **General**, at the bottom of the Settings page:
 
 - **Clear history** deletes all past Rounds and keeps your Items.
 - **Reset app** puts everything back to a fresh install with the newest version: starter Items, no pins, Round, History or settings. It needs an internet connection and asks first.

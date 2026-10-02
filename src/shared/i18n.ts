@@ -90,6 +90,10 @@ export interface Messages {
   emojiRequired: string
   deleteItemConfirm: (name: string) => string
   settings: string
+  /** Short tab labels where the full word doesn't fit a quarter of the screen. */
+  historyTab: string
+  settingsTab: string
+  general: string
   language: string
   theme: string
   system: string
@@ -174,6 +178,9 @@ export const messages: Record<Locale, Messages> = {
     emojiRequired: 'Pick an emoji',
     deleteItemConfirm: (name) => `Delete “${name}”? History keeps it.`,
     settings: 'Settings',
+    historyTab: 'History',
+    settingsTab: 'Settings',
+    general: 'General',
     language: 'Language',
     theme: 'Theme',
     system: 'System',
@@ -258,6 +265,9 @@ export const messages: Record<Locale, Messages> = {
     emojiRequired: 'Kies een emoji',
     deleteItemConfirm: (name) => `“${name}” verwijderen? De geschiedenis blijft behouden.`,
     settings: 'Instellingen',
+    historyTab: 'Historiek',
+    settingsTab: 'Opties',
+    general: 'Algemeen',
     language: 'Taal',
     theme: 'Thema',
     system: 'Systeem',

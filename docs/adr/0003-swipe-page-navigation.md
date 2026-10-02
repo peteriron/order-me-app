@@ -3,3 +3,5 @@
 The app has three places — History, the composing Round, and the Catalog (Items page, with Settings at its bottom) — and we navigate between them by swiping horizontally, with a subtle page hint in the footer, rather than a bottom tab bar or header icons. The Round page opens by default and sits in the middle, so the past is one swipe right and the Catalog one swipe left. We chose this so the tile grid, which the Operator uses 95% of the time, gets the full screen with no persistent chrome. The trade-off is discoverability (mitigated by the footer hint, which is also tappable) and gesture conflicts: horizontal swipes must need a clear threshold so they never fire from a slightly-off tile tap. The Counter view is deliberately *not* a swipe page; it opens from the Round page's bottom bar.
 
 _Update: the Counter view became the Show swipe page, between Round and Items; see ADR-0005._
+
+_Update: the footer hint became a slim tab bar with four equal tabs (History, Round, Show, Settings), the current one highlighted (#42). The grid still owns the screen; the tab bar is the only persistent chrome._

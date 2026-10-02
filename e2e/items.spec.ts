@@ -4,7 +4,7 @@ const itemsPage = (page: Page) => page.getByRole('region', { name: 'Items' })
 const sheet = (page: Page) => page.getByRole('dialog')
 const roundBar = (page: Page) => page.getByRole('region', { name: 'Round total' })
 
-async function goTo(page: Page, name: 'History' | 'Round' | 'Items') {
+async function goTo(page: Page, name: 'History' | 'Round' | 'Settings') {
   await page.getByRole('navigation', { name: 'Pages' }).getByRole('button', { name }).tap()
 }
 
@@ -17,8 +17,8 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('lists every Item in Catalog order under Drinks and Snacks, with Add Item at the top', async ({ page }) => {
-  await goTo(page, 'Items')
-  await expect(itemsPage(page).getByRole('heading', { name: 'Items', level: 1 })).toBeInViewport()
+  await goTo(page, 'Settings')
+  await expect(itemsPage(page).getByRole('heading', { name: 'Items', level: 2 })).toBeInViewport()
   await expect(itemsPage(page)).toContainText('28 in your Catalog')
   await expect(itemsPage(page).getByRole('button', { name: 'Add Item' })).toBeVisible()
 
@@ -28,7 +28,7 @@ test('lists every Item in Catalog order under Drinks and Snacks, with Add Item a
 })
 
 test('adds an Item that appears in the Catalog and as a tile, and survives a reload', async ({ page }) => {
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await itemsPage(page).getByRole('button', { name: 'Add Item' }).tap()
 
   await expect(sheet(page)).toHaveAccessibleName('Add Item')
@@ -45,7 +45,7 @@ test('adds an Item that appears in the Catalog and as a tile, and survives a rel
 })
 
 test('will not add an Item without a name', async ({ page }) => {
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await itemsPage(page).getByRole('button', { name: 'Add Item' }).tap()
   await sheet(page).getByLabel('Name').fill('   ')
   await sheet(page).getByRole('button', { name: 'Add', exact: true }).tap()
@@ -55,7 +55,7 @@ test('will not add an Item without a name', async ({ page }) => {
 })
 
 test('a typed emoji can be used instead of one from the picker', async ({ page }) => {
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await itemsPage(page).getByRole('button', { name: 'Add Item' }).tap()
   await sheet(page).getByLabel('Name').fill('Maté')
   await sheet(page).getByLabel('Or type your own').fill('🧉')
@@ -65,7 +65,7 @@ test('a typed emoji can be used instead of one from the picker', async ({ page }
 })
 
 test('Cancel throws away every change made in the sheet', async ({ page }) => {
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await itemsPage(page).getByRole('button', { name: 'Edit Duvel' }).tap()
 
   await expect(sheet(page)).toHaveAccessibleName('Edit Item')
@@ -80,7 +80,7 @@ test('Cancel throws away every change made in the sheet', async ({ page }) => {
 
 test('renaming an Item keeps its count, and a new category moves its tile', async ({ page }) => {
   await tapTiles(page, 'Duvel', 'Duvel')
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await itemsPage(page).getByRole('button', { name: 'Edit Duvel' }).tap()
   await sheet(page).getByLabel('Name').fill('Duvel 666')
   await sheet(page).getByRole('radio', { name: 'Snack' }).check()
@@ -99,7 +99,7 @@ test('deleting an Item asks first, takes it out of the Round, and leaves history
   await page.getByRole('button', { name: 'Mark as ordered' }).tap()
   await tapTiles(page, 'Chips', 'Cola')
 
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await itemsPage(page).getByRole('button', { name: 'Edit Chips' }).tap()
   await sheet(page).getByRole('button', { name: 'Delete' }).tap()
 
@@ -120,7 +120,7 @@ test('deleting an Item asks first, takes it out of the Round, and leaves history
 })
 
 test('Cancel in the delete confirmation keeps the Item and the sheet', async ({ page }) => {
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await itemsPage(page).getByRole('button', { name: 'Edit Chips' }).tap()
   await sheet(page).getByRole('button', { name: 'Delete' }).tap()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Cancel' }).tap()
@@ -151,7 +151,7 @@ test.describe('the + New tile on the Round page', () => {
     await expect(page.getByRole('button', { name: 'Kriek, 1 in round' })).toBeVisible()
     await expect(roundBar(page)).toContainText('2 items')
 
-    await goTo(page, 'Items')
+    await goTo(page, 'Settings')
     await expect(itemsPage(page).getByRole('button', { name: 'Edit Kriek' })).toBeVisible()
   })
 
@@ -162,7 +162,7 @@ test.describe('the + New tile on the Round page', () => {
 
     await expect(page.getByRole('button', { name: /^Kriek(,|$)/ })).toHaveCount(0)
     await expect(roundBar(page)).toContainText('Tap a drink to start')
-    await goTo(page, 'Items')
+    await goTo(page, 'Settings')
     await expect(itemsPage(page)).toContainText('28 in your Catalog')
   })
 })

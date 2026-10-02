@@ -29,7 +29,7 @@ test('swiping right from Round shows History; swiping left shows Show, then Item
   await expectOnPage(page, 'Round for the counter', 'Show')
 
   await touchDrag(page, { x: x + 150, y }, { x: x - 150, y })
-  await expectOnPage(page, 'Items', 'Items')
+  await expectOnPage(page, 'Settings', 'Settings')
 })
 
 test('a quick flick changes page even when it is short', async ({ page }) => {
@@ -64,9 +64,9 @@ test('there is no page beyond History or Items', async ({ page }) => {
   await touchDrag(page, { x: width(page) - 40, y }, { x: 40, y })
   await expectOnPage(page, 'Round for the counter', 'Show')
   await touchDrag(page, { x: width(page) - 40, y }, { x: 40, y })
-  await expectOnPage(page, 'Items', 'Items')
+  await expectOnPage(page, 'Settings', 'Settings')
   await touchDrag(page, { x: width(page) - 40, y }, { x: 40, y })
-  await expectOnPage(page, 'Items', 'Items')
+  await expectOnPage(page, 'Settings', 'Settings')
 })
 
 test('a slightly sideways tap on a tile adds it and stays on Round', async ({ page }) => {
@@ -94,15 +94,39 @@ test('opens on the Round page, and footer labels navigate between pages', async 
   const footer = page.getByRole('navigation', { name: 'Pages' })
   await footer.getByRole('button', { name: 'History' }).tap()
   await expectOnPage(page, 'History', 'History')
-  await footer.getByRole('button', { name: 'Items' }).tap()
-  await expectOnPage(page, 'Items', 'Items')
+  await footer.getByRole('button', { name: 'Settings' }).tap()
+  await expectOnPage(page, 'Settings', 'Settings')
   await footer.getByRole('button', { name: 'Round' }).tap()
   await expectOnPage(page, 'This round is on me', 'Round')
 })
 
+test('the tab bar: four tabs with icons, the current one marked, short Dutch labels with full names', async ({ page }) => {
+  // The one navigation; its own name changes with the language ("Pages" / "Pagina’s").
+  const tabs = page.getByRole('navigation').getByRole('button')
+  await expect(page.getByRole('navigation')).toHaveAccessibleName('Pages')
+  await expect(tabs).toHaveText(['History', 'Round', 'Show', 'Settings'])
+  await expect(tabs.locator('svg')).toHaveCount(4)
+  await expect(tabs.nth(1)).toHaveAttribute('aria-current', 'page')
+
+  for (const [i, heading] of [[2, 'Round for the counter'], [0, 'History'], [3, 'Settings']] as const) {
+    await tabs.nth(i).tap()
+    await expect(tabs.nth(i)).toHaveAttribute('aria-current', 'page')
+    await expect(page.getByRole('heading', { name: heading, level: 1 })).toBeInViewport({ ratio: 1 })
+    await expect(tabs.and(page.locator('[aria-current="page"]'))).toHaveCount(1)
+  }
+
+  await page.getByRole('group', { name: 'Language' }).getByRole('radio', { name: 'Nederlands' }).check()
+  await expect(tabs).toHaveText(['Historiek', 'Rondje', 'Toon', 'Opties'])
+  // Screen readers hear the full names.
+  await expect(tabs.nth(0)).toHaveAccessibleName('Geschiedenis')
+  await expect(tabs.nth(3)).toHaveAccessibleName('Instellingen')
+  // Page headings stay in full (the page has scrolled down to the language switch, so not necessarily in view).
+  await expect(page.getByRole('heading', { name: 'Instellingen', level: 1 })).toBeVisible()
+})
+
 test('pages that are off screen are hidden from assistive tech', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'History', level: 1 })).toHaveCount(0)
-  await expect(page.getByRole('heading', { name: 'Items', level: 1 })).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toHaveCount(0)
 })
 
 test('pages stay aligned when something off screen is scrolled into view', async ({ page }) => {
