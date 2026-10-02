@@ -60,14 +60,14 @@ A phone app, installed from the browser to the home screen, that works offline i
 
 ### Items (Catalog) and Settings
 
-35. As an Operator, I want to swipe left from the grid to reach my Catalog, so that editing Items is one gesture away.
+35. As an Operator, I want to reach my Catalog on the Settings page, by swiping or one tap on its tab, so that editing Items is always close by.
 36. As an Operator, I want to add an Item with a name, a category (drink or snack) and an emoji chosen from a curated picker, so that tiles are instantly recognisable.
 37. As an Operator, I want to edit an Item's name, category or emoji, with Cancel truly discarding my changes, so that I can fix typos safely.
 38. As an Operator, I want renaming an Item that's in the composing Round to keep its count, so that editing never loses taps.
 39. As an Operator, I want to delete an Item after a confirmation, so that I don't lose one by accident.
 40. As an Operator, I want deleting an Item that's in the composing Round to remove its line from the Round, so that the Round only holds Items that exist.
 41. As an Operator, I want the app to come with a sensible starter Catalog in my language on first launch, so that it's useful immediately.
-42. As an Operator, I want a Settings section at the bottom of the Items page, so that the rarely used options stay out of the way.
+42. As an Operator, I want the general settings below my Items on the Settings page, so that the rarely used options stay out of the way.
 43. As an Operator, I want the app to follow my phone's language (Dutch or English) with a manual override in Settings, so that it speaks my language.
 44. As an Operator, I want the app dark by default, with Light and System options in Settings, so that it's easy on the eyes in a dim bar and still readable on a sunny terrace.
 45. As an Operator, I want a "Clear history" action in Settings, with a confirmation, so that I can start fresh deliberately.
@@ -88,7 +88,7 @@ A phone app, installed from the browser to the home screen, that works offline i
 
 ### Navigation, install & robustness
 
-46. As an Operator, I want a subtle footer hint (dots with small labels) showing that History and Items exist on either side, so that the swipe navigation is discoverable; tapping a label also navigates.
+46. As an Operator, I want a slim tab bar at the bottom (History, Round, Show, Settings) that clearly highlights the page I'm on, so that I always know where I am; tapping a tab also navigates.
 47. As an Operator, I want horizontal swipes to require a clear, deliberate gesture, so that a slightly sideways tile tap never switches pages.
 48. As an Operator, I want to install the app to my home screen and have it open full-screen, so that it feels like a native app.
 49. As an Operator, I want the app to work with no network after the first visit, so that bad bar Wi-Fi doesn't matter.

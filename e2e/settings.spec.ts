@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 
-async function openSettings(page: Page, pageLabel = 'Items') {
+async function openSettings(page: Page, pageLabel = 'Settings') {
   await page.getByRole('navigation').getByRole('button', { name: pageLabel }).tap()
 }
 
@@ -24,7 +24,7 @@ test('switching to Dutch changes the app text at once but never renames Catalog 
   await expect(page.getByRole('button', { name: 'Still water bewerken' })).toBeAttached()
 
   await page.reload()
-  await openSettings(page)
+  await openSettings(page, 'Instellingen')
   await expect(setting(page, 'Taal', 'Nederlands')).toBeChecked()
 
   await setting(page, 'Taal', 'Systeem').check()

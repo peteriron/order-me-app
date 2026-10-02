@@ -4,7 +4,7 @@ const itemsPage = (page: Page) => page.getByRole('region', { name: 'Items' })
 const choice = (page: Page, group: string, option: string) =>
   page.getByRole('group', { name: group }).getByRole('radio', { name: option })
 
-async function goTo(page: Page, name: 'History' | 'Round' | 'Items') {
+async function goTo(page: Page, name: 'History' | 'Round' | 'Settings') {
   await page.getByRole('navigation', { name: 'Pages' }).getByRole('button', { name }).tap()
 }
 
@@ -23,7 +23,7 @@ async function useTheApp(page: Page) {
   await page.getByRole('region', { name: 'Round total' }).getByRole('button', { name: 'Show' }).tap()
   await page.getByRole('button', { name: 'Mark as ordered' }).tap()
   await page.getByRole('button', { name: /^Cola(,|$)/ }).tap()
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await itemsPage(page).getByRole('button', { name: 'Pin Mint tea' }).tap()
   await itemsPage(page).getByRole('button', { name: 'Edit Chips' }).tap()
   await page.getByRole('dialog').getByRole('button', { name: 'Delete' }).tap()
@@ -33,8 +33,8 @@ async function useTheApp(page: Page) {
 }
 
 async function resetFromSettings(page: Page) {
-  await goTo(page, 'Items')
-  await itemsPage(page).getByRole('button', { name: 'Reset app' }).tap()
+  await goTo(page, 'Settings')
+  await page.getByRole('region', { name: 'General' }).getByRole('button', { name: 'Reset app' }).tap()
   await expect(page.getByRole('alertdialog')).toContainText('Reset the app to how it was first installed?')
   await page.getByRole('alertdialog').getByRole('button', { name: 'Reset', exact: true }).tap()
 }
@@ -59,7 +59,7 @@ test('Reset app brings back a first install: starter Items, no Round, pins, Hist
   await expect(page.getByRole('heading', { name: 'This round is on me', level: 1 })).toBeVisible()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   await expect(page.getByRole('region', { name: 'Round total' })).toContainText('Tap a drink to start')
-  await goTo(page, 'Items')
+  await goTo(page, 'Settings')
   await expect(itemsPage(page)).toContainText('28 in your Catalog')
   await expect(itemsPage(page).getByRole('button', { name: 'Pin Mint tea' })).toHaveAttribute('aria-pressed', 'false')
   await expect(choice(page, 'Language', 'System')).toBeChecked()

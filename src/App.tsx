@@ -12,7 +12,8 @@ import { SettingsSection } from './settings/SettingsSection.tsx'
 import { useTheme } from './settings/useTheme.ts'
 import { detectLocale, formattingLocale, messages, resolveLocale } from './shared/i18n.ts'
 import { ConfirmDialog, type Confirmation } from './shared/ui/ConfirmDialog.tsx'
-import { PageHint } from './shared/ui/PageHint.tsx'
+import { TabBar } from './shared/ui/TabBar.tsx'
+import { TAB_ICONS } from './shared/ui/tabIcons.tsx'
 import { Pager } from './shared/ui/Pager.tsx'
 import { Toast, type ToastMessage } from './shared/ui/Toast.tsx'
 import type { Overlays } from './shared/ui/overlays.ts'
@@ -107,7 +108,17 @@ export function App() {
     <>
       <div className="shell" inert={sheet !== null || sharing || confirmation !== null}>
         <Pager pages={pages} page={page} onPageChange={setPage} />
-        <PageHint labels={[t.history, t.round, t.show, t.items]} page={page} navLabel={t.pages} onPageChange={setPage} />
+        <TabBar
+          tabs={[
+            { label: t.historyTab, name: t.history, icon: TAB_ICONS.history },
+            { label: t.round, name: t.round, icon: TAB_ICONS.round },
+            { label: t.show, name: t.show, icon: TAB_ICONS.show },
+            { label: t.settingsTab, name: t.settings, icon: TAB_ICONS.settings },
+          ]}
+          page={page}
+          navLabel={t.pages}
+          onPageChange={setPage}
+        />
       </div>
 
       {sheet && (

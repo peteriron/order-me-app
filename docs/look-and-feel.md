@@ -4,7 +4,7 @@ Companion to [prd.md](prd.md). The design goal is **bar mode**: legible at arm's
 
 ## Principles
 
-1. **The grid owns the screen.** No tab bar, no header chrome beyond a title line. Navigation is swipe + a footer hint (ADR-0003).
+1. **The grid owns the screen.** No header chrome beyond a title line. Navigation is swipe plus a slim tab bar at the bottom (ADR-0003, ADR-0005).
 2. **One accent.** Amber is reserved for things that matter *now*: counts, the Show button, the active page dot. Everything else is neutral.
 3. **Big, fixed targets.** Nothing tappable under 44 px. Tiles never move while a Round is composing.
 4. **Quiet feedback.** Tap = scale + haptic. Toasts only for undo or something surprising.
@@ -81,15 +81,20 @@ Same size as other tiles, with a dashed `--border` outline, a large "+" and the 
 │  Clear        7 items         [  Show  → ] │
 └────────────────────────────────────────────┘
 ```
-- Sticky above the footer hint, 64 px tall, `--surface-2`, respects `safe-area-inset-bottom`.
+- Sticky above the tab bar, 64 px tall, `--surface-2`, respects `safe-area-inset-bottom`.
 - Show is the only accent-filled button on the page. When the Round is empty, the bar collapses to the hint text "Tap a drink to start" with no buttons.
 - Clear is a quiet text button and acts instantly (see PRD).
 
-### Footer page hint
+### Tab bar
 ```
-        History   ●  Round  ○  Items
+┌──────────┬──────────┬──────────┬──────────┐
+│ ◷ History│ ▦ Round  │ ☰ Show   │ ⚙ Settings│
+└──────────┴──────────┴──────────┴──────────┘
 ```
-Four dots (History, Round, Show, Items), 6 px, with 11 px muted labels; the active one is an amber dot with a `--text` label. The labels are tappable (44 px hit height). The hint stays visible on the Show page.
+- Four equal-width tabs, like a native app's tab bar, on `--surface` with a hairline `--border` on top; it respects `safe-area-inset-bottom` and stays visible on every page.
+- Each tab: an 18 px line icon (clock, 2×2 grid, list, gear) to the left of a 13 px / 600 label, at least 44 px tall.
+- The current tab has a soft amber background (`--accent-soft`, 12 px radius) with icon and label in `--accent`; the others are `--text-muted`. The highlight moves as soon as a swipe settles. `contrast.test.ts` checks the active label in both themes.
+- Labels are shortened where a full word doesn't fit a quarter of the screen: NL "Historiek" and "Opties". Screen readers get the full names ("Geschiedenis", "Instellingen"), and page headings stay in full. Below 375 px wide, labels drop to 12 px and icons to 16 px.
 
 ### Show page (Counter view)
 ```
@@ -127,13 +132,14 @@ Four dots (History, Round, Show, Items), 6 px, with 11 px muted labels; the acti
 - The lines are a compact dot-separated summary, with emoji omitted to keep it scannable. Tapping the card expands it into the full line list.
 - "Order again" is an outlined accent button. Delete (trash icon) asks for confirmation.
 
-### Items page
+### Settings page
+The fourth page, titled "Settings". It holds two sections: **Items** (the Catalog, with its count beside the section title) and **General**.
 - A list row (56 px) per Item: emoji, name, a small category chip, a pencil icon and a pin toggle at the far right. Tapping the row opens the edit sheet; the pin toggle (48 px wide) pins or unpins the Item without opening it. The pin is a muted outline when off and an accent-filled pin when on.
 - Rows are grouped by category. In each section the **Pinned Items** come first, in the Operator's order, then the rest in Catalog order (the starter list's order, then Items as they were added). Popularity order applies only to the grid.
 - A pinned row starts with a drag handle: a 44 px wide column with a muted six-dot grip. Dragging the handle moves the row live among the section's pinned rows; while dragging, the row lifts onto `--surface-2` with a soft shadow and the grip turns `--accent`. The handle takes the whole gesture (`touch-action: none`), so it never scrolls the list or swipes the page.
 - For keyboard and screen-reader users, each pinned row also has "Move up" / "Move down" buttons ("Move Duvel up" / "Duvel omhoog"). They are visually hidden until focused, then appear as a pill over the handle. At the ends of the list they are marked unavailable rather than removed, so focus stays put.
-- "Add Item" (accent-filled) and "Share" (outline, with a QR glyph) sit side by side at the top.
-- Below the list is the **Settings** section: Language (System / Nederlands / English), Theme (Dark / Light / System) as segmented controls, then two danger text buttons: "Clear history" and "Reset app". Reset app asks first, with "Reset" as the confirm button. With no connection it changes nothing and shows the "No connection" toast.
+- "Add Item" (accent-filled) and "Share" (outline, with a QR glyph) sit side by side at the top of the Items section.
+- Below the list is the **General** section: Language (System / Nederlands / English), Theme (Dark / Light / System) as segmented controls, then two danger text buttons: "Clear history" and "Reset app". Reset app asks first, with "Reset" as the confirm button. With no connection it changes nothing and shows the "No connection" toast.
 
 ### Item sheet (add / edit / "+ New")
 A bottom sheet containing:
@@ -189,7 +195,9 @@ Short, friendly and practical, with no exclamation marks except in the empty sta
 | Share | Share | Delen |
 | Total | Total | Totaal |
 | Order again | Order again | Opnieuw bestellen |
-| History / Round / Items | History / Round / Items | Geschiedenis / Rondje / Items |
+| Tabs (as shown) | History / Round / Show / Settings | Historiek / Rondje / Toon / Opties |
+| Tabs (full names, screen readers) and page titles | History / Round / Show / Settings | Geschiedenis / Rondje / Toon / Instellingen |
+| Settings page sections | Items / General | Items / Algemeen |
 | New | New | Nieuw |
 | Drinks / Snacks | Drinks / Snacks | Dranken / Snacks |
 | Delete Item confirm | Delete "{name}"? History keeps it. | "{name}" verwijderen? De geschiedenis blijft behouden. |
@@ -199,7 +207,7 @@ Short, friendly and practical, with no exclamation marks except in the empty sta
 | Reset offline | No connection. Resetting needs internet to load the newest version. | Geen verbinding. Om te resetten is internet nodig voor de nieuwste versie. |
 | Skipped on order again | {n} items no longer exist and were skipped | {n} items bestaan niet meer en zijn overgeslagen |
 | Copied (share fallback, Copy link) | Copied to clipboard | Gekopieerd |
-| Share (Items page) | Share | Delen |
+| Share (Settings page, Items section) | Share | Delen |
 | Share sheet hint | Scan to open the page | Scan om de pagina te openen |
 | QR too big | Too many Items for a QR code that scans reliably. Copy the link instead. | Te veel items voor een QR-code die vlot scant. Kopieer de link. |
 | Save image / Copy link / Done | Save image / Copy link / Done | Afbeelding bewaren / Link kopiëren / Klaar |
