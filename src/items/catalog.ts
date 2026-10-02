@@ -1,6 +1,7 @@
 import type { ComposingRound } from '../round/round.ts'
 import type { Locale } from '../shared/i18n.ts'
 import { pinnedFirst, type Pins } from './pins.ts'
+import { isStarterName, STARTER } from './starter.ts'
 
 export type Category = 'drink' | 'snack'
 
@@ -9,52 +10,18 @@ export interface Item {
   name: string
   category: Category
   emoji: string
+  /**
+   * Set on starter Items: which starter row this is (see starter.ts). Its name then follows the app's language
+   * (localizeCatalog) until the Operator renames it.
+   */
+  starter?: string
 }
 
 export type Catalog = Item[]
 
-type SeedRow = [emoji: string, category: Category, en: string, nl: string]
-
-/** In the order the grid starts with, grouped: soft drinks, beer, hot drinks, wine, mixed drinks; then snacks. */
-const STARTER: SeedRow[] = [
-  ['🥤', 'drink', 'Cola', 'Cola'],
-  ['🥤', 'drink', 'Cola Zero', 'Cola Zero'],
-  ['💧', 'drink', 'Still water', 'Water plat'],
-  ['🫧', 'drink', 'Sparkling water', 'Water bruis'],
-  ['🍊', 'drink', 'Fanta', 'Fanta'],
-  ['🍋', 'drink', 'Sprite', 'Sprite'],
-  ['🧋', 'drink', 'Ice Tea', 'Ice Tea'],
-  ['🧃', 'drink', 'Juice', 'Fruitsap'],
-  ['🍋', 'drink', 'Gini', 'Gini'],
-  ['🫧', 'drink', 'Tönissteiner', 'Tönissteiner'],
-  ['🍺', 'drink', 'Lager', 'Pils'],
-  ['🍺', 'drink', 'Lager 0.0', 'Pils 0,0'],
-  ['🍺', 'drink', 'Duvel', 'Duvel'],
-  ['🍻', 'drink', 'Specialty beer', 'Speciaalbier'],
-  ['☕', 'drink', 'Coffee', 'Koffie'],
-  ['☕', 'drink', 'Decaf', 'Deca'],
-  ['🍵', 'drink', 'Mint tea', 'Muntthee'],
-  ['🥂', 'drink', 'White wine', 'Witte wijn'],
-  ['🍷', 'drink', 'Red wine', 'Rode wijn'],
-  ['🍷', 'drink', 'Rosé wine', 'Rosé wijn'],
-  ['🍊', 'drink', 'Aperol Spritz', 'Aperol Spritz'],
-  ['🍾', 'drink', 'Cava', 'Cava'],
-  ['🍸', 'drink', 'Gin & tonic', 'Gin-tonic'],
-  ['🍹', 'drink', 'Mocktail', 'Mocktail'],
-  ['🥔', 'snack', 'Chips', 'Chips'],
-  ['🥜', 'snack', 'Nuts', 'Nootjes'],
-  ['🧀', 'snack', 'Cheese', 'Kaasblokjes'],
-  ['🧆', 'snack', 'Bitterballen', 'Bitterballen'],
-]
-
-/** The Catalog a first launch starts with, named in the device's language. */
+/** The Catalog a first launch starts with, named in the device's language. Each Item remembers its starter row. */
 export function seedCatalog(locale: Locale, newId: () => string): Catalog {
-  return STARTER.map(([emoji, category, en, nl]) => ({
-    id: newId(),
-    name: locale === 'nl' ? nl : en,
-    category,
-    emoji,
-  }))
+  return STARTER.map((row) => ({ id: newId(), name: row[locale], category: row.category, emoji: row.emoji, starter: row.key }))
 }
 
 export type Sections = Record<Category, Item[]>
@@ -95,9 +62,16 @@ export function addToCatalog(catalog: Catalog, draft: ItemDraft, id: string): Ca
   return [...catalog, { id, ...draft }]
 }
 
-/** Changes an Item's name, category or emoji. Its id, and so its count in the composing Round, stays the same. */
+/**
+ * Changes an Item's name, category or emoji. Its id, and so its count in the composing Round, stays the same. A
+ * starter Item stays one unless renamed: saving the name the sheet showed (in either language) isn't a rename.
+ */
 export function editItem(catalog: Catalog, itemId: string, draft: ItemDraft): Catalog {
-  return catalog.map((item) => (item.id === itemId ? { id: itemId, ...draft } : item))
+  return catalog.map((item) => {
+    if (item.id !== itemId) return item
+    const starter = item.starter && isStarterName(item.starter, draft.name) ? item.starter : undefined
+    return starter ? { id: itemId, ...draft, starter } : { id: itemId, ...draft }
+  })
 }
 
 /**
