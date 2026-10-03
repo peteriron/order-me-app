@@ -138,6 +138,7 @@ The fourth page, titled "Settings". It holds two sections: **Items** (the Catalo
 - A list row (56 px) per Item: emoji, name, a small category chip, a pencil icon and a pin toggle at the far right. Tapping the row opens the edit sheet; the pin toggle (48 px wide) pins or unpins the Item without opening it. The pin is a muted outline when off and an accent-filled pin when on.
 - Rows are grouped by category. In each section the **Pinned Items** come first, in the Operator's order, then the rest in Catalog order (the starter list's order, then Items as they were added). Popularity order applies only to the grid.
 - A pinned row starts with a drag handle: a 44 px wide column with a muted six-dot grip. Dragging the handle moves the row live among the section's pinned rows; while dragging, the row lifts onto `--surface-2` with a soft shadow and the grip turns `--accent`. The handle takes the whole gesture (`touch-action: none`), so it never scrolls the list or swipes the page.
+- **Swipe to delete** (#54): swiping a row from right to left slides it with the finger and reveals a 72 px red button (`--danger`, with an `--on-danger` ×) on the right; past half its width, or with a quick flick, it snaps open, otherwise back. One row is open at a time. Swiping it back, or tapping anywhere else, closes it (that tap does nothing else). Tapping × deletes at once, with the "{name} deleted · Undo" toast. A left-to-right swipe on a closed row still goes back to Show, and a swipe on a pinned row's drag handle always reorders.
 - For keyboard and screen-reader users, each pinned row also has "Move up" / "Move down" buttons ("Move Duvel up" / "Duvel omhoog"). They are visually hidden until focused, then appear as a pill over the handle. At the ends of the list they are marked unavailable rather than removed, so focus stays put.
 - "Add Item" (accent-filled) and "Share" (outline, with a QR glyph) sit side by side at the top of the Items section.
 - Below the list is the **General** section: Language (System / Nederlands / English), Theme (Dark / Light / System) as segmented controls, then two danger text buttons: "Clear history" and "Reset app". Reset app asks first, with "Reset" as the confirm button. With no connection it changes nothing and shows the "No connection" toast.
@@ -201,7 +202,8 @@ Short, friendly and practical, with no exclamation marks except in the empty sta
 | Settings page sections | Items / General | Items / Algemeen |
 | New | New | Nieuw |
 | Drinks / Snacks | Drinks / Snacks | Dranken / Snacks |
-| Delete Item confirm | Delete "{name}"? History keeps it. | "{name}" verwijderen? De geschiedenis blijft behouden. |
+| Item deleted toast | {name} deleted · Undo | {name} verwijderd · Ongedaan maken |
+| Delete button (screen readers) | Delete {name} | {name} verwijderen |
 | Clear history confirm | Delete all past Rounds? | Alle vorige rondjes verwijderen? |
 | Reset app / Reset | Reset app / Reset | App resetten / Resetten |
 | Reset app confirm | Reset the app to how it was first installed? This deletes your Items, pins, the Round, all History and your settings, and loads the newest version. | De app terugzetten zoals bij de installatie? Je items, vastgezette items, het rondje, de hele geschiedenis en je instellingen worden gewist, en de nieuwste versie wordt geladen. |

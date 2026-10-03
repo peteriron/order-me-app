@@ -89,3 +89,37 @@ export function deleteItem(
     pins: state.pins.filter((id) => id !== itemId),
   }
 }
+
+type Deletable = { catalog: Catalog; round: ComposingRound; pins: Pins; showOrder: string[] }
+
+/** `id` put back at `index` in `ids` (clamped), unless it's there already. */
+function reinsert(ids: string[], id: string, index: number): string[] {
+  if (index < 0 || ids.includes(id)) return ids
+  return [...ids.slice(0, index), id, ...ids.slice(index)]
+}
+
+/**
+ * Deletes an Item at once (Catalog, composing Round, pins and Show order; History keeps its snapshots, ADR-0001),
+ * and returns `undo`, which puts it back exactly where it was: its Catalog place, pin position, Round count and
+ * Show order position. Anything else changed in between is kept.
+ */
+export function deleteWithUndo(state: Deletable, itemId: string): { next: Deletable; undo: (current: Deletable) => Partial<Deletable> } {
+  const index = state.catalog.findIndex((i) => i.id === itemId)
+  const item = state.catalog[index]
+  const count = state.round.counts[itemId]
+  const pinAt = state.pins.indexOf(itemId)
+  const showAt = state.showOrder.indexOf(itemId)
+  const next = { ...deleteItem(state, itemId), showOrder: state.showOrder.filter((id) => id !== itemId) }
+  return {
+    next,
+    undo: (current) => {
+      if (!item || current.catalog.some((i) => i.id === itemId)) return {}
+      return {
+        catalog: [...current.catalog.slice(0, index), item, ...current.catalog.slice(index)],
+        round: count ? { counts: { ...current.round.counts, [itemId]: count } } : current.round,
+        pins: reinsert(current.pins, itemId, pinAt),
+        showOrder: reinsert(current.showOrder, itemId, showAt),
+      }
+    },
+  }
+}

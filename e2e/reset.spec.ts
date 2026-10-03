@@ -27,7 +27,6 @@ async function useTheApp(page: Page) {
   await itemsPage(page).getByRole('button', { name: 'Pin Mint tea' }).tap()
   await itemsPage(page).getByRole('button', { name: 'Edit Chips' }).tap()
   await page.getByRole('dialog').getByRole('button', { name: 'Delete' }).tap()
-  await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).tap()
   await choice(page, 'Theme', 'Light').check()
   await expect(itemsPage(page)).toContainText('27 in your Catalog')
 }

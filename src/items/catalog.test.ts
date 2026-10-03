@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { add, emptyRound, roundLines } from '../round/round.ts'
-import { addToCatalog, catalogSections, checkDraft, deleteItem, editItem, seedCatalog, type Item } from './catalog.ts'
+import { addToCatalog, catalogSections, checkDraft, deleteItem, deleteWithUndo, editItem, seedCatalog, type Item } from './catalog.ts'
 
 const sequentialIds = () => {
   let n = 0
@@ -136,5 +136,37 @@ describe('editing the Catalog', () => {
     const next = deleteItem({ catalog: [duvel, chips], round, pins: [] }, 'duvel')
     expect(next.catalog).toEqual([chips])
     expect(next.round.counts).toEqual({ chips: 1 })
+  })
+})
+
+describe('deleting an Item, with Undo', () => {
+  const item = (id: string): Item => ({ id, name: id, category: 'drink', emoji: '🍺' })
+  const before = {
+    catalog: [item('a'), item('b'), item('c')],
+    round: add(add(add(emptyRound(), 'b'), 'b'), 'c'),
+    pins: ['c', 'b', 'a'],
+    showOrder: ['a', 'b', 'c'],
+  }
+
+  it('removes the Item from the Catalog, the Round, the pins and the Show order', () => {
+    const { next } = deleteWithUndo(before, 'b')
+    expect(next).toEqual({
+      catalog: [item('a'), item('c')],
+      round: { counts: { c: 1 } },
+      pins: ['c', 'a'],
+      showOrder: ['a', 'c'],
+    })
+  })
+
+  it('Undo puts it back where it was: Catalog place, pin position, Round count and Show order position', () => {
+    const { next, undo } = deleteWithUndo(before, 'b')
+    const later = { ...before, ...next }
+    expect({ ...later, ...undo(later) }).toEqual(before)
+  })
+
+  it('Undo keeps what changed in the meantime', () => {
+    const { next, undo } = deleteWithUndo(before, 'b')
+    const later = { ...before, ...next, round: add(next.round, 'a') }
+    expect({ ...later, ...undo(later) }.round.counts).toEqual({ a: 1, b: 2, c: 1 })
   })
 })

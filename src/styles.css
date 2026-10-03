@@ -717,6 +717,41 @@ button {
   align-items: stretch;
 }
 
+/* The row itself, on top of its delete button; swiping it left reveals the button (#54). */
+.item-row-content {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  background: var(--surface);
+  transition: transform 200ms var(--ease-out);
+}
+
+.item-row-content.swiping {
+  transition: none;
+}
+
+.item-row-delete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 72px;
+  border: 0;
+  display: grid;
+  place-items: center;
+  background: var(--danger);
+  color: var(--on-danger);
+}
+
+.item-row-delete .btn-icon {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2.5;
+}
+
 .item-row:last-child {
   border-bottom: 0;
 }
@@ -772,8 +807,11 @@ button {
 
 .item-row.dragging {
   z-index: 1;
-  background: var(--surface-2);
   box-shadow: 0 6px 16px rgb(0 0 0 / 0.25);
+}
+
+.item-row.dragging .item-row-content {
+  background: var(--surface-2);
 }
 
 .item-row.dragging .item-row-handle {
@@ -1138,6 +1176,7 @@ button {
     animation: none;
   }
   .pager-track,
+  .item-row-content,
   .item-rows.reordering .item-row {
     transition: none;
   }

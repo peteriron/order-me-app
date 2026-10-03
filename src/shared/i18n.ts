@@ -94,7 +94,8 @@ export interface Messages {
   save: string
   nameRequired: string
   emojiRequired: string
-  deleteItemConfirm: (name: string) => string
+  itemDeleted: (name: string) => string
+  deleteNamed: (name: string) => string
   settings: string
   /** Short tab labels where the full word doesn't fit a quarter of the screen. */
   historyTab: string
@@ -188,7 +189,8 @@ export const messages: Record<Locale, Messages> = {
     save: 'Save',
     nameRequired: 'Give the Item a name',
     emojiRequired: 'Pick an emoji',
-    deleteItemConfirm: (name) => `Delete “${name}”? History keeps it.`,
+    itemDeleted: (name) => `${name} deleted`,
+    deleteNamed: (name) => `Delete ${name}`,
     settings: 'Settings',
     historyTab: 'History',
     settingsTab: 'Settings',
@@ -281,7 +283,8 @@ export const messages: Record<Locale, Messages> = {
     save: 'Bewaren',
     nameRequired: 'Geef het item een naam',
     emojiRequired: 'Kies een emoji',
-    deleteItemConfirm: (name) => `“${name}” verwijderen? De geschiedenis blijft behouden.`,
+    itemDeleted: (name) => `${name} verwijderd`,
+    deleteNamed: (name) => `${name} verwijderen`,
     settings: 'Instellingen',
     historyTab: 'Historiek',
     settingsTab: 'Opties',

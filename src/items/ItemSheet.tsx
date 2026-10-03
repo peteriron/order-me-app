@@ -40,15 +40,12 @@ export function ItemSheet({ item, forRound, t, actions, overlays, onClose }: Ite
     else actions.createItem(draft, { addToRound: forRound })
     onClose()
   }
-  const confirmDelete = (item: Item) =>
-    overlays.confirm({
-      text: t.deleteItemConfirm(item.name),
-      confirmLabel: t.delete,
-      onConfirm: () => {
-        actions.removeFromCatalog(item.id)
-        onClose()
-      },
-    })
+  /** Deletes at once, no confirm: the toast's Undo puts it back where it was (#54). */
+  const remove = (item: Item) => {
+    const undo = actions.removeFromCatalog(item.id)
+    onClose()
+    overlays.notify(t.itemDeleted(item.name), { label: t.undo, run: undo })
+  }
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
@@ -141,7 +138,7 @@ export function ItemSheet({ item, forRound, t, actions, overlays, onClose }: Ite
 
         <div className="sheet-actions">
           {item && (
-            <button type="button" className="btn btn-danger-text" onClick={() => confirmDelete(item)}>
+            <button type="button" className="btn btn-danger-text" onClick={() => remove(item)}>
               {t.delete}
             </button>
           )}

@@ -92,7 +92,7 @@ test('renaming an Item keeps its count, and a new category moves its tile', asyn
   await expect(roundBar(page)).toContainText('2 items')
 })
 
-test('deleting an Item asks first, takes it out of the Round, and leaves history alone', async ({ page }) => {
+test('Delete in the Item sheet needs no confirm, takes it out of the Round, leaves history alone, and can be undone', async ({ page }) => {
   // Place a Round with Chips, then start composing another one with Chips in it.
   await tapTiles(page, 'Chips')
   await page.getByRole('region', { name: 'Round total' }).getByRole('button', { name: 'Show' }).tap()
@@ -103,31 +103,21 @@ test('deleting an Item asks first, takes it out of the Round, and leaves history
   await itemsPage(page).getByRole('button', { name: 'Edit Chips' }).tap()
   await sheet(page).getByRole('button', { name: 'Delete' }).tap()
 
-  const confirm = page.getByRole('alertdialog', { name: 'Delete “Chips”? History keeps it.' })
-  await confirm.getByRole('button', { name: 'Delete' }).tap()
-
-  await expect(confirm).toHaveCount(0)
+  await expect(page.getByRole('alertdialog')).toHaveCount(0)
   await expect(sheet(page)).toHaveCount(0)
   await expect(itemsPage(page).getByRole('button', { name: 'Edit Chips' })).toHaveCount(0)
   await expect(itemsPage(page)).toContainText('27 in your Catalog')
 
+  await goTo(page, 'History')
+  await expect(page.getByRole('region', { name: 'History' }).getByRole('article')).toContainText('1 Chips')
+
   await goTo(page, 'Round')
   await expect(page.getByRole('button', { name: /^Chips(,|$)/ })).toHaveCount(0)
   await expect(roundBar(page)).toContainText('1 item')
-
-  await goTo(page, 'History')
-  await expect(page.getByRole('region', { name: 'History' }).getByRole('article')).toContainText('1 Chips')
-})
-
-test('Cancel in the delete confirmation keeps the Item and the sheet', async ({ page }) => {
-  await goTo(page, 'Settings')
-  await itemsPage(page).getByRole('button', { name: 'Edit Chips' }).tap()
-  await sheet(page).getByRole('button', { name: 'Delete' }).tap()
-  await page.getByRole('alertdialog').getByRole('button', { name: 'Cancel' }).tap()
-
-  await expect(sheet(page)).toHaveAccessibleName('Edit Item')
-  await sheet(page).getByRole('button', { name: 'Cancel' }).tap()
-  await expect(itemsPage(page).getByRole('button', { name: 'Edit Chips' })).toBeVisible()
+  // Undo, still within the 5 seconds: Chips is back, with its count in the Round.
+  await page.getByRole('status').filter({ hasText: 'Chips deleted' }).getByRole('button', { name: 'Undo' }).tap()
+  await expect(page.getByRole('button', { name: 'Chips, 1 in round' })).toBeVisible()
+  await expect(roundBar(page)).toContainText('2 items')
 })
 
 test.describe('the + New tile on the Round page', () => {
