@@ -9,12 +9,13 @@ It's a web app you install on your home screen. It works offline, so bad bar Wi-
 ## What it does
 
 - **Tap to count.** Big tiles for every drink and snack; each tap adds one, and a small − takes one off. The Round is saved on every tap, so locking the phone or closing the app loses nothing.
-- **Show page.** One tap or swipe shows the whole Round in large type ("3 × 🍺 Duvel") with the total, and keeps the screen awake while you read it out. Counts can still be fixed there.
-- **Pass the Round on.** Whoever goes to the counter can take over your Round: they scan a QR code from your Show page and their app opens with the same drinks and counts, in your order. You can also copy the link, or send the Round as plain text to a chat.
+- **Show page.** One tap or swipe shows the whole Round in large type ("3 × 🍺 Duvel") with the total, and keeps the screen awake while you read it out. Counts can still be fixed there, and the bar at the bottom has **Clear**, the item count and **✓ Ordered**, like the Round page's.
+- **Pass the Round on.** Whoever goes to the counter can take over your Round: tap **QR** on the Show page, they scan it, and their app opens with the same drinks and counts, in your order. You can also copy the link, or tap **Text** to send the Round as plain text to a chat.
 - **History.** Placed Rounds are kept, grouped by day. "Order again" repeats last week's Round in one tap.
-- **Your own Items.** Add, rename or delete drinks and snacks, each with an emoji. It starts with a list of common Belgian bar drinks, shown in the app's language: switch to Dutch and "Still water" becomes "Water plat". Drinks you add or rename keep the name you typed.
+- **Your own Items.** Add, rename or delete drinks and snacks, each with an emoji; swipe a row left to delete it. It starts with a list of common Belgian bar drinks, shown in the app's language: switch to Dutch and "Still water" becomes "Water plat". Drinks you add or rename keep the name you typed.
 - **Order that suits you.** The drinks your group orders most move to the front over time, but never while you're tapping. Pin your favourites to keep them first, in the order you drag them into.
 - **Share your Items.** Show a QR code (or copy a link) and a friend opens the app with the same drinks and snacks.
+- **Undo for the quick actions.** Clearing the Round, deleting an Item, marking a Round as ordered and receiving a friend's Round all happen at once, with **Undo** for 5 seconds instead of an "Are you sure?".
 - **Settings.** Language (follows the phone, or pick Nederlands or English), theme (dark by default, light, or follow the phone), clear history, and reset the app to a fresh install.
 
 ## How to use it
@@ -54,7 +55,7 @@ Swipe sideways between the four pages, or tap their tabs at the bottom of the sc
 When someone else goes to the counter, hand them your Round:
 
 1. On the **Show** page, tap **QR**. The **Share Round** sheet opens.
-2. Your friend scans the QR code with their phone camera. Or tap **Copy link** and send it. To put "3× Cola … Total: 5" in a chat instead, tap **Text** on the Show page.
+2. Your friend scans the QR code with their phone camera. Or tap **Copy link** (it says **✓ Copied**) and send it. To put "3× Cola … Total: 5" in a chat instead, tap **Text** on the Show page.
 3. Their app opens on **Show** with the same drinks and counts:
    - Drinks they don't have yet are added to their Items.
    - Their own Round is replaced straight away. If that was a mistake, tap **Undo** in the "Round received" message within 5 seconds.
