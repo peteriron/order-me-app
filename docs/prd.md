@@ -32,6 +32,8 @@ A phone app, installed from the browser to the home screen, that works offline i
 14. As an Operator, I want a "+ New" tile at the end of the grid, so that I can add an Item a friend asks for that isn't in my Catalog without leaving the Round.
 15. As an Operator, I want an Item created from "+ New" to be added to the Catalog *and* to the Round with a count of 1, so that one action covers both.
 
+15a. As an Operator, I want to search the tiles on the Round page by typing part of a name, so that I find a drink quickly in a long list; the search stays while I tap, until I close it.
+
 ### Counter view
 
 16. As an Operator, I want a Counter view (the Show page, one swipe from the grid) that lists the Round as large "3 × 🍺 Duvel" lines, so that I can read it out or turn the phone to the bartender.
