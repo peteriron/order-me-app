@@ -46,7 +46,7 @@ A phone app, installed from the browser to the home screen, that works offline i
 23. As an Operator, I want an "Ordered" button in the Show page's bottom bar (next to Clear and the item count, like the Round page's bar), so that I place the Round when I'm done at the counter.
 24. As an Operator, I want to land back on an empty grid after marking a Round as ordered, so that I'm ready for the next Round.
 25. As an Operator, I want a 5-second "Round placed · Undo" toast after marking as ordered, so that I can recover if I tapped it too early.
-26. As an Operator, I want to get back to the grid from the Show page by swiping or with the footer, so that I can keep editing without placing. (Clearing the Round happens on the Round page.)
+26. As an Operator, I want to get back to the grid from the Show page by swiping or with the footer, so that I can keep editing without placing. (Clear is in the bottom bar of both the Round and the Show page.)
 26a. As an Operator, I want the Show page to say so when the Round is empty, with a way back to the grid, so that it's never a blank screen.
 26b. As an Operator, I want to note the table number and a remark on the Show page, so that the bartender (or a friend taking the Round over) knows where it goes and what's special; they're kept in History and sent with the text and QR shares.
 
