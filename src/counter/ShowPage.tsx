@@ -4,6 +4,7 @@ import { roundLines, totalOf, type ComposingRound } from '../round/round.ts'
 import type { Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
 import { RoundBar } from '../round/RoundBar.tsx'
+import { shareOrCopy, shareText } from './share.ts'
 import type { AppActions } from '../useAppState.ts'
 import { browserHost, keepScreenAwake } from './wakeLock.ts'
 
@@ -20,7 +21,7 @@ interface ShowPageProps {
   overlays: Overlays
   /** Slides to the Round page: from the empty state, and after Ordered. */
   onGoToRound: () => void
-  /** Opens the Share Round sheet. */
+  /** Opens the Share Round sheet (the QR button). */
   onShare: () => void
 }
 
@@ -63,6 +64,11 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
 
   /** Clear stays on Show, which then shows its empty state; Undo brings the Round back (#55). */
   const clear = () => overlays.notify(t.roundCleared, { label: t.undo, run: actions.clearRound() })
+  /** The Text button: the Round as plain text, straight to the phone's share sheet, or copied (#57). */
+  const shareAsText = async () => {
+    const outcome = await shareOrCopy(shareText(lines, t.total), navigator)
+    if (outcome === 'copied') overlays.notify(t.copied)
+  }
   const markOrdered = () => {
     const undo = onPlace(sections)
     onGoToRound()
@@ -104,12 +110,21 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
           {t.counterTitle}
         </h1>
         {total > 0 && (
-          <button type="button" className="btn btn-quiet" onClick={onShare}>
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
-              <path d="M12 15V3M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
-            </svg>
-            {t.share}
-          </button>
+          // Short labels to fit beside the title; the accessible names say what each shares, and contain the label.
+          <div className="show-share">
+            <button type="button" className="btn btn-quiet" aria-label={t.shareAsText} onClick={shareAsText}>
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+                <path d="M12 15V3M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
+              </svg>
+              {t.textShort}
+            </button>
+            <button type="button" className="btn btn-quiet" aria-label={t.shareAsQr} onClick={onShare}>
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+                <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2" />
+              </svg>
+              QR
+            </button>
+          </div>
         )}
       </header>
 

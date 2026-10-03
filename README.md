@@ -41,7 +41,7 @@ Swipe sideways between the four pages, or tap their tabs at the bottom of the sc
 **History** ← **Round** → **Show** → **Settings**
 
 - **History:** past Rounds by day. **Order again** puts a past Round back on the grid, and the bin icon deletes one.
-- **Show:** the Round in large type, to read out at the counter. Fix counts with − and +, **Share** it with a friend, and tap **✓ Ordered** in the bar at the bottom when it's done. The bar also has **Clear** and the item count, like on the Round page.
+- **Show:** the Round in large type, to read out at the counter. Fix counts with − and +, send it as **Text** or pass it on by **QR**, and tap **✓ Ordered** in the bar at the bottom when it's done. The bar also has **Clear** and the item count, like on the Round page.
 - **Settings:** first your **Items** (drinks and snacks), then the general settings.
   - Tap a row to edit that Item, or **Add Item** to create one.
   - Swipe a row to the left and tap the red **×** to delete it (or use **Delete** in its edit sheet). Deleted by mistake? Tap **Undo** in the message within 5 seconds.
@@ -53,8 +53,8 @@ Swipe sideways between the four pages, or tap their tabs at the bottom of the sc
 
 When someone else goes to the counter, hand them your Round:
 
-1. On the **Show** page, tap **Share**. The **Share Round** sheet opens.
-2. Your friend scans the QR code with their phone camera. Or tap **Copy link** and send it, or **Share as text** to put "3× Cola … Total: 5" in a chat.
+1. On the **Show** page, tap **QR**. The **Share Round** sheet opens.
+2. Your friend scans the QR code with their phone camera. Or tap **Copy link** and send it. To put "3× Cola … Total: 5" in a chat instead, tap **Text** on the Show page.
 3. Their app opens on **Show** with the same drinks and counts:
    - Drinks they don't have yet are added to their Items.
    - Their own Round is replaced straight away. If that was a mistake, tap **Undo** in the "Round received" message within 5 seconds.

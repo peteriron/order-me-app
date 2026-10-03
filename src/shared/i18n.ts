@@ -73,6 +73,8 @@ export interface Messages {
   shareRoundHint: string
   qrRoundAlt: (n: number) => string
   shareAsText: string
+  shareAsQr: string
+  textShort: string
   roundReceived: string
   qrAlt: (n: number) => string
   tooBigForQr: string
@@ -170,6 +172,8 @@ export const messages: Record<Locale, Messages> = {
     shareRoundHint: 'Scan to open the Round',
     qrRoundAlt: (n) => `QR code with your Round of ${n} ${n === 1 ? 'item' : 'items'}`,
     shareAsText: 'Share as text',
+    shareAsQr: 'Share as QR code',
+    textShort: 'Text',
     roundReceived: 'Round received',
     qrAlt: (n) => `QR code with your ${n} Items`,
     tooBigForQr: 'Too many Items for a QR code that scans reliably. Copy the link instead.',
@@ -265,6 +269,8 @@ export const messages: Record<Locale, Messages> = {
     shareRoundHint: 'Scan om het rondje te openen',
     qrRoundAlt: (n) => `QR-code met je rondje van ${n} ${n === 1 ? 'item' : 'items'}`,
     shareAsText: 'Delen als tekst',
+    shareAsQr: 'Delen als QR-code',
+    textShort: 'Tekst',
     roundReceived: 'Rondje ontvangen',
     qrAlt: (n) => `QR-code met je ${n} items`,
     tooBigForQr: 'Te veel items voor een QR-code die vlot scant. Kopieer de link.',
