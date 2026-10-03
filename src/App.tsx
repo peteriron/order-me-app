@@ -152,7 +152,7 @@ export function App() {
       {sharing && (
         <div inert={confirmation !== null}>
           {sharing === 'items' ? (
-            <ShareItemsSheet catalog={catalog} t={t} overlays={overlays} onClose={closeSharing} />
+            <ShareItemsSheet catalog={catalog} t={t} onClose={closeSharing} />
           ) : (
             <ShareRoundSheet lines={showLines} t={t} overlays={overlays} onClose={closeSharing} />
           )}

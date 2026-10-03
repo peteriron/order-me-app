@@ -1,7 +1,6 @@
-import { useEffect, useMemo, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { qrCode } from '../../items/qr.ts'
 import type { Messages } from '../i18n.ts'
-import type { Overlays } from './overlays.ts'
 
 interface QrSheetProps {
   title: string
@@ -11,22 +10,25 @@ interface QrSheetProps {
   link: string | null
   /** The QR code's description for screen readers. */
   alt: string
-  /** When set, a Save image button downloads the QR code as a PNG with this file name. */
-  imageName?: string
   /** More buttons after Copy link (e.g. Share as text). */
   children?: ReactNode
   t: Messages
-  overlays: Overlays
   onClose: () => void
 }
 
-/** Pixels per QR module in the saved image: crisp when printed or posted. */
-const IMAGE_SCALE = 12
+/** How long Copy link shows how copying went, before it reads "Copy link" again. */
+const FEEDBACK_MS = 2000
 const QR_COLOURS = { on: [0, 0, 0, 255], off: [255, 255, 255, 255], pad: 4 } as const
 
-/** Bottom sheet with a link as a QR code, plus Copy link and whatever else the caller adds. */
-export function QrSheet({ title, hint, link, alt, imageName, children, t, overlays, onClose }: QrSheetProps) {
+/**
+ * Bottom sheet with a link as a QR code, then full-width buttons: Copy link, whatever the caller adds, and Close.
+ * Copy link answers in its own label ("✓ Copied" or "Couldn't copy") for 2 seconds, where the thumb is (#56).
+ */
+export function QrSheet({ title, hint, link, alt, children, t, onClose }: QrSheetProps) {
   const code = useMemo(() => (link ? qrCode(link) : null), [link])
+  const [copied, setCopied] = useState<'copied' | 'failed' | null>(null)
+  const resetTimer = useRef<number>(undefined)
+  useEffect(() => () => window.clearTimeout(resetTimer.current), [])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
@@ -36,21 +38,18 @@ export function QrSheet({ title, hint, link, alt, imageName, children, t, overla
 
   const copyLink = async () => {
     if (!link) return
+    let outcome: 'copied' | 'failed' = 'copied'
     try {
       await navigator.clipboard.writeText(link)
-      overlays.notify(t.copied)
     } catch {
-      // No clipboard access (blocked or unsupported): nothing was copied, so say nothing.
+      // Blocked or unsupported: say so, rather than nothing.
+      outcome = 'failed'
     }
+    setCopied(outcome)
+    window.clearTimeout(resetTimer.current)
+    resetTimer.current = window.setTimeout(() => setCopied(null), FEEDBACK_MS)
   }
-
-  const saveImage = () => {
-    if (!code || !imageName) return
-    const a = document.createElement('a')
-    a.href = code.toDataURL({ ...QR_COLOURS, scale: IMAGE_SCALE, type: 'image/png' })
-    a.download = imageName
-    a.click()
-  }
+  const copyLabel = copied === 'copied' ? `✓ ${t.copiedShort}` : copied === 'failed' ? t.copyFailed : t.copyLink
 
   return (
     <div className="sheet-scrim" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -71,19 +70,18 @@ export function QrSheet({ title, hint, link, alt, imageName, children, t, overla
           ))}
 
         <div className="share-actions">
-          {imageName && (
-            <button type="button" className="btn btn-outline" disabled={!code} onClick={saveImage}>
-              {t.saveImage}
-            </button>
-          )}
           <button type="button" className="btn btn-outline" disabled={!link} onClick={copyLink}>
-            {t.copyLink}
+            {copyLabel}
           </button>
           {children}
+          <button type="button" className="btn btn-neutral" autoFocus onClick={onClose}>
+            {t.close}
+          </button>
         </div>
-        <button type="button" className="btn btn-quiet btn-block" autoFocus onClick={onClose}>
-          {t.done}
-        </button>
+        {/* A changing button label isn't announced on its own. */}
+        <p className="visually-hidden" aria-live="polite">
+          {copied === 'copied' ? t.copied : copied === 'failed' ? t.copyFailed : ''}
+        </p>
       </div>
     </div>
   )

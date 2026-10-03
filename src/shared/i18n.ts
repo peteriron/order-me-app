@@ -76,9 +76,10 @@ export interface Messages {
   roundReceived: string
   qrAlt: (n: number) => string
   tooBigForQr: string
-  saveImage: string
+  copiedShort: string
+  copyFailed: string
   copyLink: string
-  done: string
+  close: string
   replaceCatalogConfirm: (current: number, shared: number) => string
   replace: string
   badShareLink: string
@@ -172,9 +173,10 @@ export const messages: Record<Locale, Messages> = {
     roundReceived: 'Round received',
     qrAlt: (n) => `QR code with your ${n} Items`,
     tooBigForQr: 'Too many Items for a QR code that scans reliably. Copy the link instead.',
-    saveImage: 'Save image',
+    copiedShort: 'Copied',
+    copyFailed: 'Couldn’t copy',
     copyLink: 'Copy link',
-    done: 'Done',
+    close: 'Close',
     replaceCatalogConfirm: (current, shared) => `Replace your ${current} Items with the ${shared} shared Items? History is kept.`,
     replace: 'Replace',
     badShareLink: 'That share link couldn’t be read',
@@ -266,9 +268,10 @@ export const messages: Record<Locale, Messages> = {
     roundReceived: 'Rondje ontvangen',
     qrAlt: (n) => `QR-code met je ${n} items`,
     tooBigForQr: 'Te veel items voor een QR-code die vlot scant. Kopieer de link.',
-    saveImage: 'Afbeelding bewaren',
+    copiedShort: 'Gekopieerd',
+    copyFailed: 'Kopiëren mislukt',
     copyLink: 'Link kopiëren',
-    done: 'Klaar',
+    close: 'Sluiten',
     replaceCatalogConfirm: (current, shared) =>
       `Je ${current} items vervangen door de ${shared} gedeelde items? De geschiedenis blijft behouden.`,
     replace: 'Vervangen',
