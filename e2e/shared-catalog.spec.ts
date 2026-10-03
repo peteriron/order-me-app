@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs'
 import { expect, test, type Browser, type Page } from '@playwright/test'
 
 declare global {
@@ -31,7 +30,7 @@ async function copyShareLink(page: Page): Promise<string> {
   await goTo(page, 'Settings')
   await itemsPage(page).getByRole('button', { name: 'Share', exact: true }).tap()
   await shareSheet(page).getByRole('button', { name: 'Copy link' }).tap()
-  await shareSheet(page).getByRole('button', { name: 'Done' }).tap()
+  await shareSheet(page).getByRole('button', { name: 'Close' }).tap()
   return (await page.evaluate(() => window.copied)).at(-1)!
 }
 
@@ -53,21 +52,53 @@ test.beforeEach(async ({ page }) => {
   await page.goto('./')
 })
 
-test('the share sheet shows a QR code; Copy link copies the link and Save image downloads a PNG', async ({ page }) => {
+test('the share sheet: a QR code, Copy link that says it copied, and Close; no Save image', async ({ page }) => {
+  await page.clock.install()
+  await page.goto('./')
   await goTo(page, 'Settings')
   await itemsPage(page).getByRole('button', { name: 'Share', exact: true }).tap()
   await expect(shareSheet(page).getByRole('img', { name: 'QR code with your 28 Items' })).toBeVisible()
+  await expect(shareSheet(page).getByRole('button', { name: 'Save image' })).toHaveCount(0)
 
   await shareSheet(page).getByRole('button', { name: 'Copy link' }).tap()
-  await expect(page.getByRole('status').filter({ hasText: 'Copied to clipboard' })).toBeVisible()
+  // The button itself answers, for 2 seconds; no toast on top of it.
+  await expect(shareSheet(page).getByRole('button', { name: '✓ Copied' })).toBeVisible()
+  await expect(page.getByRole('status').filter({ hasText: 'Copied to clipboard' })).toHaveCount(0)
   const [link] = await page.evaluate(() => window.copied)
   expect(link).toMatch(/^http:\/\/localhost:\d+\/order-me-app\/#items=[\w-]+$/)
+  await page.clock.fastForward(2_100)
+  await expect(shareSheet(page).getByRole('button', { name: 'Copy link' })).toBeVisible()
 
-  const download = page.waitForEvent('download')
-  await shareSheet(page).getByRole('button', { name: 'Save image' }).tap()
-  expect((await download).suggestedFilename()).toBe('orderme-items.png')
-  const png = readFileSync((await (await download).path())!)
-  expect([...png.subarray(1, 4)].map((c) => String.fromCharCode(c)).join('')).toBe('PNG')
+  await shareSheet(page).getByRole('button', { name: 'Close' }).tap()
+  await expect(shareSheet(page)).toHaveCount(0)
+})
+
+test('Copy link says so when the phone blocks the clipboard', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: async () => Promise.reject(new DOMException('Denied', 'NotAllowedError')) },
+    })
+  })
+  await page.goto('./')
+  await goTo(page, 'Settings')
+  await itemsPage(page).getByRole('button', { name: 'Share', exact: true }).tap()
+  await shareSheet(page).getByRole('button', { name: 'Copy link' }).tap()
+  await expect(shareSheet(page).getByRole('button', { name: 'Couldn’t copy' })).toBeVisible()
+})
+
+test('a toast shows above an open sheet', async ({ page }) => {
+  await page.getByRole('button', { name: /^Duvel(,|$)/ }).tap()
+  await page.getByRole('region', { name: 'Round total' }).getByRole('button', { name: 'Clear' }).tap()
+  const toast = page.getByRole('status').filter({ hasText: 'Round cleared' })
+  await expect(toast).toBeVisible()
+  await goTo(page, 'Settings')
+  await itemsPage(page).getByRole('button', { name: 'Share', exact: true }).tap()
+  await expect(shareSheet(page)).toBeVisible()
+  // What's on top at the toast's centre is the toast, not the sheet or its backdrop.
+  const box = (await toast.boundingBox())!
+  const onTop = await page.evaluate(([x, y]) => !!document.elementFromPoint(x!, y!)?.closest('[role="status"]'), [box.x + box.width / 2, box.y + box.height / 2])
+  expect(onTop).toBe(true)
 })
 
 test('a phone opening the link for the first time starts with the shared Items, without asking', async ({ page, browser }) => {

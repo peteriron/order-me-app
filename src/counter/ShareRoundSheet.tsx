@@ -40,7 +40,6 @@ export function ShareRoundSheet({ lines, t, overlays, onClose }: ShareRoundSheet
       link={link}
       alt={t.qrRoundAlt(total)}
       t={t}
-      overlays={overlays}
       onClose={onClose}
     >
       <button type="button" className="btn btn-outline" onClick={shareAsText}>

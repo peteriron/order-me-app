@@ -39,7 +39,7 @@ async function copyRoundLink(page: Page): Promise<string> {
   await roundBar(page).getByRole('button', { name: 'Show' }).tap()
   await showPage(page).getByRole('button', { name: 'Share' }).tap()
   await shareRound(page).getByRole('button', { name: 'Copy link' }).tap()
-  await shareRound(page).getByRole('button', { name: 'Done' }).tap()
+  await shareRound(page).getByRole('button', { name: 'Close' }).tap()
   return (await page.evaluate(() => window.copied)).at(-1)!
 }
 
@@ -63,7 +63,7 @@ test('Share on the Show page opens Share Round: a QR code, Copy link and Share a
   await expect(shareRound(page).getByRole('button', { name: 'Save image' })).toHaveCount(0)
 
   await shareRound(page).getByRole('button', { name: 'Copy link' }).tap()
-  await expect(page.getByRole('status').filter({ hasText: 'Copied to clipboard' })).toBeVisible()
+  await expect(shareRound(page).getByRole('button', { name: '✓ Copied' })).toBeVisible()
   expect((await page.evaluate(() => window.copied))[0]).toMatch(/\/order-me-app\/#round=[\w-]+$/)
 })
 
