@@ -100,7 +100,7 @@ Same size as other tiles, with a dashed `--border` outline, a large "+" and the 
 ### Show page (Counter view)
 ```
 ┌────────────────────────────────────────┐
-│ Round for the counter           Share  │
+│ Round for the counter  ⇪ Text  ▦ QR    │
 │                                        │
 │  3 ×  🍺 Duvel                 [−][+]  │
 │  2 ×  🥤 Cola                  [−][+]  │
@@ -115,6 +115,7 @@ Same size as other tiles, with a dashed `--border` outline, a large "+" and the 
 ```
 - The third swipe page (ADR-0005), on `--bg`, titled "Round for the counter". The count column is accent-coloured with tabular numerals.
 - No Back: swipe or use the tab bar to go back.
+- Two quiet buttons on the title line (#57), only while the Round has something in it: **Text** (share icon) sends the plain-text Round straight to the phone's share sheet, or copies it with the "Copied to clipboard" toast; **QR** (QR icon) opens the Share Round sheet. Screen readers hear "Share as text" and "Share as QR code". The title may wrap to two lines beside them.
 - Lines follow the grid order, except on a phone that received a Shared Round: there the received **Show order** comes first (see CONTEXT.md). Nothing on screen marks it.
 - −/+ buttons are 44 px, `--surface-2`, and visually quieter than the line text, since the bartender is reading the text.
 - At the bottom, the Round page's bar (#55), sticky while a long Round scrolls: **Clear** (instant, with "Round cleared · Undo"; it stays on Show, which then shows its empty state), the item count, and **✓ Ordered** as the one accent-filled button. Ordered places the Round and slides back to Round with the "Round placed · Undo" toast.
@@ -153,11 +154,11 @@ A bottom sheet containing:
 Cancel discards all changes.
 
 ### Share sheets (Share Items, Share Round)
-Two bottom sheets, like the Item sheet, built the same way: **Share Items** from the Settings page's Share, **Share Round** from the Show page's Share. Each contains:
+Two bottom sheets, like the Item sheet, built the same way: **Share Items** from the Settings page's Share, **Share Round** from the Show page's QR button. Each contains:
 - The title: "Share Items" or "Share Round"
 - The QR code, up to 280 px square, black on white in both themes (cameras read dark-on-light best), with rounded corners and crisp, unsmoothed modules
 - A muted hint under it: "Scan to open the page" (Items) or "Scan to open the Round" (Round)
-- Full-width buttons, stacked (#56): **Copy link** (accent outline); on Share Round also **Share as text** (the plain-text Round through the phone's share sheet, or copied); then **Close** (solid `--surface-2` fill, `--text` label)
+- Full-width buttons, stacked (#56): **Copy link** (accent outline), then **Close** (solid `--surface-2` fill, `--text` label)
 
 Copy link copies the link and answers in its own label for 2 seconds: "✓ Copied", or "Couldn't copy" when the phone blocks the clipboard (also announced to screen readers); no toast. When the Catalog is too big for a QR code that scans reliably (beyond QR version 20), the code is replaced by "Too many Items for a QR code that scans reliably. Copy the link instead."
 
@@ -217,7 +218,7 @@ Short, friendly and practical, with no exclamation marks except in the empty sta
 | Share sheet hint | Scan to open the page | Scan om de pagina te openen |
 | Share sheet titles | Share Items / Share Round | Items delen / Rondje delen |
 | Share Round hint | Scan to open the Round | Scan om het rondje te openen |
-| Share as text | Share as text | Delen als tekst |
+| Show page share buttons (shown / screen readers) | Text, QR / Share as text, Share as QR code | Tekst, QR / Delen als tekst, Delen als QR-code |
 | Round received toast | Round received · Undo | Rondje ontvangen · Ongedaan maken |
 | QR too big | Too many Items for a QR code that scans reliably. Copy the link instead. | Te veel items voor een QR-code die vlot scant. Kopieer de link. |
 | Copy link / Close | Copy link / Close | Link kopiëren / Sluiten |

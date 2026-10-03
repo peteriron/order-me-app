@@ -37,7 +37,7 @@ async function addItem(page: Page, name: string) {
 /** The link from Share Round on the Show page. */
 async function copyRoundLink(page: Page): Promise<string> {
   await roundBar(page).getByRole('button', { name: 'Show' }).tap()
-  await showPage(page).getByRole('button', { name: 'Share' }).tap()
+  await showPage(page).getByRole('button', { name: 'Share as QR code' }).tap()
   await shareRound(page).getByRole('button', { name: 'Copy link' }).tap()
   await shareRound(page).getByRole('button', { name: 'Close' }).tap()
   return (await page.evaluate(() => window.copied)).at(-1)!
@@ -52,14 +52,15 @@ test.beforeEach(async ({ page }) => {
   await page.goto('./')
 })
 
-test('Share on the Show page opens Share Round: a QR code, Copy link and Share as text', async ({ page }) => {
+test('QR on the Show page opens Share Round: a QR code, Copy link and Close', async ({ page }) => {
   await tapTiles(page, 'Cola', 'Cola', 'Duvel')
   await roundBar(page).getByRole('button', { name: 'Show' }).tap()
-  await showPage(page).getByRole('button', { name: 'Share' }).tap()
+  await showPage(page).getByRole('button', { name: 'Share as QR code' }).tap()
 
   await expect(shareRound(page).getByRole('img', { name: 'QR code with your Round of 3 items' })).toBeVisible()
   await expect(shareRound(page)).toContainText('Scan to open the Round')
-  await expect(shareRound(page).getByRole('button', { name: 'Share as text' })).toBeVisible()
+  await expect(shareRound(page).getByRole('button', { name: 'Share as text' })).toHaveCount(0)
+  await expect(shareRound(page).getByRole('button', { name: 'Close' })).toBeVisible()
   await expect(shareRound(page).getByRole('button', { name: 'Save image' })).toHaveCount(0)
 
   await shareRound(page).getByRole('button', { name: 'Copy link' }).tap()

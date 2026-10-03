@@ -528,6 +528,12 @@ button {
   flex: 1;
 }
 
+/* Text and QR, side by side on the title line (#57). */
+.show-share {
+  display: flex;
+  gap: 0.25rem;
+}
+
 /* The Show page's bar (#55): the Round page's bar, edge to edge like there, sticky at the bottom. */
 .show-bar {
   position: sticky;

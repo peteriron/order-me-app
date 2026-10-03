@@ -46,7 +46,9 @@ test('Show is a swipe page between Round and Items, with the Round bar but no Ba
 
   await expect(showPage(page).getByRole('region', { name: 'Round total' })).toContainText('1 item')
   await expect(showPage(page).getByRole('button', { name: 'Back to Round' })).toHaveCount(0)
-  await expect(showPage(page).getByRole('button', { name: 'Share' })).toBeVisible()
+  // Two share buttons on the title line: Text and QR.
+  await expect(showPage(page).getByRole('button', { name: 'Share as text' })).toHaveText('Text')
+  await expect(showPage(page).getByRole('button', { name: 'Share as QR code' })).toHaveText('QR')
 
   await touchDrag(page, { x: 40, y: height / 2 }, { x: width - 40, y: height / 2 })
   await expectOnRoundPage(page)
@@ -57,7 +59,7 @@ test('with an empty Round the Show page says so and leads back to Round', async 
   await footerTab(page, 'Show').tap()
   await expect(showPage(page)).toContainText('Nothing in this Round yet. Tap drinks on the Round page.')
   await expect(showPage(page).getByRole('button', { name: 'Ordered' })).toHaveCount(0)
-  await expect(showPage(page).getByRole('button', { name: 'Share' })).toHaveCount(0)
+  await expect(showPage(page).getByRole('button', { name: /^Share/ })).toHaveCount(0)
 
   await showPage(page).getByRole('button', { name: 'Back to Round' }).tap()
   await expectOnRoundPage(page)

@@ -53,8 +53,8 @@ Swipe sideways between the four pages, or tap their tabs at the bottom of the sc
 
 When someone else goes to the counter, hand them your Round:
 
-1. On the **Show** page, tap **Share**. The **Share Round** sheet opens.
-2. Your friend scans the QR code with their phone camera. Or tap **Copy link** and send it, or **Share as text** to put "3× Cola … Total: 5" in a chat.
+1. On the **Show** page, tap **QR**. The **Share Round** sheet opens.
+2. Your friend scans the QR code with their phone camera. Or tap **Copy link** and send it. To put "3× Cola … Total: 5" in a chat instead, tap **Text** on the Show page.
 3. Their app opens on **Show** with the same drinks and counts:
    - Drinks they don't have yet are added to their Items.
    - Their own Round is replaced straight away. If that was a mistake, tap **Undo** in the "Round received" message within 5 seconds.
