@@ -9,9 +9,10 @@ It's a web app you install on your home screen. It works offline, so bad bar Wi-
 ## What it does
 
 - **Tap to count.** Big tiles for every drink and snack; each tap adds one, and a small − takes one off. The Round is saved on every tap, so locking the phone or closing the app loses nothing.
-- **Show page.** One tap or swipe shows the whole Round in large type ("3 × 🍺 Duvel") with the total, and keeps the screen awake while you read it out. Counts can still be fixed there, and Share sends the order as plain text to a chat.
+- **Show page.** One tap or swipe shows the whole Round in large type ("3 × 🍺 Duvel") with the total, and keeps the screen awake while you read it out. Counts can still be fixed there.
+- **Pass the Round on.** Whoever goes to the counter can take over your Round: they scan a QR code from your Show page and their app opens with the same drinks and counts, in your order. You can also copy the link, or send the Round as plain text to a chat.
 - **History.** Placed Rounds are kept, grouped by day. "Order again" repeats last week's Round in one tap.
-- **Your own Items.** Add, rename or delete drinks and snacks, each with an emoji. It starts with a list of common Belgian bar drinks.
+- **Your own Items.** Add, rename or delete drinks and snacks, each with an emoji. It starts with a list of common Belgian bar drinks, shown in the app's language: switch to Dutch and "Still water" becomes "Water plat". Drinks you add or rename keep the name you typed.
 - **Order that suits you.** The drinks your group orders most move to the front over time, but never while you're tapping. Pin your favourites to keep them first, in the order you drag them into.
 - **Share your Items.** Show a QR code (or copy a link) and a friend opens the app with the same drinks and snacks.
 - **Settings.** Language (follows the phone, or pick Nederlands or English), theme (dark by default, light, or follow the phone), clear history, and reset the app to a fresh install.
@@ -30,7 +31,7 @@ It's a web app you install on your home screen. It works offline, so bad bar Wi-
 
 1. The app opens on the **Round** page. As friends call out their order, tap the tiles: one tap is one drink. Tap − on a tile to take one off, or **Clear** to start over.
 2. Something missing? Tap **+ New** at the end of the grid to add it to your Items and to the Round in one go.
-3. At the counter, tap **Show**. Read the list out, or show the screen to the bartender. Fix counts with − and + if someone changes their mind, or tap **Share** to send the order to a chat.
+3. At the counter, tap **Show** (or swipe to it). Read the list out, or show the screen to the bartender. Fix counts with − and + if someone changes their mind.
 4. Tap **Mark as ordered** when it's done. The Round moves to History and you're back on an empty grid. Tapped it too early? **Undo** appears for 5 seconds.
 
 ### Move around
@@ -40,12 +41,27 @@ Swipe sideways between the four pages, or tap their tabs at the bottom of the sc
 **History** ← **Round** → **Show** → **Settings**
 
 - **History:** past Rounds by day. **Order again** puts a past Round back on the grid, and the bin icon deletes one.
-- **Show:** the Round in large type, to read out at the counter. Fix counts with − and +, **Share** it as text, and **Mark as ordered** when it's done.
+- **Show:** the Round in large type, to read out at the counter. Fix counts with − and +, **Share** it with a friend, and **Mark as ordered** when it's done.
 - **Settings:** first your **Items** (drinks and snacks), then the general settings.
   - Tap a row to edit or delete that Item, or **Add Item** to create one.
   - Tap the pin on a row to pin it. Pinned Items come first; drag them by their handle (⠿) to change the order.
-  - **Share** shows the QR code, with **Save image** and **Copy link**.
+  - **Share** shows your Items as a QR code, with **Save image** and **Copy link**.
   - **General**, at the bottom: language, theme, Clear history and Reset app.
+
+### Pass the Round to a friend
+
+When someone else goes to the counter, hand them your Round:
+
+1. On the **Show** page, tap **Share**. The **Share Round** sheet opens.
+2. Your friend scans the QR code with their phone camera. Or tap **Copy link** and send it, or **Share as text** to put "3× Cola … Total: 5" in a chat.
+3. Their app opens on **Show** with the same drinks and counts:
+   - Drinks they don't have yet are added to their Items.
+   - Their own Round is replaced straight away. If that was a mistake, tap **Undo** in the "Round received" message within 5 seconds.
+   - On a phone that has never used the app, they first get the starter drinks in their own language.
+
+It's a copy at that moment, not a live link: taps on either phone stay on that phone. Share again to send an update.
+
+Their phone also keeps your order: from then on, its Show page lists those drinks first in the order you had them, also for their next Rounds, so you both read the same list. The next Round they receive replaces that order, and **Reset app** clears it.
 
 ### Share your Items with a friend
 
@@ -53,9 +69,9 @@ Swipe sideways between the four pages, or tap their tabs at the bottom of the sc
 2. Your friend scans the QR code with their phone camera, or opens the link you copied to them.
 3. On a phone that has never used the app, it opens with your Items straight away. If they already have Items, they're asked whether to replace them. Their History is always kept.
 
-Only the Items travel: not your History, Round, pins or settings.
+Only the Items travel: not your History, Round, pins or settings. Starter drinks arrive in your friend's language.
 
-> **iPhone note:** a link or QR code always opens in Safari, and a home-screen app on iPhone keeps its data separate from Safari. So a friend who already installed the app on an iPhone gets your Items in Safari, not in their installed app. On Android, and for friends who don't have the app yet, it just works.
+> **iPhone note:** a link or QR code always opens in Safari, and a home-screen app on iPhone keeps its data separate from Safari. So a friend who already installed the app on an iPhone gets your Round or Items in Safari, not in their installed app. On Android, and for friends who don't have the app yet, it just works.
 
 ### Start fresh
 
