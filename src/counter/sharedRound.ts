@@ -3,6 +3,7 @@ import type { Pins } from '../items/pins.ts'
 import { fragmentLink, itemLine, pack, parseItemLine, unpack, type SharedItem } from '../items/sharedCatalog.ts'
 import { starterRow } from '../items/starter.ts'
 import type { ComposingRound, RoundLine } from '../round/round.ts'
+import type { ShowOrder } from './showOrder.ts'
 
 /**
  * A shared Round travels in the app's own link, after `#round=`, so it never reaches a server: a one-time hand-over
@@ -55,22 +56,25 @@ export function roundPayload(hash: string): string | null {
   return hash.startsWith(FRAGMENT) ? hash.slice(FRAGMENT.length) : null
 }
 
-type Receiving = { catalog: Catalog; round: ComposingRound; pins: Pins }
+type Receiving = { catalog: Catalog; round: ComposingRound; pins: Pins; showOrder: ShowOrder }
 
 /**
  * Takes in a shared Round: each line is matched to one of the receiver's Items (a starter Item by its mark, any Item
  * by name and category, ignoring case, in either language for starter Items), drinks the receiver doesn't have are
- * added to their Catalog, unpinned, and the shared Round replaces theirs. Nothing of theirs is removed or renamed;
- * History and pins aren't touched. `undo` brings back their Round and removes the added Items.
+ * added to their Catalog, unpinned, and the shared Round replaces theirs. The sender's line order becomes their Show
+ * order (#49). Nothing of theirs is removed or renamed; History and pins aren't touched. `undo` brings back their
+ * Round and Show order and removes the added Items.
  */
 export function receiveRound(
   state: Receiving,
   lines: SharedLine[],
   newId: () => string,
-): { next: Pick<Receiving, 'catalog' | 'round'>; undo: (current: Receiving) => Partial<Receiving> } {
+): { next: Pick<Receiving, 'catalog' | 'round' | 'showOrder'>; undo: (current: Receiving) => Partial<Receiving> } {
   const catalog = [...state.catalog]
   const added = new Set<string>()
   const counts: Record<string, number> = {}
+  /** The sender's line order, once per Item. */
+  const order: string[] = []
   for (const { item, count } of lines) {
     let match = findMatch(catalog, item)
     if (!match) {
@@ -78,13 +82,14 @@ export function receiveRound(
       catalog.push(match)
       added.add(match.id)
     }
+    if (!(match.id in counts)) order.push(match.id)
     counts[match.id] = (counts[match.id] ?? 0) + count
   }
-  const previous = state.round
+  const previous = { round: state.round, showOrder: state.showOrder }
   return {
-    next: { catalog, round: { counts } },
+    next: { catalog, round: { counts }, showOrder: order },
     undo: (current) => ({
-      round: previous,
+      ...previous,
       catalog: current.catalog.filter((i) => !added.has(i.id)),
       pins: current.pins.filter((id) => !added.has(id)),
     }),

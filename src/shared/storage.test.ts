@@ -124,6 +124,22 @@ describe('app state storage', () => {
     expect(loadAppState(store, { locale: 'en', newId: ids() }).pins).toEqual(['id-3', 'id-1'])
   })
 
+  it('remembers the Show order after a restart, and starts without one', () => {
+    const store = memoryStore()
+    const first = loadAppState(store, { locale: 'en', newId: ids() })
+    expect(first.showOrder).toEqual([])
+    saveAppState(store, { ...first, showOrder: ['id-2', 'id-1'] })
+    expect(loadAppState(store, { locale: 'en', newId: ids() }).showOrder).toEqual(['id-2', 'id-1'])
+  })
+
+  it('upgrades a save from before the Show order existed: no Show order', () => {
+    const store = memoryStore()
+    const catalog = [{ id: 'k', name: 'Kriek', category: 'drink', emoji: '🍒' }]
+    const settings = { language: 'en', theme: 'dark' }
+    store.setItem('order-me', JSON.stringify({ version: 5, catalog, round: { counts: {} }, history: [], settings, pins: [] }))
+    expect(loadAppState(store, { locale: 'en', newId: ids() })).toEqual({ catalog, round: { counts: {} }, history: [], settings, pins: [], showOrder: [] })
+  })
+
   it('upgrades a save from before starter Items were marked: recognises them, keeps everything else', () => {
     const store = memoryStore()
     const catalog = [
@@ -154,7 +170,7 @@ describe('app state storage', () => {
     store.setItem('order-me', JSON.stringify({ version: 3, catalog, round: { counts: { d: 1 } }, history, settings }))
 
     const state = loadAppState(store, { locale: 'en', newId: ids() })
-    expect(state).toEqual({ catalog: [{ ...catalog[0], starter: 'duvel' }], round: { counts: { d: 1 } }, history, settings, pins: [] })
+    expect(state).toEqual({ catalog: [{ ...catalog[0], starter: 'duvel' }], round: { counts: { d: 1 } }, history, settings, pins: [], showOrder: [] })
   })
 
   it('upgrades a save from before settings existed, keeping history', () => {
