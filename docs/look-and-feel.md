@@ -58,6 +58,11 @@ All sizes are in `rem` so OS text scaling works. The grid tolerates names wrappi
 
 ## Components
 
+### Search (Round page)
+- A quiet search icon (magnifier, 44 px) sits on the right of the Round page's title line. Tapping it puts a search field in the title's place (the heading stays for screen readers), with the keyboard open and a × on its right.
+- Typing filters the tiles live: Items whose shown name contains the text, ignoring case, accents and surrounding spaces, in grid order. A section with no matches is hidden; "+ New" stays at the end. With no match at all: the muted line "No drinks or snacks match "{text}"".
+- Tapping a tile counts it as usual and keeps the search. The × (or Escape) closes the field and shows the whole grid again; Enter just puts the keyboard away.
+
 ### Tile
 ```
 ┌───────────────────┐
@@ -190,6 +195,8 @@ Short, friendly and practical, with no exclamation marks except in the empty sta
 | App name (home screen, manifest) | OrderMe | OrderMe |
 | Heading and page title | This round is on me | Dit rondje is van mij |
 | Empty Round hint | Tap a drink to start | Tik op een drankje om te starten |
+| Search (icon and field) / placeholder / close | Search / Search drinks and snacks / Close search | Zoeken / Zoek drankjes en snacks / Zoeken sluiten |
+| Search, no match | No drinks or snacks match “{text}” | Geen drankjes of snacks gevonden voor “{text}” |
 | Show page, empty Round | Nothing in this Round yet. Tap drinks on the Round page. | Nog niets in dit rondje. Tik drankjes aan op de pagina Rondje. |
 | Show | Show | Toon |
 | Clear | Clear | Wissen |

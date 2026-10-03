@@ -30,6 +30,10 @@ export interface Messages {
   roundTotal: string
   itemsCount: (n: number) => string
   emptyHint: string
+  search: string
+  searchPlaceholder: string
+  closeSearch: string
+  noMatch: (query: string) => string
   clear: string
   show: string
   counterTitle: string
@@ -128,6 +132,10 @@ export const messages: Record<Locale, Messages> = {
     roundTotal: 'Round total',
     itemsCount: (n) => `${n} ${n === 1 ? 'item' : 'items'}`,
     emptyHint: 'Tap a drink to start',
+    search: 'Search',
+    searchPlaceholder: 'Search drinks and snacks',
+    closeSearch: 'Close search',
+    noMatch: (query) => `No drinks or snacks match “${query}”`,
     clear: 'Clear',
     show: 'Show',
     counterTitle: 'Round for the counter',
@@ -225,6 +233,10 @@ export const messages: Record<Locale, Messages> = {
     roundTotal: 'Totaal van het rondje',
     itemsCount: (n) => `${n} ${n === 1 ? 'item' : 'items'}`,
     emptyHint: 'Tik op een drankje om te starten',
+    search: 'Zoeken',
+    searchPlaceholder: 'Zoek drankjes en snacks',
+    closeSearch: 'Zoeken sluiten',
+    noMatch: (query) => `Geen drankjes of snacks gevonden voor “${query}”`,
     clear: 'Wissen',
     show: 'Toon',
     counterTitle: 'Rondje voor de toog',
