@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ShareRoundSheet } from './counter/ShareRoundSheet.tsx'
 import { ShowPage } from './counter/ShowPage.tsx'
 import { HistoryPage } from './history/HistoryPage.tsx'
 import { ItemSheet } from './items/ItemSheet.tsx'
 import { ItemsPage } from './items/ItemsPage.tsx'
-import { ShareSheet } from './items/ShareSheet.tsx'
+import { ShareItemsSheet } from './items/ShareItemsSheet.tsx'
 import { catalogSections, type Item } from './items/catalog.ts'
 import { localizeCatalog } from './items/starter.ts'
-import { useSharedLink } from './items/useSharedLink.ts'
 import { RoundPage } from './round/RoundPage.tsx'
 import { useTileOrder } from './round/useTileOrder.ts'
 import { SettingsSection } from './settings/SettingsSection.tsx'
@@ -18,7 +18,9 @@ import { TAB_ICONS } from './shared/ui/tabIcons.tsx'
 import { Pager } from './shared/ui/Pager.tsx'
 import { Toast, type ToastMessage } from './shared/ui/Toast.tsx'
 import type { Overlays } from './shared/ui/overlays.ts'
+import { roundLines } from './round/round.ts'
 import { useAppState } from './useAppState.ts'
+import { useSharedLinks } from './useSharedLinks.ts'
 
 const ROUND_PAGE = 1
 const SHOW_PAGE = 2
@@ -32,18 +34,28 @@ export function App() {
   /** The Catalog as shown: starter Items named in the app's language. Everything on screen, placed or shared uses it. */
   const catalog = useMemo(() => localizeCatalog(state.catalog, locale), [state.catalog, locale])
   const sections = useTileOrder(catalog, state.pins, state.history, placements)
+  /** The Round as the Show tab lists it: what Share Round sends. */
+  const showLines = useMemo(() => roundLines(state.round, sections), [state.round, sections])
 
   const [page, setPage] = useState(ROUND_PAGE)
   /** The Item sheet: `{}` to add a new Item, `{ item }` to edit one, `{ forRound }` from the + New tile. */
   const [sheet, setSheet] = useState<{ item?: Item; forRound?: boolean } | null>(null)
-  const [sharing, setSharing] = useState(false)
+  /** Which share sheet is open: the Catalog (Settings page) or the Round (Show page). */
+  const [sharing, setSharing] = useState<'items' | 'round' | null>(null)
   const [toast, setToast] = useState<ToastMessage | null>(null)
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null)
   const overlays = useMemo<Overlays>(
     () => ({ confirm: setConfirmation, notify: (text, action) => setToast({ id: Date.now(), text, action }) }),
     [],
   )
-  useSharedLink({ firstLaunch, catalogSize: catalog.length, t, actions, overlays })
+  useSharedLinks({
+    firstLaunch,
+    catalogSize: catalog.length,
+    t,
+    actions,
+    overlays,
+    onRoundReceived: () => setPage(SHOW_PAGE),
+  })
 
   useEffect(() => {
     document.documentElement.lang = locale
@@ -51,7 +63,7 @@ export function App() {
   }, [locale, t])
 
   const closeSheet = useCallback(() => setSheet(null), [])
-  const closeSharing = useCallback(() => setSharing(false), [])
+  const closeSharing = useCallback(() => setSharing(null), [])
   const closeToast = useCallback(() => setToast(null), [])
   const closeConfirmation = useCallback(() => setConfirmation(null), [])
 
@@ -85,6 +97,7 @@ export function App() {
       onPlace={placeRound}
       overlays={overlays}
       onGoToRound={() => setPage(ROUND_PAGE)}
+      onShare={() => setSharing('round')}
     />,
     <ItemsPage
       key="items"
@@ -94,7 +107,7 @@ export function App() {
       t={t}
       actions={actions}
       onAdd={() => setSheet({})}
-      onShare={() => setSharing(true)}
+      onShare={() => setSharing('items')}
       onEdit={(item) => setSheet({ item })}
     >
       <SettingsSection
@@ -109,7 +122,7 @@ export function App() {
 
   return (
     <>
-      <div className="shell" inert={sheet !== null || sharing || confirmation !== null}>
+      <div className="shell" inert={sheet !== null || sharing !== null || confirmation !== null}>
         <Pager pages={pages} page={page} onPageChange={setPage} />
         <TabBar
           tabs={[
@@ -133,7 +146,11 @@ export function App() {
 
       {sharing && (
         <div inert={confirmation !== null}>
-          <ShareSheet catalog={catalog} t={t} overlays={overlays} onClose={closeSharing} />
+          {sharing === 'items' ? (
+            <ShareItemsSheet catalog={catalog} t={t} overlays={overlays} onClose={closeSharing} />
+          ) : (
+            <ShareRoundSheet lines={showLines} t={t} overlays={overlays} onClose={closeSharing} />
+          )}
         </div>
       )}
 

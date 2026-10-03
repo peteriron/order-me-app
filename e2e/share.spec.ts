@@ -54,22 +54,24 @@ async function composeAndShow(page: Page) {
   await expect(showPage(page).getByRole('listitem').first()).toBeInViewport()
 }
 
-test('Share sends the Round as plain text through the share sheet', async ({ page }) => {
+test('Share as text sends the Round as plain text through the share sheet', async ({ page }) => {
   await fakePhone(page, 'ok')
   await page.goto('./')
   await composeAndShow(page)
   await showPage(page).getByRole('button', { name: 'Share' }).tap()
+  await page.getByRole('dialog', { name: 'Share Round' }).getByRole('button', { name: 'Share as text' }).tap()
 
   await expect.poll(() => page.evaluate(() => window.shared)).toEqual(['1× Cola\n2× Duvel\n1× Chips\nTotal: 4'])
   expect(await page.evaluate(() => window.copied)).toEqual([])
   await expect(page.getByRole('status')).toHaveCount(0)
 })
 
-test('without a share sheet, Share copies the text and says so', async ({ page }) => {
+test('without a share sheet, Share as text copies the text and says so', async ({ page }) => {
   await fakePhone(page, 'none')
   await page.goto('./')
   await composeAndShow(page)
   await showPage(page).getByRole('button', { name: 'Share' }).tap()
+  await page.getByRole('dialog', { name: 'Share Round' }).getByRole('button', { name: 'Share as text' }).tap()
 
   await expect(page.getByRole('status')).toHaveText('Copied to clipboard')
   expect(await page.evaluate(() => window.copied)).toEqual(['1× Cola\n2× Duvel\n1× Chips\nTotal: 4'])

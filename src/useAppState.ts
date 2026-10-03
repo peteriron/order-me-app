@@ -3,6 +3,7 @@ import { deletePlacedRound, markOrdered } from './history/history.ts'
 import { addToCatalog, deleteItem, editItem, type ItemDraft, type Sections } from './items/catalog.ts'
 import { movePin, pinsAfterEdit, togglePin } from './items/pins.ts'
 import { replaceCatalog, type SharedItem } from './items/sharedCatalog.ts'
+import { receiveRound, type SharedLine } from './counter/sharedRound.ts'
 import { add, emptyRound, remove, type ComposingRound } from './round/round.ts'
 import type { ThemeSetting } from './settings/settings.ts'
 import type { LanguageSetting, Locale } from './shared/i18n.ts'
@@ -73,6 +74,20 @@ export function useAppState(seedLocale: Locale) {
       /** Moves a pinned Item to position `to` among its section's pinned Items. */
       movePin: (itemId: string, to: number) => update((s) => ({ pins: movePin(s.pins, s.catalog, itemId, to) })),
       clearHistory: () => update(() => ({ history: [] })),
+      /**
+       * Takes in a shared Round (see receiveRound): replaces the Round, adding missing Items. Returns its Undo, which
+       * brings back the previous Round and removes the added Items.
+       */
+      receiveRound: (lines: SharedLine[]) => {
+        let undo: ((s: AppState) => Partial<AppState>) | undefined
+        update((s) => {
+          const received = receiveRound(s, lines, () => crypto.randomUUID())
+          undo = received.undo
+          return received.next
+        })
+        // The updater has run by the time anyone can tap Undo (the toast appears after the next render).
+        return () => update((s) => undo?.(s) ?? {})
+      },
       /** Replaces the Catalog with a Shared Catalog: fresh ids, empty Round, no pins, History kept. */
       replaceCatalog: (items: SharedItem[]) => {
         update(() => replaceCatalog(items, () => crypto.randomUUID()))
