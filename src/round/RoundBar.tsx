@@ -1,15 +1,19 @@
+import type { ReactNode } from 'react'
 import type { Messages } from '../shared/i18n.ts'
 
 interface RoundBarProps {
   total: number
   t: Messages
   onClear: () => void
-  /** Slides to the Show page. */
-  onShow: () => void
+  /** The bar's one amber button, on the right: Show (Round page) or Ordered (Show page). */
+  children: ReactNode
 }
 
-/** Sticky footer of the Round page: the running total plus Clear and Show. */
-export function RoundBar({ total, t, onClear, onShow }: RoundBarProps) {
+/**
+ * Sticky footer of the Round and Show pages: Clear, the running total, and the page's main action. With an empty
+ * Round it collapses to the hint "Tap a drink to start".
+ */
+export function RoundBar({ total, t, onClear, children }: RoundBarProps) {
   return (
     <section className="round-bar" aria-label={t.roundTotal}>
       {total > 0 && (
@@ -20,14 +24,8 @@ export function RoundBar({ total, t, onClear, onShow }: RoundBarProps) {
       <p className="round-bar-status" aria-live="polite">
         {total > 0 ? t.itemsCount(total) : t.emptyHint}
       </p>
-      {total > 0 && (
-        <button type="button" className="btn btn-primary" onClick={onShow}>
-          {t.show}
-          <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
-            <path d="M5 12h14M13 6l6 6-6 6" />
-          </svg>
-        </button>
-      )}
+      {total > 0 && children}
     </section>
   )
 }
+

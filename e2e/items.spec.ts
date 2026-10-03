@@ -96,7 +96,7 @@ test('Delete in the Item sheet needs no confirm, takes it out of the Round, leav
   // Place a Round with Chips, then start composing another one with Chips in it.
   await tapTiles(page, 'Chips')
   await page.getByRole('region', { name: 'Round total' }).getByRole('button', { name: 'Show' }).tap()
-  await page.getByRole('button', { name: 'Mark as ordered' }).tap()
+  await page.getByRole('button', { name: 'Ordered' }).tap()
   await tapTiles(page, 'Chips', 'Cola')
 
   await goTo(page, 'Settings')

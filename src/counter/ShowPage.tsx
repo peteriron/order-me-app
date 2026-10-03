@@ -3,6 +3,7 @@ import type { Sections } from '../items/catalog.ts'
 import { roundLines, totalOf, type ComposingRound } from '../round/round.ts'
 import type { Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
+import { RoundBar } from '../round/RoundBar.tsx'
 import type { AppActions } from '../useAppState.ts'
 import { browserHost, keepScreenAwake } from './wakeLock.ts'
 
@@ -13,11 +14,11 @@ interface ShowPageProps {
   /** True while this is the page on screen: the screen is kept awake only then. */
   active: boolean
   t: Messages
-  actions: Pick<AppActions, 'addToRound' | 'removeFromRound'>
+  actions: Pick<AppActions, 'addToRound' | 'removeFromRound' | 'clearRound'>
   /** Places the Round and returns its Undo (see useAppState). */
   onPlace: (sections: Sections) => () => void
   overlays: Overlays
-  /** Slides to the Round page: from the empty state, and after Mark as ordered. */
+  /** Slides to the Round page: from the empty state, and after Ordered. */
   onGoToRound: () => void
   /** Opens the Share Round sheet. */
   onShare: () => void
@@ -60,6 +61,8 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
   // The screen stays on while the bartender reads it, and may sleep once the Operator swipes away.
   useEffect(() => (active ? keepScreenAwake(browserHost()) : undefined), [active])
 
+  /** Clear stays on Show, which then shows its empty state; Undo brings the Round back (#55). */
+  const clear = () => overlays.notify(t.roundCleared, { label: t.undo, run: actions.clearRound() })
   const markOrdered = () => {
     const undo = onPlace(sections)
     onGoToRound()
@@ -136,13 +139,16 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
             </p>
           </div>
 
+          {/* The same bar as the Round page's (#55); none while the Round is empty. */}
           <div className="show-bar">
-            <button type="button" className="btn btn-primary btn-big btn-block" onClick={markOrdered}>
-              <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
-                <path d="M5 12l5 5 9-10" />
-              </svg>
-              {t.markOrdered}
-            </button>
+            <RoundBar total={total} t={t} onClear={clear}>
+              <button type="button" className="btn btn-primary" onClick={markOrdered}>
+                <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+                  <path d="M5 12l5 5 9-10" />
+                </svg>
+                {t.markOrdered}
+              </button>
+            </RoundBar>
           </div>
         </>
       )}

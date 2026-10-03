@@ -48,7 +48,7 @@ test('the − corner removes one, and disappears with the badge at zero', async 
   await expect(minus).toHaveCount(0)
 })
 
-test('the bottom bar shows the total, and Clear empties the Round for good', async ({ page }) => {
+test('the bottom bar shows the total, and Clear empties the Round, which stays empty after a reload', async ({ page }) => {
   await page.goto('./')
   const bar = page.getByRole('region', { name: 'Round total' })
   await expect(bar).toContainText('Tap a drink to start')
@@ -68,9 +68,14 @@ test('the bottom bar shows the total, and Clear empties the Round for good', asy
   await expect(page.getByRole('region', { name: 'Round total' })).toContainText('Tap a drink to start')
 })
 
-test('the bottom bar belongs to the Round page only', async ({ page }) => {
+test('the bottom bar is on the Round and Show pages only', async ({ page }) => {
   await page.goto('./')
   await page.getByRole('button', { name: /^Duvel(,|$)/ }).tap()
-  await page.getByRole('navigation', { name: 'Pages' }).getByRole('button', { name: 'History' }).tap()
-  await expect(page.getByText('1 item', { exact: true })).not.toBeInViewport()
+  const bar = page.getByRole('region', { name: 'Round total' })
+  const footer = page.getByRole('navigation', { name: 'Pages' })
+  // Off-screen pages are hidden from assistive tech, so only the current page's bar counts.
+  for (const [tab, bars] of [['Show', 1], ['History', 0], ['Settings', 0], ['Round', 1]] as const) {
+    await footer.getByRole('button', { name: tab }).tap()
+    await expect(bar).toHaveCount(bars)
+  }
 })

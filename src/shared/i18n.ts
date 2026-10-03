@@ -41,6 +41,7 @@ export interface Messages {
   copied: string
   markOrdered: string
   roundPlaced: string
+  roundCleared: string
   undo: string
   history: string
   round: string
@@ -133,8 +134,9 @@ export const messages: Record<Locale, Messages> = {
     total: 'Total',
     share: 'Share',
     copied: 'Copied to clipboard',
-    markOrdered: 'Mark as ordered',
+    markOrdered: 'Ordered',
     roundPlaced: 'Round placed',
+    roundCleared: 'Round cleared',
     undo: 'Undo',
     history: 'History',
     round: 'Round',
@@ -228,6 +230,7 @@ export const messages: Record<Locale, Messages> = {
     copied: 'Gekopieerd',
     markOrdered: 'Besteld',
     roundPlaced: 'Rondje geplaatst',
+    roundCleared: 'Rondje gewist',
     undo: 'Ongedaan maken',
     history: 'Geschiedenis',
     round: 'Rondje',

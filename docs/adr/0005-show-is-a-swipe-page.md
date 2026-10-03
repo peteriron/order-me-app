@@ -9,3 +9,5 @@ Consequences:
 - The page keeps only what belongs at the counter: −/+ per line, Share and "Mark as ordered". "Back to Round" (swiping and the footer do that) and Clear (a composing decision, with no undo, kept off the bartender's screen) are gone; Clear lives on the Round page only.
 - "Mark as ordered" slides back to Round, with the Undo toast, as before.
 - The footer stays visible on Show. It's small and muted, so it doesn't distract the bartender.
+
+_Update (#55): the Show page now has the Round page's bottom bar, "Clear · x items · ✓ Ordered". Clear is back on Show: Clear now has a 5-second Undo on both pages, which removes the risk that kept it off the bartender's screen. "Mark as ordered" became "Ordered" in that bar._

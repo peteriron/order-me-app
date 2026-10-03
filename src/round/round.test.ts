@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { catalogSections, type Item } from '../items/catalog.ts'
-import { add, countOf, emptyRound, remove, roundLines, totalOf } from './round.ts'
+import { add, clearWithUndo, countOf, emptyRound, remove, roundLines, totalOf } from './round.ts'
 
 describe('composing Round', () => {
   it('starts empty', () => {
@@ -60,5 +60,14 @@ describe('Round lines for the Counter view', () => {
   it('leaves out Items that are not in the Round', () => {
     const round = add(emptyRound(), 'duvel')
     expect(roundLines(round, sections).map((l) => l.item.name)).toEqual(['Duvel'])
+  })
+})
+
+describe('Clear, with Undo', () => {
+  it('empties the Round, and Undo brings back exactly what it held', () => {
+    const round = add(add(add(emptyRound(), 'duvel'), 'duvel'), 'cola')
+    const { next, undo } = clearWithUndo(round)
+    expect(totalOf(next)).toBe(0)
+    expect(undo()).toEqual(round)
   })
 })

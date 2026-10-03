@@ -83,7 +83,8 @@ Same size as other tiles, with a dashed `--border` outline, a large "+" and the 
 ```
 - Sticky above the tab bar, 64 px tall, `--surface-2`, respects `safe-area-inset-bottom`.
 - Show is the only accent-filled button on the page. When the Round is empty, the bar collapses to the hint text "Tap a drink to start" with no buttons.
-- Clear is a quiet text button and acts instantly (see PRD).
+- Clear is a quiet text button. It acts instantly, with a 5-second "Round cleared · Undo" toast (#55).
+- The Show page has the same bar, with "✓ Ordered" in place of Show (see below).
 
 ### Tab bar
 ```
@@ -108,17 +109,16 @@ Same size as other tiles, with a dashed `--border` outline, a large "+" and the 
 │  2 ×  🥔 Chips                 [−][+]  │
 │                                        │
 │  Total                              8  │
-│ ┌────────────────────────────────────┐ │
-│ │          ✓  Mark as ordered        │ │
-│ └────────────────────────────────────┘ │
+├────────────────────────────────────────┤
+│  Clear        8 items      [ ✓ Ordered]│
 └────────────────────────────────────────┘
 ```
 - The third swipe page (ADR-0005), on `--bg`, titled "Round for the counter". The count column is accent-coloured with tabular numerals.
-- No Back or Clear: swipe or use the footer to go back; Clear lives on the Round page.
+- No Back: swipe or use the tab bar to go back.
 - Lines follow the grid order, except on a phone that received a Shared Round: there the received **Show order** comes first (see CONTEXT.md). Nothing on screen marks it.
 - −/+ buttons are 44 px, `--surface-2`, and visually quieter than the line text, since the bartender is reading the text.
-- "Mark as ordered" is full width, 56 px, accent fill, and stays at the bottom of the page (sticky) while a long Round scrolls. It slides back to Round with the Undo toast.
-- Empty Round: the muted text "Nothing in this Round yet. Tap drinks on the Round page." with an outline "Back to Round" button, centred; no Share or Mark as ordered.
+- At the bottom, the Round page's bar (#55), sticky while a long Round scrolls: **Clear** (instant, with "Round cleared · Undo"; it stays on Show, which then shows its empty state), the item count, and **✓ Ordered** as the one accent-filled button. Ordered places the Round and slides back to Round with the "Round placed · Undo" toast.
+- Empty Round: the muted text "Nothing in this Round yet. Tap drinks on the Round page." with an outline "Back to Round" button, centred; no Share and no bar.
 - Wake lock is active while Show is the page on screen. There's no visible indicator unless it fails, and then nothing is shown either (silent fallback).
 
 ### History card
@@ -191,7 +191,8 @@ Short, friendly and practical, with no exclamation marks except in the empty sta
 | Show | Show | Toon |
 | Clear | Clear | Wissen |
 | Items count | {n} items | {n} items |
-| Mark as ordered | Mark as ordered | Besteld |
+| Ordered (Show bar) | ✓ Ordered | ✓ Besteld |
+| Round cleared toast | Round cleared · Undo | Rondje gewist · Ongedaan maken |
 | Round placed toast | Round placed | Rondje geplaatst |
 | Undo | Undo | Ongedaan maken |
 | Share | Share | Delen |

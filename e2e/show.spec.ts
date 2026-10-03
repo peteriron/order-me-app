@@ -36,7 +36,7 @@ test('Show slides to the Show page: drinks then snacks in grid order, with the t
   await expect(showPage(page).getByTestId('counter-total')).toHaveText('4')
 })
 
-test('Show is a swipe page between Round and Items, with no Clear or Back to Round', async ({ page }) => {
+test('Show is a swipe page between Round and Items, with the Round bar but no Back to Round', async ({ page }) => {
   await tapTiles(page, 'Duvel')
   const { width, height } = page.viewportSize()!
   await touchDrag(page, { x: width - 40, y: height / 2 }, { x: 40, y: height / 2 })
@@ -44,7 +44,7 @@ test('Show is a swipe page between Round and Items, with no Clear or Back to Rou
   await expect(showHeading(page)).toBeInViewport({ ratio: 1 })
   await expect(showPage(page).getByRole('listitem')).toHaveText([/^1\s*×\s*🍺\s*Duvel/])
 
-  await expect(showPage(page).getByRole('button', { name: 'Clear' })).toHaveCount(0)
+  await expect(showPage(page).getByRole('region', { name: 'Round total' })).toContainText('1 item')
   await expect(showPage(page).getByRole('button', { name: 'Back to Round' })).toHaveCount(0)
   await expect(showPage(page).getByRole('button', { name: 'Share' })).toBeVisible()
 
@@ -56,7 +56,7 @@ test('Show is a swipe page between Round and Items, with no Clear or Back to Rou
 test('with an empty Round the Show page says so and leads back to Round', async ({ page }) => {
   await footerTab(page, 'Show').tap()
   await expect(showPage(page)).toContainText('Nothing in this Round yet. Tap drinks on the Round page.')
-  await expect(showPage(page).getByRole('button', { name: 'Mark as ordered' })).toHaveCount(0)
+  await expect(showPage(page).getByRole('button', { name: 'Ordered' })).toHaveCount(0)
   await expect(showPage(page).getByRole('button', { name: 'Share' })).toHaveCount(0)
 
   await showPage(page).getByRole('button', { name: 'Back to Round' }).tap()
@@ -78,10 +78,10 @@ test('−/+ on a line adjust the Round, and removing the last Item shows the emp
   await expect(footerTab(page, 'Show')).toHaveAttribute('aria-current', 'page')
 })
 
-test('Mark as ordered empties the Round, slides back to Round, and Undo brings it back', async ({ page }) => {
+test('Ordered empties the Round, slides back to Round, and Undo brings it back', async ({ page }) => {
   await tapTiles(page, 'Duvel', 'Duvel', 'Chips')
   await openShowPage(page)
-  await showPage(page).getByRole('button', { name: 'Mark as ordered' }).tap()
+  await showPage(page).getByRole('button', { name: 'Ordered' }).tap()
 
   await expectOnRoundPage(page)
   await expect(roundBar(page)).toContainText('Tap a drink to start')
@@ -94,12 +94,37 @@ test('Mark as ordered empties the Round, slides back to Round, and Undo brings i
   await expect(page.getByRole('button', { name: 'Chips, 1 in round' })).toBeVisible()
 })
 
+test('Clear on the Show bar empties the Round and stays on Show; Undo brings it back', async ({ page }) => {
+  await tapTiles(page, 'Duvel', 'Duvel', 'Cola')
+  await openShowPage(page)
+  const bar = showPage(page).getByRole('region', { name: 'Round total' })
+  await expect(bar).toContainText('3 items')
+  await expect(bar.getByRole('button', { name: 'Ordered' })).toBeVisible()
+
+  await bar.getByRole('button', { name: 'Clear' }).tap()
+  await expect(footerTab(page, 'Show')).toHaveAttribute('aria-current', 'page')
+  await expect(showPage(page)).toContainText('Nothing in this Round yet.')
+  // No bar while the Round is empty: the empty state says it all.
+  await expect(showPage(page).getByRole('region', { name: 'Round total' })).toHaveCount(0)
+
+  await page.getByRole('status').filter({ hasText: 'Round cleared' }).getByRole('button', { name: 'Undo' }).tap()
+  await expect(showPage(page).getByRole('listitem')).toHaveText([/^1\s*×\s*🥤\s*Cola/, /^2\s*×\s*🍺\s*Duvel/])
+})
+
+test('Clear on the Round page has the same Undo', async ({ page }) => {
+  await tapTiles(page, 'Duvel', 'Duvel')
+  await roundBar(page).getByRole('button', { name: 'Clear' }).tap()
+  await expect(roundBar(page)).toContainText('Tap a drink to start')
+  await page.getByRole('status').filter({ hasText: 'Round cleared' }).getByRole('button', { name: 'Undo' }).tap()
+  await expect(page.getByRole('button', { name: 'Duvel, 2 in round' })).toBeVisible()
+})
+
 test('the Undo toast goes away after 5 seconds', async ({ page }) => {
   await page.clock.install()
   await page.goto('./')
   await tapTiles(page, 'Duvel')
   await openShowPage(page)
-  await showPage(page).getByRole('button', { name: 'Mark as ordered' }).tap()
+  await showPage(page).getByRole('button', { name: 'Ordered' }).tap()
 
   const toast = page.getByRole('status').filter({ hasText: 'Round placed' })
   await expect(toast).toBeVisible()

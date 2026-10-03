@@ -9,6 +9,11 @@ export function emptyRound(): ComposingRound {
   return { counts: {} }
 }
 
+/** Empties the Round; `undo` gives back exactly what it held (the "Round cleared · Undo" toast, #55). */
+export function clearWithUndo(round: ComposingRound): { next: ComposingRound; undo: () => ComposingRound } {
+  return { next: emptyRound(), undo: () => round }
+}
+
 export function add(round: ComposingRound, itemId: string): ComposingRound {
   return { counts: { ...round.counts, [itemId]: countOf(round, itemId) + 1 } }
 }

@@ -87,6 +87,7 @@ export function App() {
       round={state.round}
       t={t}
       actions={actions}
+      overlays={overlays}
       onShow={() => setPage(SHOW_PAGE)}
       onNew={() => setSheet({ forRound: true })}
     />,

@@ -4,7 +4,7 @@ import { addToCatalog, deleteWithUndo, editItem, type ItemDraft, type Sections }
 import { movePin, pinsAfterEdit, togglePin } from './items/pins.ts'
 import { replaceCatalog, type SharedItem } from './items/sharedCatalog.ts'
 import { receiveRound, type SharedLine } from './counter/sharedRound.ts'
-import { add, emptyRound, remove, type ComposingRound } from './round/round.ts'
+import { add, clearWithUndo, remove, type ComposingRound } from './round/round.ts'
 import type { ThemeSetting } from './settings/settings.ts'
 import type { LanguageSetting, Locale } from './shared/i18n.ts'
 import { resetApp } from './settings/reset.ts'
@@ -55,8 +55,16 @@ export function useAppState(seedLocale: Locale) {
     return {
       addToRound: (itemId: string) => update((s) => ({ round: add(s.round, itemId) })),
       removeFromRound: (itemId: string) => update((s) => ({ round: remove(s.round, itemId) })),
-      /** Empties the Round in one go. Deliberately no undo (see PRD). */
-      clearRound: () => update(() => ({ round: emptyRound() })),
+      /** Empties the Round in one go and returns its Undo, which brings the Round back exactly (#55). */
+      clearRound: () => {
+        let undo: (() => ComposingRound) | undefined
+        update((s) => {
+          const cleared = clearWithUndo(s.round)
+          undo = cleared.undo
+          return { round: cleared.next }
+        })
+        return () => update(() => (undo ? { round: undo() } : {}))
+      },
       replaceRound: (round: ComposingRound) => update(() => ({ round })),
       deleteRound: (roundId: string) => update((s) => ({ history: deletePlacedRound(s.history, roundId) })),
       /** Adds a new Item to the Catalog, and optionally straight into the composing Round ("+ New" tile). */

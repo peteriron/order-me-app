@@ -116,7 +116,7 @@ test('the friend’s phone keeps the sender’s order on Show, in History and fo
   await expect(showLines(friend)).toHaveText(duvelThenCola)
 
   // Placed: History keeps that order.
-  await showPage(friend).getByRole('button', { name: 'Mark as ordered' }).tap()
+  await showPage(friend).getByRole('button', { name: 'Ordered' }).tap()
   await tab(friend, 'History').tap()
   await expect(friend.getByRole('region', { name: 'History' }).getByRole('article')).toContainText('1 Duvel · 1 Cola')
 
