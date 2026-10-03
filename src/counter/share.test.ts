@@ -49,10 +49,20 @@ describe('share text', () => {
   const round = add(add(add(add(add(emptyRound(), 'chips'), 'cola'), 'duvel'), 'duvel'), 'duvel')
 
   it('lists one plain line per Item in grid order, drinks then snacks, then the total', () => {
-    expect(shareText(roundLines(round, sections), messages.en.total)).toBe('3× Duvel\n1× Cola\n1× Chips\nTotal: 5')
+    expect(shareText(roundLines(round, sections), messages.en)).toBe('3× Duvel\n1× Cola\n1× Chips\nTotal: 5')
+  })
+
+  it('puts the table first and the remark last; empty ones are left out', () => {
+    const lines = roundLines(round, sections)
+    expect(shareText(lines, messages.en, { table: ' 12 ', remark: 'No ice in the cola' })).toBe(
+      'Table 12\n3× Duvel\n1× Cola\n1× Chips\nTotal: 5\nRemark: No ice in the cola',
+    )
+    expect(shareText(lines, messages.nl, { table: 'Terras 3', remark: '  ' })).toBe(
+      'Tafel Terras 3\n3× Duvel\n1× Cola\n1× Chips\nTotaal: 5',
+    )
   })
 
   it('says Totaal in Dutch', () => {
-    expect(shareText(roundLines(round, sections), messages.nl.total)).toBe('3× Duvel\n1× Cola\n1× Chips\nTotaal: 5')
+    expect(shareText(roundLines(round, sections), messages.nl)).toBe('3× Duvel\n1× Cola\n1× Chips\nTotaal: 5')
   })
 })

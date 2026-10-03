@@ -73,7 +73,10 @@ export function HistoryPage({ history, catalog, dateLocale, t, actions, overlays
             return (
               <article key={round.id} className="history-card" aria-label={t.roundAt(at)}>
                 <div className="history-card-head">
-                  <b>{at}</b>
+                  <b>
+                    {at}
+                    {round.table && <span className="history-table"> · {t.tableLine(round.table)}</span>}
+                  </b>
                   <span>{t.itemsCount(placedTotal(round))}</span>
                 </div>
                 <button
@@ -96,6 +99,7 @@ export function HistoryPage({ history, catalog, dateLocale, t, actions, overlays
                     ))}
                   </ul>
                 )}
+                {round.remark && <p className="history-remark">{t.remarkLine(round.remark)}</p>}
                 <div className="history-card-actions">
                   <button type="button" className="btn btn-outline" onClick={() => orderAgainFrom(round)}>
                     {t.orderAgain}

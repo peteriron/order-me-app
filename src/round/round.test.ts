@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { catalogSections, type Item } from '../items/catalog.ts'
-import { add, clearWithUndo, countOf, emptyRound, remove, roundLines, totalOf } from './round.ts'
+import { add, clearWithUndo, countOf, emptyRound, remove, roundLines, totalOf, withNote } from './round.ts'
 
 describe('composing Round', () => {
   it('starts empty', () => {
@@ -69,5 +69,25 @@ describe('Clear, with Undo', () => {
     const { next, undo } = clearWithUndo(round)
     expect(totalOf(next)).toBe(0)
     expect(undo()).toEqual(round)
+  })
+})
+
+describe('the table and remark of the Round being composed', () => {
+  it('are kept while drinks are added and removed', () => {
+    let round = withNote(add(emptyRound(), 'duvel'), { table: '12', remark: 'No ice' })
+    round = remove(add(round, 'cola'), 'cola')
+    expect(round).toEqual({ counts: { duvel: 1 }, table: '12', remark: 'No ice' })
+  })
+
+  it('are emptied by Clear, and Undo brings them back', () => {
+    const round = withNote(add(emptyRound(), 'duvel'), { table: '12', remark: 'No ice' })
+    const { next, undo } = clearWithUndo(round)
+    expect(next).toEqual(emptyRound())
+    expect(undo()).toEqual(round)
+  })
+
+  it('can be set one at a time', () => {
+    const round = withNote(withNote(emptyRound(), { table: '12' }), { remark: 'Terrace' })
+    expect(round).toMatchObject({ table: '12', remark: 'Terrace' })
   })
 })

@@ -19,7 +19,7 @@ import { TAB_ICONS } from './shared/ui/tabIcons.tsx'
 import { Pager } from './shared/ui/Pager.tsx'
 import { Toast, type ToastMessage } from './shared/ui/Toast.tsx'
 import type { Overlays } from './shared/ui/overlays.ts'
-import { roundLines } from './round/round.ts'
+import { noteOf, roundLines } from './round/round.ts'
 import { useAppState } from './useAppState.ts'
 import { useSharedLinks } from './useSharedLinks.ts'
 
@@ -39,6 +39,8 @@ export function App() {
   const show = useMemo(() => showSections(sections, state.showOrder), [sections, state.showOrder])
   /** The Round as the Show tab lists it: what Share Round sends. */
   const showLines = useMemo(() => roundLines(state.round, show), [state.round, show])
+  /** The Round's table and remark, tidied: what Share Round sends. */
+  const roundNote = useMemo(() => noteOf(state.round), [state.round])
 
   const [page, setPage] = useState(ROUND_PAGE)
   /** The Item sheet: `{}` to add a new Item, `{ item }` to edit one, `{ forRound }` from the + New tile. */
@@ -154,7 +156,7 @@ export function App() {
           {sharing === 'items' ? (
             <ShareItemsSheet catalog={catalog} t={t} onClose={closeSharing} />
           ) : (
-            <ShareRoundSheet lines={showLines} t={t} onClose={closeSharing} />
+            <ShareRoundSheet lines={showLines} note={roundNote} t={t} onClose={closeSharing} />
           )}
         </div>
       )}

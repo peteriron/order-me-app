@@ -41,6 +41,10 @@ export interface Messages {
   showEmpty: string
   addOne: (name: string) => string
   total: string
+  tableLabel: string
+  remarkLabel: string
+  tableLine: (table: string) => string
+  remarkLine: (remark: string) => string
   share: string
   copied: string
   markOrdered: string
@@ -143,6 +147,10 @@ export const messages: Record<Locale, Messages> = {
     showEmpty: 'Nothing in this Round yet. Tap drinks on the Round page.',
     addOne: (name) => `Add one ${name}`,
     total: 'Total',
+    tableLabel: 'Table',
+    remarkLabel: 'Remark',
+    tableLine: (table) => `Table ${table}`,
+    remarkLine: (remark) => `Remark: ${remark}`,
     share: 'Share',
     copied: 'Copied to clipboard',
     markOrdered: 'Ordered',
@@ -244,6 +252,10 @@ export const messages: Record<Locale, Messages> = {
     showEmpty: 'Nog niets in dit rondje. Tik drankjes aan op de pagina Rondje.',
     addOne: (name) => `Eén ${name} meer`,
     total: 'Totaal',
+    tableLabel: 'Tafel',
+    remarkLabel: 'Opmerking',
+    tableLine: (table) => `Tafel ${table}`,
+    remarkLine: (remark) => `Opmerking: ${remark}`,
     share: 'Delen',
     copied: 'Gekopieerd',
     markOrdered: 'Besteld',
