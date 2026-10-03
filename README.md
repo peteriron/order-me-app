@@ -43,7 +43,8 @@ Swipe sideways between the four pages, or tap their tabs at the bottom of the sc
 - **History:** past Rounds by day. **Order again** puts a past Round back on the grid, and the bin icon deletes one.
 - **Show:** the Round in large type, to read out at the counter. Fix counts with − and +, **Share** it with a friend, and **Mark as ordered** when it's done.
 - **Settings:** first your **Items** (drinks and snacks), then the general settings.
-  - Tap a row to edit or delete that Item, or **Add Item** to create one.
+  - Tap a row to edit that Item, or **Add Item** to create one.
+  - Swipe a row to the left and tap the red **×** to delete it (or use **Delete** in its edit sheet). Deleted by mistake? Tap **Undo** in the message within 5 seconds.
   - Tap the pin on a row to pin it. Pinned Items come first; drag them by their handle (⠿) to change the order.
   - **Share** shows your Items as a QR code, with **Save image** and **Copy link**.
   - **General**, at the bottom: language, theme, Clear history and Reset app.

@@ -109,6 +109,7 @@ export function App() {
       count={catalog.length}
       t={t}
       actions={actions}
+      overlays={overlays}
       onAdd={() => setSheet({})}
       onShare={() => setSharing('items')}
       onEdit={(item) => setSheet({ item })}

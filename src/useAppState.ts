@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { deletePlacedRound, markOrdered } from './history/history.ts'
-import { addToCatalog, deleteItem, editItem, type ItemDraft, type Sections } from './items/catalog.ts'
+import { addToCatalog, deleteWithUndo, editItem, type ItemDraft, type Sections } from './items/catalog.ts'
 import { movePin, pinsAfterEdit, togglePin } from './items/pins.ts'
 import { replaceCatalog, type SharedItem } from './items/sharedCatalog.ts'
 import { receiveRound, type SharedLine } from './counter/sharedRound.ts'
@@ -69,8 +69,16 @@ export function useAppState(seedLocale: Locale) {
       },
       updateItem: (itemId: string, draft: ItemDraft) =>
         update((s) => ({ catalog: editItem(s.catalog, itemId, draft), pins: pinsAfterEdit(s.pins, s.catalog, itemId, draft) })),
-      removeFromCatalog: (itemId: string) =>
-        update((s) => ({ ...deleteItem(s, itemId), showOrder: s.showOrder.filter((id) => id !== itemId) })),
+      /** Deletes an Item at once and returns its Undo, which puts it back where it was (see deleteWithUndo). */
+      removeFromCatalog: (itemId: string) => {
+        let undo: ((s: AppState) => Partial<AppState>) | undefined
+        update((s) => {
+          const deleted = deleteWithUndo(s, itemId)
+          undo = deleted.undo
+          return deleted.next
+        })
+        return () => update((s) => undo?.(s) ?? {})
+      },
       togglePin: (itemId: string) => update((s) => ({ pins: togglePin(s.pins, itemId) })),
       /** Moves a pinned Item to position `to` among its section's pinned Items. */
       movePin: (itemId: string, to: number) => update((s) => ({ pins: movePin(s.pins, s.catalog, itemId, to) })),

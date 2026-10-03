@@ -1,9 +1,11 @@
 import { useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react'
 import type { Messages } from '../shared/i18n.ts'
+import type { Overlays } from '../shared/ui/overlays.ts'
 import { CategorySection } from '../shared/ui/CategorySection.tsx'
 import type { AppActions } from '../useAppState.ts'
 import type { Category, Item, Sections } from './catalog.ts'
 import type { Pins } from './pins.ts'
+import { useRowSwipe } from './useRowSwipe.ts'
 
 interface ItemsPageProps {
   /** The Catalog per category, Pinned Items first, then A–Z (catalogSections), independent of the grid's order. */
@@ -11,7 +13,8 @@ interface ItemsPageProps {
   pins: Pins
   count: number
   t: Messages
-  actions: Pick<AppActions, 'togglePin' | 'movePin'>
+  actions: Pick<AppActions, 'togglePin' | 'movePin' | 'removeFromCatalog'>
+  overlays: Overlays
   onAdd: () => void
   onShare: () => void
   onEdit: (item: Item) => void
@@ -40,7 +43,14 @@ interface Drag {
  * edit sheet and pinning the Item; then the general settings passed in as children. Pinned Items come first and are
  * reordered by dragging their handle, or with Move up / Move down for keyboard and screen readers.
  */
-export function ItemsPage({ sections, pins, count, t, actions, onAdd, onShare, onEdit, children }: ItemsPageProps) {
+export function ItemsPage({ sections, pins, count, t, actions, overlays, onAdd, onShare, onEdit, children }: ItemsPageProps) {
+  const rows = useRowSwipe()
+  /** Deletes at once; the toast's Undo puts it back where it was (#54). */
+  const remove = (item: Item) => {
+    rows.close()
+    const undo = actions.removeFromCatalog(item.id)
+    overlays.notify(t.itemDeleted(item.name), { label: t.undo, run: undo })
+  }
   const pinned = new Set(pins)
   const [drag, setDrag] = useState<Drag | null>(null)
 
@@ -96,68 +106,84 @@ export function ItemsPage({ sections, pins, count, t, actions, onAdd, onShare, o
     const move = (to: number) => {
       if (to >= 0 && to < pinnedCount) actions.movePin(item.id, to)
     }
+    const offset = rows.offsetOf(item.id)
     return (
       <div
         key={item.id}
         className={`item-row${isPinned ? ' pinned' : ''}${drag?.itemId === item.id ? ' dragging' : ''}`}
         data-pinned={isPinned || undefined}
+        data-row-id={item.id}
         style={isPinned ? dragShift(item, index) : undefined}
       >
-        {isPinned && (
-          // Pointer-only; the Move buttons below are the keyboard and screen-reader way to reorder.
-          <span
-            className="item-row-handle"
-            aria-hidden="true"
-            onPointerDown={(e) => startDrag(e, item, index)}
-            onPointerMove={followDrag}
-            onPointerUp={endDrag}
-            onPointerCancel={endDrag}
-          >
-            <svg viewBox="0 0 24 24" className="grip">
-              {[8, 16].flatMap((x) => [6, 12, 18].map((y) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1.75" />))}
+        {/* Behind the row, revealed by swiping it left (#54). Only there while visible, so it isn't focusable hidden. */}
+        {offset < 0 && (
+          <button type="button" className="item-row-delete" aria-label={t.deleteNamed(item.name)} onClick={() => remove(item)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+              <path d="M6 6l12 12M18 6L6 18" />
             </svg>
-          </span>
+          </button>
         )}
-        <button type="button" className="item-row-main" aria-label={t.editNamed(item.name)} onClick={() => onEdit(item)}>
-          <span className="item-row-emoji">{item.emoji}</span>
-          <span className="item-row-name">{item.name}</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon item-row-edit">
-            <path d="M4 20h4L19 9l-4-4L4 16z" />
-          </svg>
-        </button>
-        {isPinned && (
-          <>
-            {/* aria-disabled rather than disabled at the ends, so focus stays on the button as the row moves. */}
-            <button
-              type="button"
-              className="item-row-move"
-              aria-disabled={index === 0}
-              onClick={() => move(index - 1)}
-            >
-              {t.moveUp(item.name)}
-            </button>
-            <button
-              type="button"
-              className="item-row-move"
-              aria-disabled={index === pinnedCount - 1}
-              onClick={() => move(index + 1)}
-            >
-              {t.moveDown(item.name)}
-            </button>
-          </>
-        )}
-        <button
-          type="button"
-          className="item-row-pin"
-          aria-label={t.pinNamed(item.name)}
-          aria-pressed={isPinned}
-          onClick={() => actions.togglePin(item.id)}
+        <div
+          className={`item-row-content${rows.isDragging(item.id) ? ' swiping' : ''}`}
+          style={offset ? { transform: `translateX(${offset}px)` } : undefined}
+          {...rows.rowHandlers(item.id)}
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
-            <path d="M12 17v5" />
-            <path d="M9 3h6l-1 6 3 3.5V15H7v-2.5L10 9z" />
-          </svg>
-        </button>
+          {isPinned && (
+            // Pointer-only; the Move buttons below are the keyboard and screen-reader way to reorder.
+            <span
+              className="item-row-handle"
+              aria-hidden="true"
+              onPointerDown={(e) => startDrag(e, item, index)}
+              onPointerMove={followDrag}
+              onPointerUp={endDrag}
+              onPointerCancel={endDrag}
+            >
+              <svg viewBox="0 0 24 24" className="grip">
+                {[8, 16].flatMap((x) => [6, 12, 18].map((y) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1.75" />))}
+              </svg>
+            </span>
+          )}
+          <button type="button" className="item-row-main" aria-label={t.editNamed(item.name)} onClick={() => onEdit(item)}>
+            <span className="item-row-emoji">{item.emoji}</span>
+            <span className="item-row-name">{item.name}</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon item-row-edit">
+              <path d="M4 20h4L19 9l-4-4L4 16z" />
+            </svg>
+          </button>
+          {isPinned && (
+            <>
+              {/* aria-disabled rather than disabled at the ends, so focus stays on the button as the row moves. */}
+              <button
+                type="button"
+                className="item-row-move"
+                aria-disabled={index === 0}
+                onClick={() => move(index - 1)}
+              >
+                {t.moveUp(item.name)}
+              </button>
+              <button
+                type="button"
+                className="item-row-move"
+                aria-disabled={index === pinnedCount - 1}
+                onClick={() => move(index + 1)}
+              >
+                {t.moveDown(item.name)}
+              </button>
+            </>
+          )}
+          <button
+            type="button"
+            className="item-row-pin"
+            aria-label={t.pinNamed(item.name)}
+            aria-pressed={isPinned}
+            onClick={() => actions.togglePin(item.id)}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+              <path d="M12 17v5" />
+              <path d="M9 3h6l-1 6 3 3.5V15H7v-2.5L10 9z" />
+            </svg>
+          </button>
+        </div>
       </div>
     )
   }
@@ -167,7 +193,10 @@ export function ItemsPage({ sections, pins, count, t, actions, onAdd, onShare, o
     const pinnedCount = items.filter((i) => pinned.has(i.id)).length
     return (
       <CategorySection category={category} heading={heading} idPrefix="items">
-        <div className={drag?.category === category ? 'item-rows reordering' : 'item-rows'}>
+        <div
+          className={drag?.category === category ? 'item-rows reordering' : 'item-rows'}
+          onPointerDownCapture={rows.onListPointerDownCapture}
+        >
           {items.map((item, index) => row(item, index, pinnedCount))}
         </div>
       </CategorySection>

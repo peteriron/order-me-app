@@ -59,3 +59,23 @@ export function settle(args: { page: number; lastPage: number; dx: number; veloc
   else if (dx >= width * DISTANCE_THRESHOLD || velocity >= FLING_VELOCITY) next = page - 1
   return Math.min(Math.max(next, 0), lastPage)
 }
+
+/**
+ * Where an Item row sits while a finger drags it sideways: following the finger leftwards to reveal the delete
+ * button (`button` px wide), with resistance past it, and never right of its resting place. `open` rows start at
+ * the button's width.
+ */
+export function rowOffset(dx: number, open: boolean, button: number): number {
+  const raw = (open ? -button : 0) + dx
+  if (raw > 0) return 0
+  if (raw < -button) return -button + (raw + button) * EDGE_RESISTANCE
+  return raw
+}
+
+/** Whether a released row stays open: a flick decides, otherwise whether it was dragged past half the button. */
+export function settleRow(args: { offset: number; velocity: number; button: number }): boolean {
+  const { offset, velocity, button } = args
+  if (velocity <= -FLING_VELOCITY) return true
+  if (velocity >= FLING_VELOCITY) return false
+  return offset <= -button / 2
+}

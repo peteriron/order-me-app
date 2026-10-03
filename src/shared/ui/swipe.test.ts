@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { releaseVelocity, settle } from './swipe.ts'
+import { releaseVelocity, rowOffset, settle, settleRow } from './swipe.ts'
 
 const width = 400
 
@@ -57,5 +57,24 @@ describe('where a released swipe lands', () => {
   it('never goes past the first or last page', () => {
     expect(settle({ page: 0, lastPage: 2, dx: 200, velocity: 2, width })).toBe(0)
     expect(settle({ page: 2, lastPage: 2, dx: -200, velocity: -2, width })).toBe(2)
+  })
+})
+
+describe('a row swiped open to reveal its delete button', () => {
+  const button = 72
+
+  it('follows the finger left, but not past the button by much, and not right of its place', () => {
+    expect(rowOffset(-30, false, button)).toBe(-30)
+    expect(rowOffset(30, false, button)).toBe(0)
+    expect(rowOffset(-200, false, button)).toBeGreaterThan(-button - 40)
+    // An open row starts at the button's width.
+    expect(rowOffset(20, true, button)).toBe(-button + 20)
+  })
+
+  it('snaps open past halfway, or with a quick flick left; otherwise it closes', () => {
+    expect(settleRow({ offset: -40, velocity: 0, button })).toBe(true)
+    expect(settleRow({ offset: -30, velocity: 0, button })).toBe(false)
+    expect(settleRow({ offset: -20, velocity: -0.8, button })).toBe(true)
+    expect(settleRow({ offset: -60, velocity: 0.8, button })).toBe(false)
   })
 })
