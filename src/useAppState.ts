@@ -69,7 +69,8 @@ export function useAppState(seedLocale: Locale) {
       },
       updateItem: (itemId: string, draft: ItemDraft) =>
         update((s) => ({ catalog: editItem(s.catalog, itemId, draft), pins: pinsAfterEdit(s.pins, s.catalog, itemId, draft) })),
-      removeFromCatalog: (itemId: string) => update((s) => deleteItem(s, itemId)),
+      removeFromCatalog: (itemId: string) =>
+        update((s) => ({ ...deleteItem(s, itemId), showOrder: s.showOrder.filter((id) => id !== itemId) })),
       togglePin: (itemId: string) => update((s) => ({ pins: togglePin(s.pins, itemId) })),
       /** Moves a pinned Item to position `to` among its section's pinned Items. */
       movePin: (itemId: string, to: number) => update((s) => ({ pins: movePin(s.pins, s.catalog, itemId, to) })),
@@ -90,7 +91,8 @@ export function useAppState(seedLocale: Locale) {
       },
       /** Replaces the Catalog with a Shared Catalog: fresh ids, empty Round, no pins, History kept. */
       replaceCatalog: (items: SharedItem[]) => {
-        update(() => replaceCatalog(items, () => crypto.randomUUID()))
+        // New ids: a Show order from before points at nothing any more.
+        update(() => ({ ...replaceCatalog(items, () => crypto.randomUUID()), showOrder: [] }))
         setPlacements((n) => n + 1)
       },
       setLanguage: (language: LanguageSetting) => update((s) => ({ settings: { ...s.settings, language } })),

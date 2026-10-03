@@ -32,6 +32,10 @@ _Avoid_: Menu export, sync
 A one-time copy of the composing Round as the sender's Show tab lists it (each line's Item and count, in that order) carried in a link or QR code, so a friend can take the Round to the counter. It is a hand-over, not a live sync. Opening one always replaces the recipient's composing Round, without asking (Undo for 5 seconds), and adds any Items they don't have; their Items are otherwise untouched (ADR-0004).
 _Avoid_: Round sync, live order
 
+**Show order** (v3):
+The line order of the last Shared Round a phone received, which it keeps for good so it lists Rounds the way the sender did. The Show page lists the Items in the Show order first, then the rest in grid order (drinks before snacks); Share as text and History follow it. It never changes the grid, pins or Popularity. The next Shared Round replaces it, deleting an Item drops it from it, and Reset app (or importing a Shared Catalog) clears it. A phone that never received a Round has none.
+_Avoid_: Custom order, sort order
+
 **Counter view**:
 The large-type presentation of the composing Round that the Operator reads from or shows to the bartender, shown on the **Show** page (a swipe page between Round and Items, ADR-0005); the screen stays awake while that page is on screen, and it is where a Round is marked as ordered.
 _Avoid_: Summary, review screen, receipt

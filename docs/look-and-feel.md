@@ -115,6 +115,7 @@ Same size as other tiles, with a dashed `--border` outline, a large "+" and the 
 ```
 - The third swipe page (ADR-0005), on `--bg`, titled "Round for the counter". The count column is accent-coloured with tabular numerals.
 - No Back or Clear: swipe or use the footer to go back; Clear lives on the Round page.
+- Lines follow the grid order, except on a phone that received a Shared Round: there the received **Show order** comes first (see CONTEXT.md). Nothing on screen marks it.
 - −/+ buttons are 44 px, `--surface-2`, and visually quieter than the line text, since the bartender is reading the text.
 - "Mark as ordered" is full width, 56 px, accent fill, and stays at the bottom of the page (sticky) while a long Round scrolls. It slides back to Round with the Undo toast.
 - Empty Round: the muted text "Nothing in this Round yet. Tap drinks on the Round page." with an outline "Back to Round" button, centred; no Share or Mark as ordered.

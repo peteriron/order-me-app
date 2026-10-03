@@ -101,6 +101,42 @@ test('it replaces the friend’s own Round without asking, and Undo brings their
   await friend.context().close()
 })
 
+test('the friend’s phone keeps the sender’s order on Show, in History and for its next Rounds, until Reset app', async ({ page, browser }) => {
+  // The sender pins Duvel, so its Show tab reads Duvel, Cola; a fresh phone's grid has Cola before Duvel.
+  await tab(page, 'Settings').tap()
+  await page.getByRole('region', { name: 'Items' }).getByRole('button', { name: 'Pin Duvel', exact: true }).tap()
+  await tab(page, 'Round').tap()
+  await tapTiles(page, 'Cola', 'Duvel')
+  const link = await copyRoundLink(page)
+  const showLines = (phone: Page) => showPage(phone).getByRole('listitem')
+  const duvelThenCola = [/Duvel/, /Cola/]
+
+  const friend = await freshPhone(browser)
+  await friend.goto(link)
+  await expect(showLines(friend)).toHaveText(duvelThenCola)
+
+  // Placed: History keeps that order.
+  await showPage(friend).getByRole('button', { name: 'Mark as ordered' }).tap()
+  await tab(friend, 'History').tap()
+  await expect(friend.getByRole('region', { name: 'History' }).getByRole('article')).toContainText('1 Duvel · 1 Cola')
+
+  // Their next own Round keeps it too, though their grid still starts with Cola.
+  await tab(friend, 'Round').tap()
+  await tapTiles(friend, 'Cola', 'Duvel')
+  await roundBar(friend).getByRole('button', { name: 'Show' }).tap()
+  await expect(showLines(friend)).toHaveText(duvelThenCola)
+
+  // Reset app forgets it: a fresh install follows its grid again.
+  await tab(friend, 'Settings').tap()
+  await friend.getByRole('region', { name: 'General' }).getByRole('button', { name: 'Reset app' }).tap()
+  await friend.getByRole('alertdialog').getByRole('button', { name: 'Reset', exact: true }).tap()
+  await expect(roundBar(friend)).toContainText('Tap a drink to start')
+  await tapTiles(friend, 'Duvel', 'Cola')
+  await roundBar(friend).getByRole('button', { name: 'Show' }).tap()
+  await expect(showLines(friend)).toHaveText([/Cola/, /Duvel/])
+  await friend.context().close()
+})
+
 test('a broken Round link is ignored with a short note', async ({ page }) => {
   await tapTiles(page, 'Duvel')
   await page.goto('./#round=broken')

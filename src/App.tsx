@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ShareRoundSheet } from './counter/ShareRoundSheet.tsx'
 import { ShowPage } from './counter/ShowPage.tsx'
+import { showSections } from './counter/showOrder.ts'
 import { HistoryPage } from './history/HistoryPage.tsx'
 import { ItemSheet } from './items/ItemSheet.tsx'
 import { ItemsPage } from './items/ItemsPage.tsx'
@@ -34,8 +35,10 @@ export function App() {
   /** The Catalog as shown: starter Items named in the app's language. Everything on screen, placed or shared uses it. */
   const catalog = useMemo(() => localizeCatalog(state.catalog, locale), [state.catalog, locale])
   const sections = useTileOrder(catalog, state.pins, state.history, placements)
+  /** The grid in the Show tab's order: a received Show order first (#49). Share and History follow it too. */
+  const show = useMemo(() => showSections(sections, state.showOrder), [sections, state.showOrder])
   /** The Round as the Show tab lists it: what Share Round sends. */
-  const showLines = useMemo(() => roundLines(state.round, sections), [state.round, sections])
+  const showLines = useMemo(() => roundLines(state.round, show), [state.round, show])
 
   const [page, setPage] = useState(ROUND_PAGE)
   /** The Item sheet: `{}` to add a new Item, `{ item }` to edit one, `{ forRound }` from the + New tile. */
@@ -90,7 +93,7 @@ export function App() {
     <ShowPage
       key="show"
       round={state.round}
-      sections={sections}
+      sections={show}
       active={page === SHOW_PAGE}
       t={t}
       actions={actions}

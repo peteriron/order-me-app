@@ -62,9 +62,16 @@ describe('Round link', () => {
 })
 
 describe('receiving a Round', () => {
+  it('remembers the sender’s line order as the Show order', async () => {
+    const shared = (await decodeRound(await encodeRound(sender().lines)))!
+    const catalog = seedCatalog('en', ids('friend'))
+    const { next } = receiveRound({ catalog, round: emptyRound(), pins: [], showOrder: ['old'] }, shared, ids('new'))
+    expect(next.showOrder).toEqual([byName(catalog, 'Cola').id, 'new-1', byName(catalog, 'Chips').id])
+  })
+
   it('matches starter Items by their mark, whatever language either phone is in', async () => {
     const shared = (await decodeRound(await encodeRound(sender().lines)))!
-    const friend = { catalog: seedCatalog('nl', ids('friend')), round: emptyRound(), pins: [] }
+    const friend = { catalog: seedCatalog('nl', ids('friend')), round: emptyRound(), pins: [], showOrder: [] }
     const { next } = receiveRound(friend, shared, ids('new'))
     const cola = byName(localizeCatalog(next.catalog, 'nl'), 'Cola')
     expect(next.round.counts[cola.id]).toBe(3)
@@ -76,6 +83,7 @@ describe('receiving a Round', () => {
       catalog: [{ id: 'k', name: 'KRIEK', category: 'drink' as const, emoji: '🍒' }],
       round: emptyRound(),
       pins: [],
+      showOrder: [],
     }
     const { next } = receiveRound(friend, [{ item: { name: 'Kriek', category: 'drink', emoji: '🍷' }, count: 2 }], ids())
     expect(next.catalog).toEqual(friend.catalog)
@@ -84,7 +92,7 @@ describe('receiving a Round', () => {
 
   it('matches a renamed sender Item to a friend’s starter Item by either of its names', () => {
     // The sender's "Water plat" is a plain name (say, typed by hand); the friend has the starter Item.
-    const friend = { catalog: seedCatalog('en', ids('friend')), round: emptyRound(), pins: [] }
+    const friend = { catalog: seedCatalog('en', ids('friend')), round: emptyRound(), pins: [], showOrder: [] }
     const { next } = receiveRound(friend, [{ item: { name: 'water plat', category: 'drink', emoji: '💧' }, count: 1 }], ids())
     expect(next.catalog).toHaveLength(friend.catalog.length)
     expect(next.round.counts).toEqual({ [byName(friend.catalog, 'Still water').id]: 1 })
@@ -92,7 +100,7 @@ describe('receiving a Round', () => {
 
   it('adds the drinks the friend doesn’t have, unpinned, and keeps everything of theirs', async () => {
     const shared = (await decodeRound(await encodeRound(sender().lines)))!
-    const friend = { catalog: seedCatalog('en', ids('friend')), round: emptyRound(), pins: ['friend-3'] }
+    const friend = { catalog: seedCatalog('en', ids('friend')), round: emptyRound(), pins: ['friend-3'], showOrder: [] }
     const { next } = receiveRound(friend, shared, ids('new'))
     expect(next.catalog).toEqual([...friend.catalog, { id: 'new-1', name: 'Kriek', category: 'drink', emoji: '🍒' }])
     expect(next.round.counts['new-1']).toBe(2)
@@ -103,12 +111,12 @@ describe('receiving a Round', () => {
     const shared = (await decodeRound(await encodeRound(sender().lines)))!
     const catalog = seedCatalog('en', ids('friend'))
     const own = add(add(emptyRound(), byName(catalog, 'Duvel').id), byName(catalog, 'Duvel').id)
-    const friend = { catalog, round: own, pins: [] as string[] }
+    const friend = { catalog, round: own, pins: [] as string[], showOrder: ['previous'] }
 
     const { next, undo } = receiveRound(friend, shared, ids('new'))
     expect(next.round.counts[byName(catalog, 'Duvel').id]).toBeUndefined()
 
     const after = { ...friend, ...next, pins: ['new-1'] }
-    expect({ ...after, ...undo(after) }).toEqual({ catalog, round: own, pins: [] })
+    expect({ ...after, ...undo(after) }).toEqual({ catalog, round: own, pins: [], showOrder: ['previous'] })
   })
 })
