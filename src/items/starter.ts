@@ -69,6 +69,11 @@ const OLD_STARTER: readonly StarterRow[] = [
 const KNOWN = [...STARTER, ...OLD_STARTER]
 const BY_KEY = new Map(KNOWN.map((r) => [r.key, r]))
 
+/** The starter row for a key (current or old list), or undefined for a key this version doesn't know. */
+export function starterRow(key: string): Readonly<StarterRow> | undefined {
+  return BY_KEY.get(key)
+}
+
 /** The starter row's name in a language, or undefined for a key this version doesn't know. */
 export function starterName(key: string, locale: Locale): string | undefined {
   return BY_KEY.get(key)?.[locale]

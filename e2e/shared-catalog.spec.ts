@@ -87,6 +87,20 @@ test('a phone opening the link for the first time starts with the shared Items, 
   await friend.context().close()
 })
 
+test('a Dutch phone gets an English phone’s starter Items in Dutch, and its own added Items as typed', async ({ page, browser }) => {
+  await addItem(page, 'Kriek')
+  const link = await copyShareLink(page)
+
+  const context = await browser.newContext({ ...test.info().project.use, locale: 'nl-BE' })
+  const friend = await context.newPage()
+  await friend.goto(link)
+  const drinks = friend.getByRole('region', { name: 'Dranken' })
+  await expect(drinks.getByRole('button', { name: 'Water plat', exact: true })).toBeVisible()
+  await expect(drinks.getByRole('button', { name: 'Pils', exact: true })).toBeVisible()
+  await expect(drinks.getByRole('button', { name: 'Kriek', exact: true })).toBeVisible()
+  await context.close()
+})
+
 test('with Items of their own, the friend is asked: Cancel keeps them, Replace takes the shared ones', async ({ page }) => {
   const link = await copyShareLink(page)
   await addItem(page, 'Kriek')
