@@ -1,5 +1,6 @@
 import type { Sections } from '../items/catalog.ts'
 import type { Messages } from '../shared/i18n.ts'
+import type { Overlays } from '../shared/ui/overlays.ts'
 import { CategorySection } from '../shared/ui/CategorySection.tsx'
 import type { AppActions } from '../useAppState.ts'
 import { RoundBar } from './RoundBar.tsx'
@@ -11,11 +12,14 @@ interface RoundPageProps {
   round: ComposingRound
   t: Messages
   actions: Pick<AppActions, 'addToRound' | 'removeFromRound' | 'clearRound'>
+  overlays: Overlays
   onShow: () => void
   onNew: () => void
 }
 
-export function RoundPage({ sections, round, t, actions, onShow, onNew }: RoundPageProps) {
+export function RoundPage({ sections, round, t, actions, onShow, onNew, overlays }: RoundPageProps) {
+  /** Clear at once, with Undo (#55). */
+  const clear = () => overlays.notify(t.roundCleared, { label: t.undo, run: actions.clearRound() })
   const section = (category: keyof Sections, heading: string) => (
     <CategorySection category={category} heading={heading} idPrefix="round">
       <div className="grid">
@@ -55,7 +59,14 @@ export function RoundPage({ sections, round, t, actions, onShow, onNew }: RoundP
         {section('drink', t.drinks)}
         {section('snack', t.snacks)}
       </div>
-      <RoundBar total={totalOf(round)} t={t} onClear={actions.clearRound} onShow={onShow} />
+      <RoundBar total={totalOf(round)} t={t} onClear={clear}>
+        <button type="button" className="btn btn-primary" onClick={onShow}>
+          {t.show}
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        </button>
+      </RoundBar>
     </>
   )
 }

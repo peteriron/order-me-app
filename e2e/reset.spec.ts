@@ -21,7 +21,7 @@ async function waitForServiceWorker(page: Page) {
 async function useTheApp(page: Page) {
   await page.getByRole('button', { name: /^Duvel(,|$)/ }).tap()
   await page.getByRole('region', { name: 'Round total' }).getByRole('button', { name: 'Show' }).tap()
-  await page.getByRole('button', { name: 'Mark as ordered' }).tap()
+  await page.getByRole('button', { name: 'Ordered' }).tap()
   await page.getByRole('button', { name: /^Cola(,|$)/ }).tap()
   await goTo(page, 'Settings')
   await itemsPage(page).getByRole('button', { name: 'Pin Mint tea' }).tap()

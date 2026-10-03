@@ -29,10 +29,10 @@ It's a web app you install on your home screen. It works offline, so bad bar Wi-
 
 ### Get a round
 
-1. The app opens on the **Round** page. As friends call out their order, tap the tiles: one tap is one drink. Tap − on a tile to take one off, or **Clear** to start over.
+1. The app opens on the **Round** page. As friends call out their order, tap the tiles: one tap is one drink. Tap − on a tile to take one off, or **Clear** to start over (**Undo** brings it back for 5 seconds).
 2. Something missing? Tap **+ New** at the end of the grid to add it to your Items and to the Round in one go.
 3. At the counter, tap **Show** (or swipe to it). Read the list out, or show the screen to the bartender. Fix counts with − and + if someone changes their mind.
-4. Tap **Mark as ordered** when it's done. The Round moves to History and you're back on an empty grid. Tapped it too early? **Undo** appears for 5 seconds.
+4. Tap **✓ Ordered** at the bottom of the Show page when it's done. The Round moves to History and you're back on an empty grid. Tapped it too early? **Undo** appears for 5 seconds.
 
 ### Move around
 
@@ -41,7 +41,7 @@ Swipe sideways between the four pages, or tap their tabs at the bottom of the sc
 **History** ← **Round** → **Show** → **Settings**
 
 - **History:** past Rounds by day. **Order again** puts a past Round back on the grid, and the bin icon deletes one.
-- **Show:** the Round in large type, to read out at the counter. Fix counts with − and +, **Share** it with a friend, and **Mark as ordered** when it's done.
+- **Show:** the Round in large type, to read out at the counter. Fix counts with − and +, **Share** it with a friend, and tap **✓ Ordered** in the bar at the bottom when it's done. The bar also has **Clear** and the item count, like on the Round page.
 - **Settings:** first your **Items** (drinks and snacks), then the general settings.
   - Tap a row to edit that Item, or **Add Item** to create one.
   - Swipe a row to the left and tap the red **×** to delete it (or use **Delete** in its edit sheet). Deleted by mistake? Tap **Undo** in the message within 5 seconds.

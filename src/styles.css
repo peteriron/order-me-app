@@ -512,7 +512,7 @@ button {
 }
 
 /* ---------- show page: the Round read at arm's length (ADR-0005) ---------- */
-/* At least a screen tall, so Mark as ordered sits at the bottom even for a short Round. */
+/* At least a screen tall, so the bar sits at the bottom even for a short Round. */
 .show-page {
   min-height: 100%;
   padding-bottom: 0;
@@ -523,12 +523,11 @@ button {
   flex: 1;
 }
 
-/* Mark as ordered stays in reach while a long Round scrolls. */
+/* The Show page's bar (#55): the Round page's bar, edge to edge like there, sticky at the bottom. */
 .show-bar {
   position: sticky;
   bottom: 0;
-  padding: 0.75rem 0 1rem;
-  background: var(--bg);
+  margin: 0 -1rem;
 }
 
 .show-empty {

@@ -45,7 +45,7 @@ test('most ordered first; tiles hold still while composing, and reorder on place
   expect(await firstDrinks(page)).toEqual(['Rosé wine', 'Mint tea', 'Cola', 'Cola Zero'])
 
   await page.getByRole('region', { name: 'Round total' }).getByRole('button', { name: 'Show' }).tap()
-  await showPage(page).getByRole('button', { name: 'Mark as ordered' }).tap()
+  await showPage(page).getByRole('button', { name: 'Ordered' }).tap()
   // Mint tea and Rosé wine now tie on two Rounds each, so the Catalog order decides: Mint tea is listed first.
   await expect.poll(() => firstDrinks(page)).toEqual(['Mint tea', 'Rosé wine', 'Cola', 'Cola Zero'])
 

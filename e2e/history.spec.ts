@@ -44,7 +44,7 @@ test.beforeEach(async ({ page }) => {
 test('a Round marked as ordered shows up under Today with its time, total and summary', async ({ page }) => {
   for (const name of ['Duvel', 'Duvel', 'Cola']) await page.getByRole('button', { name: new RegExp(`^${name}(,|$)`) }).tap()
   await page.getByRole('region', { name: 'Round total' }).getByRole('button', { name: 'Show' }).tap()
-  await page.getByRole('button', { name: 'Mark as ordered' }).tap()
+  await page.getByRole('button', { name: 'Ordered' }).tap()
   await goToHistory(page)
 
   await expect(historyPage(page).getByRole('heading', { level: 2 })).toHaveText(['Today'])
