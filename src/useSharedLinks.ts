@@ -46,10 +46,10 @@ export function useSharedLinks(options: SharedLinkOptions) {
       })
 
     const receiveRound = (payload: string) =>
-      void decodeRound(payload).then((lines) => {
+      void decodeRound(payload).then((shared) => {
         const { t, actions, overlays, onRoundReceived } = latest.current
-        if (!lines) return overlays.notify(t.badShareLink)
-        const undo = actions.receiveRound(lines)
+        if (!shared) return overlays.notify(t.badShareLink)
+        const undo = actions.receiveRound(shared)
         onRoundReceived()
         overlays.notify(t.roundReceived, { label: t.undo, run: undo })
       })

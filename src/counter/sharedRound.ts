@@ -2,19 +2,22 @@ import type { Catalog, Item } from '../items/catalog.ts'
 import type { Pins } from '../items/pins.ts'
 import { fragmentLink, itemLine, pack, parseItemLine, unpack, type SharedItem } from '../items/sharedCatalog.ts'
 import { starterRow } from '../items/starter.ts'
-import type { ComposingRound, RoundLine } from '../round/round.ts'
+import { noteOf, type ComposingRound, type RoundLine, type RoundNote } from '../round/round.ts'
 import type { ShowOrder } from './showOrder.ts'
 
 /**
  * A shared Round travels in the app's own link, after `#round=`, so it never reaches a server: a one-time hand-over
  * of the Round as the sender's Show tab lists it, not a live sync.
  *
- * Format v1: the text "1", then one line per Round line, in the sender's Show order: the count, a tab, then the
- * Item as an Item line of the Items link (sharedCatalog.ts: a starter mark, or category, emoji and name). Packed the
- * same way as the Items link.
+ * Format v2: the text "2"; then the table and remark when set, as `t` or `r`, a tab and the text as a JSON string
+ * (so line breaks and quotes survive); then one line per Round line, in the sender's Show order: the count, a tab,
+ * then the Item as an Item line of the Items link (sharedCatalog.ts: a starter mark, or category, emoji and name).
+ * Packed the same way as the Items link. Format v1 (no table or remark) is still read.
  */
 const FRAGMENT = '#round='
-const VERSION = '1'
+const VERSION = '2'
+/** Longest table and remark taken from a link: the Show page's own limits. */
+const MAX_NOTE = { t: 10, r: 200 } as const
 /** Far beyond any real Round; a bigger count is a broken or crafted link. */
 const MAX_COUNT = 999
 
@@ -23,24 +26,45 @@ export interface SharedLine {
   count: number
 }
 
-export async function encodeRound(lines: RoundLine[]): Promise<string> {
-  return pack([VERSION, ...lines.map(({ item, count }) => `${count}\t${itemLine(item)}`)].join('\n'))
+/** A Round as it arrives from a link: its lines in the sender's order, and its table and remark if any. */
+export interface SharedRound extends RoundNote {
+  lines: SharedLine[]
 }
 
-/** The lines of a shared Round, or null when the link can't be read in full: used whole or not at all. */
-export async function decodeRound(payload: string): Promise<SharedLine[] | null> {
+export async function encodeRound(lines: RoundLine[], note: RoundNote = {}): Promise<string> {
+  const { table, remark } = noteOf(note)
+  return pack(
+    [
+      VERSION,
+      ...(table ? [`t\t${JSON.stringify(table)}`] : []),
+      ...(remark ? [`r\t${JSON.stringify(remark)}`] : []),
+      ...lines.map(({ item, count }) => `${count}\t${itemLine(item)}`),
+    ].join('\n'),
+  )
+}
+
+/** A shared Round, or null when the link can't be read in full: used whole or not at all. */
+export async function decodeRound(payload: string): Promise<SharedRound | null> {
   try {
     const [version, ...rows] = (await unpack(payload)).split('\n')
-    if (version !== VERSION || rows.length === 0) return null
+    if ((version !== '1' && version !== VERSION) || rows.length === 0) return null
     const lines: SharedLine[] = []
+    const note: RoundNote = {}
     for (const row of rows) {
+      const field = version === VERSION && (row.startsWith('t\t') || row.startsWith('r\t')) ? (row[0] as 't' | 'r') : null
+      if (field) {
+        const text: unknown = JSON.parse(row.slice(2))
+        if (typeof text !== 'string' || text.length > MAX_NOTE[field] || lines.length > 0) return null
+        note[field === 't' ? 'table' : 'remark'] = text
+        continue
+      }
       const tab = row.indexOf('\t')
       const count = Number(row.slice(0, tab))
       const item = tab > 0 ? parseItemLine(row.slice(tab + 1)) : null
       if (!item || !Number.isInteger(count) || count < 1 || count > MAX_COUNT) return null
       lines.push({ item, count })
     }
-    return lines
+    return lines.length > 0 ? { lines, ...noteOf(note) } : null
   } catch {
     return null
   }
@@ -62,12 +86,12 @@ type Receiving = { catalog: Catalog; round: ComposingRound; pins: Pins; showOrde
  * Takes in a shared Round: each line is matched to one of the receiver's Items (a starter Item by its mark, any Item
  * by name and category, ignoring case, in either language for starter Items), drinks the receiver doesn't have are
  * added to their Catalog, unpinned, and the shared Round replaces theirs. The sender's line order becomes their Show
- * order (#49). Nothing of theirs is removed or renamed; History and pins aren't touched. `undo` brings back their
+ * order (#49), and its table and remark replace theirs. Nothing of theirs is removed or renamed; History and pins aren't touched. `undo` brings back their
  * Round and Show order and removes the added Items.
  */
 export function receiveRound(
   state: Receiving,
-  lines: SharedLine[],
+  { lines, ...note }: SharedRound,
   newId: () => string,
 ): { next: Pick<Receiving, 'catalog' | 'round' | 'showOrder'>; undo: (current: Receiving) => Partial<Receiving> } {
   const catalog = [...state.catalog]
@@ -87,7 +111,7 @@ export function receiveRound(
   }
   const previous = { round: state.round, showOrder: state.showOrder }
   return {
-    next: { catalog, round: { counts }, showOrder: order },
+    next: { catalog, round: { counts, ...noteOf(note) }, showOrder: order },
     undo: (current) => ({
       ...previous,
       catalog: current.catalog.filter((i) => !added.has(i.id)),

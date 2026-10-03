@@ -123,6 +123,7 @@ Same size as other tiles, with a dashed `--border` outline, a large "+" and the 
 - Two quiet buttons on the title line (#57), only while the Round has something in it: **Text** (share icon) sends the plain-text Round straight to the phone's share sheet, or copies it with the "Copied to clipboard" toast; **QR** (QR icon) opens the Share Round sheet. Screen readers hear "Share as text" and "Share as QR code". The title may wrap to two lines beside them.
 - Lines follow the grid order, except on a phone that received a Shared Round: there the received **Show order** comes first (see CONTEXT.md). Nothing on screen marks it.
 - −/+ buttons are 44 px, `--surface-2`, and visually quieter than the line text, since the bartender is reading the text.
+- **Table and Remark**, above the lines while the Round has something in it: "Table" ("Tafel") with a short single-line field (8 rem wide, up to 10 characters), and below it "Remark" ("Opmerking") with a taller two-line field (up to 200 characters). Labels are the 13 px muted field labels. They're kept with the Round (also after closing the app), emptied by Clear (Undo brings them back) and by Ordered.
 - At the bottom, the Round page's bar (#55), sticky while a long Round scrolls: **Clear** (instant, with "Round cleared · Undo"; it stays on Show, which then shows its empty state), the item count, and **✓ Ordered** as the one accent-filled button. Ordered places the Round and slides back to Round with the "Round placed · Undo" toast.
 - Empty Round: the muted text "Nothing in this Round yet. Tap drinks on the Round page." with an outline "Back to Round" button, centred; no Share and no bar.
 - Wake lock is active while Show is the page on screen. There's no visible indicator unless it fails, and then nothing is shown either (silent fallback).
@@ -138,6 +139,8 @@ Same size as other tiles, with a dashed `--border` outline, a large "+" and the 
 ```
 - The lines are a compact dot-separated summary, with emoji omitted to keep it scannable. Tapping the card expands it into the full line list.
 - "Order again" is an outlined accent button. Delete (trash icon) asks for confirmation.
+
+- A Round placed with a table shows it after the time ("21:14 · Table 12"); a remark shows below the lines, muted ("Remark: No ice").
 
 ### Settings page
 The fourth page, titled "Settings". It holds two sections: **Items** (the Catalog, with its count beside the section title) and **General**.
@@ -197,6 +200,8 @@ Short, friendly and practical, with no exclamation marks except in the empty sta
 | Empty Round hint | Tap a drink to start | Tik op een drankje om te starten |
 | Search (icon and field) / placeholder / close | Search / Search drinks and snacks / Close search | Zoeken / Zoek drankjes en snacks / Zoeken sluiten |
 | Search, no match | No drinks or snacks match “{text}” | Geen drankjes of snacks gevonden voor “{text}” |
+| Table / Remark (Show page) | Table / Remark | Tafel / Opmerking |
+| In shares and History | Table {table} / Remark: {remark} | Tafel {table} / Opmerking: {remark} |
 | Show page, empty Round | Nothing in this Round yet. Tap drinks on the Round page. | Nog niets in dit rondje. Tik drankjes aan op de pagina Rondje. |
 | Show | Show | Toon |
 | Clear | Clear | Wissen |

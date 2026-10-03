@@ -24,7 +24,7 @@ function sender() {
 
 describe('Round link', () => {
   it('round-trips the lines in the order the Show tab lists them, with their counts', async () => {
-    const decoded = await decodeRound(await encodeRound(sender().lines))
+    const decoded = (await decodeRound(await encodeRound(sender().lines)))!.lines
     expect(decoded!.map((l) => [l.item.name, l.count])).toEqual([
       ['Cola', 3],
       ['Kriek', 2],
@@ -47,7 +47,10 @@ describe('Round link', () => {
     expect(await decodeRound(payload.slice(0, -8))).toBeNull()
     expect(await decodeRound('not base64!')).toBeNull()
     for (const text of [
-      '2\n3\t*cola', // unknown version
+      '3\n3\t*cola', // unknown version
+      '2\nt\t"12"', // a table but no lines
+      '2\nt\t12\n3\t*cola', // a table that isn't a JSON string
+      '2\n3\t*cola\nt\t"12"', // a table after the lines
       '1', // no lines
       '1\n0\t*cola', // a count of zero
       '1\n2.5\t*cola', // not a whole number
@@ -58,6 +61,31 @@ describe('Round link', () => {
     ]) {
       expect(await decodeRound(await pack(text)), text).toBeNull()
     }
+  })
+})
+
+describe('the table and remark in a Round link', () => {
+  it('travel along, including line breaks and quotes in the remark', async () => {
+    const shared = await decodeRound(await encodeRound(sender().lines, { table: '12', remark: 'No ice\nand "cold" glasses' }))
+    expect(shared!.table).toBe('12')
+    expect(shared!.remark).toBe('No ice\nand "cold" glasses')
+    expect(shared!.lines).toHaveLength(3)
+  })
+
+  it('are left out when empty, and a link from before them still works', async () => {
+    const shared = await decodeRound(await encodeRound(sender().lines, { table: ' ', remark: '' }))
+    expect(shared).not.toHaveProperty('table')
+    expect(await decodeRound(await pack('1\n3\t*cola'))).toMatchObject({ lines: [{ count: 3 }] })
+  })
+
+  it('replace the receiver’s, and Undo brings theirs back', async () => {
+    const shared = (await decodeRound(await encodeRound(sender().lines, { table: '12' })))!
+    const catalog = seedCatalog('en', ids('friend'))
+    const friend = { catalog, round: { counts: {}, remark: 'theirs' }, pins: [], showOrder: [] }
+    const { next, undo } = receiveRound(friend, shared, ids('new'))
+    expect(next.round).toMatchObject({ table: '12' })
+    expect(next.round).not.toHaveProperty('remark')
+    expect({ ...friend, ...next, ...undo({ ...friend, ...next }) }.round).toEqual({ counts: {}, remark: 'theirs' })
   })
 })
 
@@ -85,7 +113,7 @@ describe('receiving a Round', () => {
       pins: [],
       showOrder: [],
     }
-    const { next } = receiveRound(friend, [{ item: { name: 'Kriek', category: 'drink', emoji: '🍷' }, count: 2 }], ids())
+    const { next } = receiveRound(friend, { lines: [{ item: { name: 'Kriek', category: 'drink', emoji: '🍷' }, count: 2 }] }, ids())
     expect(next.catalog).toEqual(friend.catalog)
     expect(next.round.counts).toEqual({ k: 2 })
   })
@@ -93,7 +121,7 @@ describe('receiving a Round', () => {
   it('matches a renamed sender Item to a friend’s starter Item by either of its names', () => {
     // The sender's "Water plat" is a plain name (say, typed by hand); the friend has the starter Item.
     const friend = { catalog: seedCatalog('en', ids('friend')), round: emptyRound(), pins: [], showOrder: [] }
-    const { next } = receiveRound(friend, [{ item: { name: 'water plat', category: 'drink', emoji: '💧' }, count: 1 }], ids())
+    const { next } = receiveRound(friend, { lines: [{ item: { name: 'water plat', category: 'drink', emoji: '💧' }, count: 1 }] }, ids())
     expect(next.catalog).toHaveLength(friend.catalog.length)
     expect(next.round.counts).toEqual({ [byName(friend.catalog, 'Still water').id]: 1 })
   })

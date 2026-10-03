@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { markOrdered } from '../history/history.ts'
 import type { Item, Sections } from '../items/catalog.ts'
 import { add, emptyRound, roundLines } from '../round/round.ts'
+import { messages } from '../shared/i18n.ts'
 import { shareText } from './share.ts'
 import { showSections } from './showOrder.ts'
 
@@ -26,7 +27,7 @@ describe('the Show order from a shared Round', () => {
   it('is the order of what Share as text sends and what History saves', () => {
     const round = add(add(add(emptyRound(), 'Duvel'), 'Water'), 'Water')
     const sections = showSections(grid, ['Water'])
-    expect(shareText(roundLines(round, sections), 'Total')).toBe('2× Water\n1× Duvel\nTotal: 3')
+    expect(shareText(roundLines(round, sections), messages.en)).toBe('2× Water\n1× Duvel\nTotal: 3')
     const { next } = markOrdered({ round, history: [] }, sections, { id: 'r1', placedAt: '2026-10-03T20:00:00.000Z' })
     expect(next.history[0]!.lines.map((l) => l.name)).toEqual(['Water', 'Duvel'])
   })

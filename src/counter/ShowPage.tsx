@@ -15,7 +15,7 @@ interface ShowPageProps {
   /** True while this is the page on screen: the screen is kept awake only then. */
   active: boolean
   t: Messages
-  actions: Pick<AppActions, 'addToRound' | 'removeFromRound' | 'clearRound'>
+  actions: Pick<AppActions, 'addToRound' | 'removeFromRound' | 'clearRound' | 'setRoundNote'>
   /** Places the Round and returns its Undo (see useAppState). */
   onPlace: (sections: Sections) => () => void
   overlays: Overlays
@@ -66,7 +66,7 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
   const clear = () => overlays.notify(t.roundCleared, { label: t.undo, run: actions.clearRound() })
   /** The Text button: the Round as plain text, straight to the phone's share sheet, or copied (#57). */
   const shareAsText = async () => {
-    const outcome = await shareOrCopy(shareText(lines, t.total), navigator)
+    const outcome = await shareOrCopy(shareText(lines, t, round), navigator)
     if (outcome === 'copied') overlays.notify(t.copied)
   }
   const markOrdered = () => {
@@ -137,6 +137,32 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
         </div>
       ) : (
         <>
+          {/* Table and remark: kept with the Round, saved in History, sent with Text and QR; Clear empties them. */}
+          <div className="round-note">
+            <div className="field">
+              <label htmlFor="round-table">{t.tableLabel}</label>
+              <input
+                id="round-table"
+                className="input input-table"
+                value={round.table ?? ''}
+                maxLength={10}
+                autoComplete="off"
+                enterKeyHint="done"
+                onChange={(e) => actions.setRoundNote({ table: e.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="round-remark">{t.remarkLabel}</label>
+              <textarea
+                id="round-remark"
+                className="input input-remark"
+                value={round.remark ?? ''}
+                rows={2}
+                maxLength={200}
+                onChange={(e) => actions.setRoundNote({ remark: e.target.value })}
+              />
+            </div>
+          </div>
           <div className="counter-body" ref={bodyRef}>
             {list('drink')}
             {hasSnacks && (

@@ -35,7 +35,8 @@ It's a web app you install on your home screen. It works offline, so bad bar Wi-
 2. Can't spot a drink in a long list? Tap the **search** icon next to the title and type a few letters: the tiles filter as you type, and tapping one still counts it. The **×** closes the search.
 3. Something missing? Tap **+ New** at the end of the grid to add it to your Items and to the Round in one go.
 4. At the counter, tap **Show** (or swipe to it). Read the list out, or show the screen to the bartender. Fix counts with − and + if someone changes their mind.
-5. Tap **✓ Ordered** at the bottom of the Show page when it's done. The Round moves to History and you're back on an empty grid. Tapped it too early? **Undo** appears for 5 seconds.
+5. Optionally, fill in the **Table** number and a **Remark** at the top of the Show page. They're kept in History and sent along when you share the Round as **Text** or **QR**; **Clear** empties them.
+6. Tap **✓ Ordered** at the bottom of the Show page when it's done. The Round moves to History and you're back on an empty grid. Tapped it too early? **Undo** appears for 5 seconds.
 
 ### Move around
 

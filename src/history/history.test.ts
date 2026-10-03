@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { catalogSections, type Item } from '../items/catalog.ts'
-import { add, emptyRound, totalOf } from '../round/round.ts'
+import { add, emptyRound, totalOf, withNote } from '../round/round.ts'
 import { deletePlacedRound, groupByDay, markOrdered, orderAgain, placedTotal } from './history.ts'
 
 describe('marking a Round as ordered', () => {
@@ -129,5 +129,31 @@ describe('order again', () => {
     const { round } = orderAgain(lastFriday, [duvel, chips])
     add(round, 'duvel')
     expect(lastFriday).toEqual(before)
+  })
+})
+
+describe('the table and remark in History', () => {
+  const duvel: Item = { id: 'duvel', name: 'Duvel', category: 'drink', emoji: '🍺' }
+  const sections = catalogSections([duvel])
+  const meta = { id: 'r1', placedAt: '2026-10-04T20:00:00.000Z' }
+
+  it('are saved with the placed Round, tidied, and the next Round starts without them', () => {
+    const round = withNote(add(emptyRound(), 'duvel'), { table: ' 12 ', remark: 'No ice ' })
+    const { next } = markOrdered({ round, history: [] }, sections, meta)
+    expect(next.history[0]).toMatchObject({ table: '12', remark: 'No ice' })
+    expect(next.round).toEqual(emptyRound())
+  })
+
+  it('are left out when empty', () => {
+    const round = withNote(add(emptyRound(), 'duvel'), { table: '', remark: '  ' })
+    const { next } = markOrdered({ round, history: [] }, sections, meta)
+    expect(next.history[0]).not.toHaveProperty('table')
+    expect(next.history[0]).not.toHaveProperty('remark')
+  })
+
+  it('come back with Order again', () => {
+    const round = withNote(add(emptyRound(), 'duvel'), { table: '12', remark: 'No ice' })
+    const placed = markOrdered({ round, history: [] }, sections, meta).next.history[0]!
+    expect(orderAgain(placed, [duvel]).round).toEqual({ counts: { duvel: 1 }, table: '12', remark: 'No ice' })
   })
 })

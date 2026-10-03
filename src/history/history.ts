@@ -1,5 +1,5 @@
 import type { Catalog, Category, Sections } from '../items/catalog.ts'
-import { emptyRound, roundLines, type ComposingRound } from '../round/round.ts'
+import { emptyRound, noteOf, roundLines, type ComposingRound, type RoundNote } from '../round/round.ts'
 
 /** One line of a placed Round: a frozen copy of the Item as it was (ADR-0001) plus its id, for Popularity only (ADR-0002). */
 export interface PlacedLine {
@@ -10,7 +10,7 @@ export interface PlacedLine {
   count: number
 }
 
-export interface PlacedRound {
+export interface PlacedRound extends RoundNote {
   id: string
   /** ISO 8601 timestamp. */
   placedAt: string
@@ -34,6 +34,7 @@ export function markOrdered(
 ): { next: RoundAndHistory; undo: (current: RoundAndHistory) => RoundAndHistory } {
   const placed: PlacedRound = {
     ...meta,
+    ...noteOf(state.round),
     lines: roundLines(state.round, sections).map(({ item, count }) => ({
       itemId: item.id,
       name: item.name,
@@ -94,5 +95,5 @@ export function orderAgain(placed: PlacedRound, catalog: Catalog): { round: Comp
     if (inCatalog.has(line.itemId)) counts[line.itemId] = line.count
     else skipped++
   }
-  return { round: { counts }, skipped }
+  return { round: { counts, ...noteOf(placed) }, skipped }
 }

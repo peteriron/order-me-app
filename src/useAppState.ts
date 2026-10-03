@@ -3,8 +3,8 @@ import { deletePlacedRound, markOrdered } from './history/history.ts'
 import { addToCatalog, deleteWithUndo, editItem, type ItemDraft, type Sections } from './items/catalog.ts'
 import { movePin, pinsAfterEdit, togglePin } from './items/pins.ts'
 import { replaceCatalog, type SharedItem } from './items/sharedCatalog.ts'
-import { receiveRound, type SharedLine } from './counter/sharedRound.ts'
-import { add, clearWithUndo, remove, type ComposingRound } from './round/round.ts'
+import { receiveRound, type SharedRound } from './counter/sharedRound.ts'
+import { add, clearWithUndo, remove, withNote, type ComposingRound, type RoundNote } from './round/round.ts'
 import type { ThemeSetting } from './settings/settings.ts'
 import type { LanguageSetting, Locale } from './shared/i18n.ts'
 import { resetApp } from './settings/reset.ts'
@@ -66,6 +66,8 @@ export function useAppState(seedLocale: Locale) {
         return () => update(() => (undo ? { round: undo() } : {}))
       },
       replaceRound: (round: ComposingRound) => update(() => ({ round })),
+      /** Sets the Round's table and/or remark, as typed on the Show page. */
+      setRoundNote: (note: RoundNote) => update((s) => ({ round: withNote(s.round, note) })),
       deleteRound: (roundId: string) => update((s) => ({ history: deletePlacedRound(s.history, roundId) })),
       /** Adds a new Item to the Catalog, and optionally straight into the composing Round ("+ New" tile). */
       createItem: (draft: ItemDraft, options: { addToRound?: boolean } = {}) => {
@@ -95,10 +97,10 @@ export function useAppState(seedLocale: Locale) {
        * Takes in a shared Round (see receiveRound): replaces the Round, adding missing Items. Returns its Undo, which
        * brings back the previous Round and removes the added Items.
        */
-      receiveRound: (lines: SharedLine[]) => {
+      receiveRound: (shared: SharedRound) => {
         let undo: ((s: AppState) => Partial<AppState>) | undefined
         update((s) => {
-          const received = receiveRound(s, lines, () => crypto.randomUUID())
+          const received = receiveRound(s, shared, () => crypto.randomUUID())
           undo = received.undo
           return received.next
         })

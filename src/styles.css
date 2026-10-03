@@ -555,6 +555,24 @@ button {
   gap: 0.75rem;
 }
 
+/* Table and remark at the top of the Show page: a short field, and a taller one below it. */
+.round-note {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.input-table {
+  width: 8rem;
+}
+
+.input-remark {
+  min-height: 4.5rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+  resize: vertical;
+}
+
 .counter-body {
   flex: 1;
 }
@@ -700,6 +718,17 @@ button {
 
 .history-card-head span {
   color: var(--text-muted);
+}
+
+.history-table {
+  font-weight: 600;
+}
+
+.history-remark {
+  margin: 0;
+  color: var(--text-muted);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
 }
 
 .history-summary {

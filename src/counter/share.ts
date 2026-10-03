@@ -1,9 +1,23 @@
-import type { RoundLine } from '../round/round.ts'
+import { noteOf, type RoundLine, type RoundNote } from '../round/round.ts'
+import type { Messages } from '../shared/i18n.ts'
 
-/** The Round as plain text for the share sheet: "{count}× {name}" per line in grid order, then the total. No emoji. */
-export function shareText(lines: RoundLine[], totalLabel: string): string {
+/**
+ * The Round as plain text for the share sheet: the table first ("Table 12"), then "{count}× {name}" per line in
+ * the Show tab's order, the total, and the remark last ("Remark: …"). Empty table or remark are left out. No emoji.
+ */
+export function shareText(
+  lines: RoundLine[],
+  t: Pick<Messages, 'total' | 'tableLine' | 'remarkLine'>,
+  note: RoundNote = {},
+): string {
+  const { table, remark } = noteOf(note)
   const total = lines.reduce((sum, line) => sum + line.count, 0)
-  return [...lines.map(({ item, count }) => `${count}× ${item.name}`), `${totalLabel}: ${total}`].join('\n')
+  return [
+    ...(table ? [t.tableLine(table)] : []),
+    ...lines.map(({ item, count }) => `${count}× ${item.name}`),
+    `${t.total}: ${total}`,
+    ...(remark ? [t.remarkLine(remark)] : []),
+  ].join('\n')
 }
 
 /** The slice of `navigator` that sharing needs; the real one satisfies it. */
