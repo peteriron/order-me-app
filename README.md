@@ -9,6 +9,7 @@ It's a web app you install on your home screen. It works offline, so bad bar Wi-
 ## What it does
 
 - **Tap to count.** Big tiles for every drink and snack; each tap adds one, and a small − takes one off. The Round is saved on every tap, so locking the phone or closing the app loses nothing.
+- **Search.** Type a few letters to find a drink in a long list: the tiles filter as you type ("rose" finds "Rosé wine"), and tapping one still counts it.
 - **Show page.** One tap or swipe shows the whole Round in large type ("3 × 🍺 Duvel") with the total, and keeps the screen awake while you read it out. Counts can still be fixed there, and the bar at the bottom has **Clear**, the item count and **✓ Ordered**, like the Round page's.
 - **Pass the Round on.** Whoever goes to the counter can take over your Round: tap **QR** on the Show page, they scan it, and their app opens with the same drinks and counts, in your order. You can also copy the link, or tap **Text** to send the Round as plain text to a chat.
 - **History.** Placed Rounds are kept, grouped by day. "Order again" repeats last week's Round in one tap.
@@ -42,6 +43,7 @@ Swipe sideways between the four pages, or tap their tabs at the bottom of the sc
 
 **History** ← **Round** → **Show** → **Settings**
 
+- **Round:** the tiles. Tap to count; the **search** icon next to the title filters them as you type, until you close it with **×**.
 - **History:** past Rounds by day. **Order again** puts a past Round back on the grid, and the bin icon deletes one.
 - **Show:** the Round in large type, to read out at the counter. Fix counts with − and +, send it as **Text** or pass it on by **QR**, and tap **✓ Ordered** in the bar at the bottom when it's done. The bar also has **Clear** and the item count, like on the Round page.
 - **Settings:** first your **Items** (drinks and snacks), then the general settings.
