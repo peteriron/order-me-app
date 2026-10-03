@@ -136,16 +136,24 @@ test('the Undo toast goes away after 5 seconds', async ({ page }) => {
   await expect(toast).toHaveCount(0)
 })
 
-test('long names fit their line instead of breaking mid-word', async ({ page }) => {
-  await tapTiles(page, 'Bitterballen', 'Sparkling water')
-  await openShowPage(page)
+test.describe('on a Dutch phone', () => {
+  test.use({ locale: 'nl-BE' })
 
-  const overflowing = await showPage(page)
-    .locator('.counter-what')
-    .evaluateAll((els) => els.filter((el) => el.scrollWidth > el.clientWidth).map((el) => el.textContent))
-  expect(overflowing).toEqual([])
-  // Still one piece: the name wasn't split across lines inside a word.
-  const bitterballen = showPage(page).getByRole('listitem').filter({ hasText: 'Bitterballen' }).locator('.counter-what')
-  const lineHeight = await bitterballen.evaluate((el) => parseFloat(getComputedStyle(el).lineHeight))
-  expect((await bitterballen.boundingBox())!.height).toBeLessThan(lineHeight * 1.5)
+  // "Bitterballen" is the long single word ("Dutch meatballs" in English wraps between its words).
+  test('long names fit their line instead of breaking mid-word', async ({ page }) => {
+    await page.goto('./')
+    await tapTiles(page, 'Bitterballen', 'Water bruis')
+    await page.getByRole('region', { name: 'Totaal van het rondje' }).getByRole('button', { name: 'Toon' }).tap()
+    const toon = page.getByRole('region', { name: 'Rondje voor de toog' })
+    await expect(toon.getByRole('listitem')).toHaveCount(2)
+
+    const overflowing = await toon
+      .locator('.counter-what')
+      .evaluateAll((els) => els.filter((el) => el.scrollWidth > el.clientWidth).map((el) => el.textContent))
+    expect(overflowing).toEqual([])
+    // Still one piece: the name wasn't split across lines inside a word.
+    const bitterballen = toon.getByRole('listitem').filter({ hasText: 'Bitterballen' }).locator('.counter-what')
+    const lineHeight = await bitterballen.evaluate((el) => parseFloat(getComputedStyle(el).lineHeight))
+    expect((await bitterballen.boundingBox())!.height).toBeLessThan(lineHeight * 1.5)
+  })
 })

@@ -38,7 +38,7 @@ describe('starter Catalog', () => {
 
   it('seeds four snacks', () => {
     const snacks = seedCatalog('en', sequentialIds()).filter((i) => i.category === 'snack')
-    expect(snacks.map((i) => i.name)).toEqual(['Chips', 'Nuts', 'Cheese', 'Bitterballen'])
+    expect(snacks.map((i) => i.name)).toEqual(['Chips', 'Nuts', 'Cheese', 'Dutch meatballs'])
   })
 
   it('gives every Item its own id, even when names repeat across languages', () => {
