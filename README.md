@@ -41,7 +41,7 @@ Swipe sideways between the four pages, or tap their tabs at the bottom of the sc
 **History** ← **Round** → **Show** → **Settings**
 
 - **History:** past Rounds by day. **Order again** puts a past Round back on the grid, and the bin icon deletes one.
-- **Show:** the Round in large type, to read out at the counter. Fix counts with − and +, **Share** it with a friend, and tap **✓ Ordered** in the bar at the bottom when it's done. The bar also has **Clear** and the item count, like on the Round page.
+- **Show:** the Round in large type, to read out at the counter. Fix counts with − and +, send it as **Text** or pass it on by **QR**, and tap **✓ Ordered** in the bar at the bottom when it's done. The bar also has **Clear** and the item count, like on the Round page.
 - **Settings:** first your **Items** (drinks and snacks), then the general settings.
   - Tap a row to edit that Item, or **Add Item** to create one.
   - Swipe a row to the left and tap the red **×** to delete it (or use **Delete** in its edit sheet). Deleted by mistake? Tap **Undo** in the message within 5 seconds.
