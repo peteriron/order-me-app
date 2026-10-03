@@ -4,7 +4,6 @@ import { roundLines, totalOf, type ComposingRound } from '../round/round.ts'
 import type { Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
 import type { AppActions } from '../useAppState.ts'
-import { shareOrCopy, shareText } from './share.ts'
 import { browserHost, keepScreenAwake } from './wakeLock.ts'
 
 interface ShowPageProps {
@@ -20,6 +19,8 @@ interface ShowPageProps {
   overlays: Overlays
   /** Slides to the Round page: from the empty state, and after Mark as ordered. */
   onGoToRound: () => void
+  /** Opens the Share Round sheet. */
+  onShare: () => void
 }
 
 /** Smallest size a name may shrink to before it is allowed to break mid-word. */
@@ -44,7 +45,7 @@ function fitName(el: HTMLElement) {
  * The Show page (ADR-0005): the Round in large type to read out or show to the bartender, and the place to mark it
  * as ordered. A swipe page between Round and Items; Clear lives on the Round page only.
  */
-export function ShowPage({ round, sections, active, t, actions, onPlace, overlays, onGoToRound }: ShowPageProps) {
+export function ShowPage({ round, sections, active, t, actions, onPlace, overlays, onGoToRound, onShare }: ShowPageProps) {
   const lines = roundLines(round, sections)
   const total = totalOf(round)
   const bodyRef = useRef<HTMLDivElement>(null)
@@ -63,10 +64,6 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
     const undo = onPlace(sections)
     onGoToRound()
     overlays.notify(t.roundPlaced, { label: t.undo, run: undo })
-  }
-  const share = async () => {
-    const outcome = await shareOrCopy(shareText(lines, t.total), navigator)
-    if (outcome === 'copied') overlays.notify(t.copied)
   }
 
   const list = (category: 'drink' | 'snack') => (
@@ -104,7 +101,7 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
           {t.counterTitle}
         </h1>
         {total > 0 && (
-          <button type="button" className="btn btn-quiet" onClick={share}>
+          <button type="button" className="btn btn-quiet" onClick={onShare}>
             <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
               <path d="M12 15V3M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
             </svg>

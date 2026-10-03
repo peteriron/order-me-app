@@ -150,16 +150,16 @@ A bottom sheet containing:
 
 Cancel discards all changes.
 
-### Share sheet
-A bottom sheet, like the Item sheet, containing:
-- The title "Share"
+### Share sheets (Share Items, Share Round)
+Two bottom sheets, like the Item sheet, built the same way: **Share Items** from the Settings page's Share, **Share Round** from the Show page's Share. Each contains:
+- The title: "Share Items" or "Share Round"
 - The QR code, up to 280 px square, black on white in both themes (cameras read dark-on-light best), with rounded corners and crisp, unsmoothed modules
-- A muted hint under it: "Scan to open the page"
-- "Save image" and "Copy link" side by side as outline buttons, then a quiet "Done"
+- A muted hint under it: "Scan to open the page" (Items) or "Scan to open the Round" (Round)
+- Outline buttons side by side: Share Items has "Save image" and "Copy link"; Share Round has "Copy link" and "Share as text" (the plain-text Round through the phone's share sheet, or copied). Then a quiet "Done"
 
 Save image downloads `orderme-items.png` (the QR at 12 px per module, with a white margin). Copy link copies the link and shows the "Copied to clipboard" toast. When the Catalog is too big for a QR code that scans reliably (beyond QR version 20), the code is replaced by "Too many Items for a QR code that scans reliably. Copy the link instead." and Save image is disabled.
 
-Opening a shared link on a phone that already has Items shows the standard confirm dialog, with "Replace" as the confirm button. A link that can't be read shows a toast and changes nothing.
+Opening a shared Items link on a phone that already has Items shows the standard confirm dialog, with "Replace" as the confirm button. Opening a shared Round link replaces the Round without asking, slides to the Show page and shows the "Round received · Undo" toast. A link that can't be read shows a toast and changes nothing.
 
 ### Toast
 Bottom-centred above the bottom bar, `--surface-2`, 48 px tall, with an optional accent "Undo" action. It auto-dismisses after 5 s. Only one is shown at a time.
@@ -209,6 +209,10 @@ Short, friendly and practical, with no exclamation marks except in the empty sta
 | Copied (share fallback, Copy link) | Copied to clipboard | Gekopieerd |
 | Share (Settings page, Items section) | Share | Delen |
 | Share sheet hint | Scan to open the page | Scan om de pagina te openen |
+| Share sheet titles | Share Items / Share Round | Items delen / Rondje delen |
+| Share Round hint | Scan to open the Round | Scan om het rondje te openen |
+| Share as text | Share as text | Delen als tekst |
+| Round received toast | Round received · Undo | Rondje ontvangen · Ongedaan maken |
 | QR too big | Too many Items for a QR code that scans reliably. Copy the link instead. | Te veel items voor een QR-code die vlot scant. Kopieer de link. |
 | Save image / Copy link / Done | Save image / Copy link / Done | Afbeelding bewaren / Link kopiëren / Klaar |
 | Replace Catalog confirm | Replace your {n} Items with the {m} shared Items? History is kept. | Je {n} items vervangen door de {m} gedeelde items? De geschiedenis blijft behouden. |

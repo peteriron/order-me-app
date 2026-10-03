@@ -28,6 +28,10 @@ _Avoid_: Favourite, starred
 A copy of the Catalog (each Item's name, category and emoji, nothing else: no History, Round, settings or pins) carried in a link or QR code so a friend can start with the same Items. Opening one replaces the recipient's Catalog: straight away on a first launch, otherwise after a confirm. The replaced Catalog's Items get fresh ids, the composing Round is emptied and History is kept (ADR-0004).
 _Avoid_: Menu export, sync
 
+**Shared Round** (v3):
+A one-time copy of the composing Round as the sender's Show tab lists it (each line's Item and count, in that order) carried in a link or QR code, so a friend can take the Round to the counter. It is a hand-over, not a live sync. Opening one always replaces the recipient's composing Round, without asking (Undo for 5 seconds), and adds any Items they don't have; their Items are otherwise untouched (ADR-0004).
+_Avoid_: Round sync, live order
+
 **Counter view**:
 The large-type presentation of the composing Round that the Operator reads from or shows to the bartender, shown on the **Show** page (a swipe page between Round and Items, ADR-0005); the screen stays awake while that page is on screen, and it is where a Round is marked as ordered.
 _Avoid_: Summary, review screen, receipt

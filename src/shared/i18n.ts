@@ -67,6 +67,12 @@ export interface Messages {
   pinNamed: (name: string) => string
   shareItems: string
   shareItemsHint: string
+  shareItemsTitle: string
+  shareRound: string
+  shareRoundHint: string
+  qrRoundAlt: (n: number) => string
+  shareAsText: string
+  roundReceived: string
   qrAlt: (n: number) => string
   tooBigForQr: string
   saveImage: string
@@ -155,6 +161,12 @@ export const messages: Record<Locale, Messages> = {
     pinNamed: (name) => `Pin ${name}`,
     shareItems: 'Share',
     shareItemsHint: 'Scan to open the page',
+    shareItemsTitle: 'Share Items',
+    shareRound: 'Share Round',
+    shareRoundHint: 'Scan to open the Round',
+    qrRoundAlt: (n) => `QR code with your Round of ${n} ${n === 1 ? 'item' : 'items'}`,
+    shareAsText: 'Share as text',
+    roundReceived: 'Round received',
     qrAlt: (n) => `QR code with your ${n} Items`,
     tooBigForQr: 'Too many Items for a QR code that scans reliably. Copy the link instead.',
     saveImage: 'Save image',
@@ -241,6 +253,12 @@ export const messages: Record<Locale, Messages> = {
     pinNamed: (name) => `${name} vastzetten`,
     shareItems: 'Delen',
     shareItemsHint: 'Scan om de pagina te openen',
+    shareItemsTitle: 'Items delen',
+    shareRound: 'Rondje delen',
+    shareRoundHint: 'Scan om het rondje te openen',
+    qrRoundAlt: (n) => `QR-code met je rondje van ${n} ${n === 1 ? 'item' : 'items'}`,
+    shareAsText: 'Delen als tekst',
+    roundReceived: 'Rondje ontvangen',
     qrAlt: (n) => `QR-code met je ${n} items`,
     tooBigForQr: 'Te veel items voor een QR-code die vlot scant. Kopieer de link.',
     saveImage: 'Afbeelding bewaren',

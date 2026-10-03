@@ -8,7 +8,7 @@ declare global {
 }
 
 const itemsPage = (page: Page) => page.getByRole('region', { name: 'Items' })
-const shareSheet = (page: Page) => page.getByRole('dialog', { name: 'Share', exact: true })
+const shareSheet = (page: Page) => page.getByRole('dialog', { name: 'Share Items' })
 const confirmDialog = (page: Page) => page.getByRole('alertdialog')
 
 async function goTo(page: Page, name: 'History' | 'Round' | 'Settings') {

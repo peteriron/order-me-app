@@ -1,5 +1,5 @@
 import { emptyRound, type ComposingRound } from '../round/round.ts'
-import { checkDraft, type Catalog, type Category, type ItemDraft } from './catalog.ts'
+import { checkDraft, type Catalog, type Category, type Item, type ItemDraft } from './catalog.ts'
 import type { Pins } from './pins.ts'
 import { starterRow } from './starter.ts'
 
@@ -26,26 +26,43 @@ const MAX_TEXT_BYTES = 64 * 1024
 export type SharedItem = ItemDraft & { starter?: string }
 
 export async function encodeCatalog(catalog: Catalog): Promise<string> {
-  const lines = catalog.map((item) => {
-    const looks = `${CATEGORY_CODES[item.category]}${item.emoji}`
-    const row = item.starter ? starterRow(item.starter) : undefined
-    if (!row) return `${looks}\t${item.name}`
-    const changed = item.category !== row.category || item.emoji !== row.emoji
-    return changed ? `*${row.key}\t${looks}` : `*${row.key}`
-  })
-  const stream = new Blob([[VERSION, ...lines].join('\n')]).stream().pipeThrough(new CompressionStream('deflate-raw'))
+  return pack([VERSION, ...catalog.map(itemLine)].join('\n'))
+}
+
+/** One Item as a line of a shared link (format v2, see above). The Round link (sharedRound.ts) uses it too. */
+export function itemLine(item: Item): string {
+  const looks = `${CATEGORY_CODES[item.category]}${item.emoji}`
+  const row = item.starter ? starterRow(item.starter) : undefined
+  if (!row) return `${looks}\t${item.name}`
+  const changed = item.category !== row.category || item.emoji !== row.emoji
+  return changed ? `*${row.key}\t${looks}` : `*${row.key}`
+}
+
+/** Reads an Item line; `starterMarks` is false for format v1, which had none. Null when anything is invalid. */
+export function parseItemLine(line: string, starterMarks = true): SharedItem | null {
+  return line.startsWith('*') ? (starterMarks ? starterLine(line.slice(1)) : null) : plainLine(line)
+}
+
+/** Deflates and base64url-encodes a link's text. */
+export async function pack(text: string): Promise<string> {
+  const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('deflate-raw'))
   return toBase64Url(new Uint8Array(await new Response(stream).arrayBuffer()))
+}
+
+/** The text of a link payload. Throws when it isn't valid base64url, deflate or UTF-8, or inflates too large. */
+export async function unpack(payload: string): Promise<string> {
+  return inflate(fromBase64Url(payload))
 }
 
 /** The Items in a shared link, or null when it can't be read in full: a link is used whole or not at all. */
 export async function decodeCatalog(payload: string): Promise<SharedItem[] | null> {
   try {
-    const text = await inflate(fromBase64Url(payload))
+    const text = await unpack(payload)
     const [version, ...lines] = text.split('\n')
     if ((version !== '1' && version !== VERSION) || lines.length === 0) return null
     const items: SharedItem[] = []
     for (const line of lines) {
-      const item = line.startsWith('*') && version === VERSION ? starterLine(line.slice(1)) : plainLine(line)
+      const item = parseItemLine(line, version === VERSION)
       if (!item) return null
       items.push(item)
     }
@@ -82,14 +99,19 @@ function checkedItem(draft: ItemDraft): SharedItem | null {
 
 /** The app's address with the Shared Catalog in its fragment. */
 export function shareLink(appUrl: string, payload: string): string {
-  const url = new URL(appUrl)
-  url.hash = ''
-  return `${url.href.replace(/#$/, '')}${FRAGMENT}${payload}`
+  return fragmentLink(appUrl, FRAGMENT, payload)
 }
 
 /** The encoded Catalog in an address fragment, or null when the fragment isn't a shared link. */
 export function sharedPayload(hash: string): string | null {
   return hash.startsWith(FRAGMENT) ? hash.slice(FRAGMENT.length) : null
+}
+
+/** The app's address with `fragment` and `payload` after it, replacing any fragment it had. */
+export function fragmentLink(appUrl: string, fragment: string, payload: string): string {
+  const url = new URL(appUrl)
+  url.hash = ''
+  return `${url.href.replace(/#$/, '')}${fragment}${payload}`
 }
 
 /**
@@ -113,7 +135,7 @@ async function inflate(bytes: Uint8Array): Promise<string> {
     size += value.length
     if (size > MAX_TEXT_BYTES) {
       await reader.cancel()
-      throw new Error('Shared Catalog too large')
+      throw new Error('Shared link too large')
     }
     chunks.push(value)
   }
