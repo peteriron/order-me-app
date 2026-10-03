@@ -16,6 +16,14 @@ describe('starter Items follow the app language', () => {
     expect(names(localizeCatalog(catalog, 'nl')).slice(0, 4)).toEqual(['Cola', 'Cola Zero', 'Water plat', 'Water bruis'])
   })
 
+  it('names Bitterballen "Dutch meatballs" in English', () => {
+    const snacks = seedCatalog('nl', ids()).filter((i) => i.category === 'snack')
+    expect(names(localizeCatalog(snacks, 'nl')).at(-1)).toBe('Bitterballen')
+    expect(names(localizeCatalog(snacks, 'en')).at(-1)).toBe('Dutch meatballs')
+    // A Catalog saved with the old English name still counts it as the starter snack.
+    expect(names(localizeCatalog(recognizeStarters([plain('Bitterballen', 'snack')]), 'en'))).toEqual(['Dutch meatballs'])
+  })
+
   it('never translates an Item the Operator added', () => {
     const kriek = plain('Kriek')
     expect(localizeCatalog([kriek], 'nl')).toEqual([kriek])

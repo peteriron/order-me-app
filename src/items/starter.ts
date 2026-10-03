@@ -47,7 +47,7 @@ export const STARTER: readonly StarterRow[] = [
   row('chips', '🥔', 'snack', 'Chips', 'Chips'),
   row('nuts', '🥜', 'snack', 'Nuts', 'Nootjes'),
   row('cheese', '🧀', 'snack', 'Cheese', 'Kaasblokjes'),
-  row('bitterballen', '🧆', 'snack', 'Bitterballen', 'Bitterballen'),
+  row('bitterballen', '🧆', 'snack', 'Dutch meatballs', 'Bitterballen'),
 ]
 
 /**

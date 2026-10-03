@@ -23,7 +23,7 @@ test('lists every Item in Catalog order under Drinks and Snacks, with Add Item a
   await expect(itemsPage(page).getByRole('button', { name: 'Add Item' })).toBeVisible()
 
   const snacks = itemsPage(page).getByRole('region', { name: 'Snacks' }).getByRole('button', { name: /^Edit / })
-  await expect(snacks).toHaveText([/Chips/, /Nuts/, /Cheese/, /Bitterballen/])
+  await expect(snacks).toHaveText([/Chips/, /Nuts/, /Cheese/, /Dutch meatballs/])
   await expect(itemsPage(page).getByRole('region', { name: 'Drinks' }).getByRole('button', { name: /^Edit / })).toHaveCount(24)
 })
 

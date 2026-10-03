@@ -170,7 +170,7 @@ A phone app, installed from the browser to the home screen, that works offline i
     - hot drinks: ☕ Coffee (Koffie), ☕ Decaf (Deca), 🍵 Mint tea (Muntthee)
     - wine: 🥂 White wine (Witte wijn), 🍷 Red wine (Rode wijn), 🍷 Rosé wine (Rosé wijn)
     - mixed drinks: 🍊 Aperol Spritz, 🍾 Cava, 🍸 Gin & tonic (Gin-tonic), 🍹 Mocktail
-  - **Snacks:** 🥔 Chips, 🥜 Nuts (Nootjes), 🧀 Cheese (Kaasblokjes), 🧆 Bitterballen.
+  - **Snacks:** 🥔 Chips, 🥜 Nuts (Nootjes), 🧀 Cheese (Kaasblokjes), 🧆 Dutch meatballs (Bitterballen).
 - **Theme:** Dark by default. Settings offers Dark / Light / System. Tokens are defined in look-and-feel.md.
 
 ## Testing Decisions
