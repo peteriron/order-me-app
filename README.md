@@ -89,7 +89,7 @@ When a new version of OrderMe is out, the app notices by itself while you're onl
 - **Update** loads the new version straight away. Your Round, Items and History are kept.
 - **Later** closes the question. The bottom of the Settings page then shows **Update available · Update**, and the next time you open the app it's on the new version anyway.
 
-Without a connection there's nothing to check, and the app keeps working as it is. The bottom of the Settings page always shows the version you're running, its build number and date (for example "Version 4.2.0 · build 112 · 4 Oct 2026").
+Without a connection there's nothing to check, and the app keeps working as it is. The bottom of the Settings page always shows the version you're running, its build number and date (for example "Version 5.0.0 · build 112 · 4 Oct 2026").
 
 ### Start fresh
 
@@ -116,7 +116,7 @@ npm run build && npm run preview   # the production build, as deployed
 
 ### Versions and releases
 
-- The version shown at the bottom of Settings is `version` in `package.json` (semantic: currently 4.2.0). Bump it in every PR that changes the app: minor for a feature, patch for a fix. Docs- or CI-only changes don't bump it.
+- The version shown at the bottom of Settings is `version` in `package.json` (semantic: currently 5.0.0; every release is in [CHANGELOG.md](CHANGELOG.md) and on [GitHub Releases](https://github.com/peteriron/order-me-app/releases)). Bump it in every PR that changes the app: minor for a feature, patch for a fix, major for a big milestone. Docs- or CI-only changes don't bump it. A release adds its notes to `CHANGELOG.md`; after the PR is merged, the GitHub release `vX.Y.Z` is published from `main`, which creates the tag on the merged commit.
 - The build number is the GitHub Actions run number of the deploy (`dev` locally) and the date is the build date; both are filled in at build time (`__BUILD__` in `vite.config.ts`).
 - Every push to `main` that passes CI deploys. Open apps notice the new version on their next check (start, coming back to the app, coming back online, or every 30 minutes) and offer **Update**; see `src/app/updates.ts`.
 
