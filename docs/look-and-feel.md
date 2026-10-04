@@ -25,7 +25,8 @@ Dark is the default; Light is available from Settings (and System follows the OS
 | `--accent` | `#F5A524` | `#B45309` | Counts, primary button fill (dark), active dot |
 | `--accent-fill` | `#F5A524` | `#F59E0B` | Primary button background |
 | `--on-accent` | `#1A1204` | `#1A1204` | Text on accent fill |
-| `--accent-soft` | `rgb(245 165 36 / .14)` | `rgb(245 158 11 / .14)` | Tile background when count > 0 |
+| `--accent-soft` | `rgb(245 165 36 / .14)` | `rgb(245 158 11 / .14)` | Background of a counted tile whose emoji has no colour; active tab |
+| `--tint-rest` / `--tint-counted` | `14%` / `28%` | `12%` / `24%` | How much of the emoji's colour a coloured tile mixes in at its top edge, at rest / in the Round (#83) |
 | `--snack` | `#2DD4BF` | `#0F766E` | Snack section marker only |
 | `--danger` | `#F87171` | `#B91C1C` | Delete actions |
 
@@ -70,10 +71,11 @@ All sizes are in `rem` so OS text scaling works. The grid tolerates names wrappi
 │                   │   [−]  = 44×44 hit area in the top-left corner, visible only when count > 0
 │        🍺         │           (visual 28px circle on surface-2)
 │      Duvel        │   tile ≈ 100 px tall, 1/3 of width minus gaps
-└───────────────────┘   count > 0 → background --accent-soft, border --accent at 40%
+└───────────────────┘   count > 0 → stronger colour (see below), border --accent at 40%
 ```
+- **Coloured tiles** (#83): each tile's background is a gradient from the top edge to the bottom, from its emoji's main colour mixed into `--surface` to plain `--surface`. The colour is measured on the phone by drawing the emoji with its own emoji font; white, grey and black pixels are ignored, and the main colour among the rest is used (the brown in ☕, the blue on 🥛). At rest the top mixes in `--tint-rest` (a whisper); in the Round, `--tint-counted` (soft), fading between the two in 160 ms, instead of the amber background. The amber border and badge stay. The strongest tint keeps the name at 4.5:1 for any colour, in both themes (`contrast.test.ts`). An emoji with no colour at all keeps the plain tile, with `--accent-soft` when counted. "+ New", Settings rows, Show lines and History stay plain.
 - The whole tile adds one; the − corner subtracts one and does not propagate the tap.
-- Press: scale to 0.94 over 80 ms, spring back over 160 ms, and `navigator.vibrate(10)` where available.
+- Press: scale to 0.94 over 80 ms, spring back over 160 ms, and `navigator.vibrate(10)` where available. A coloured tile keeps its colour while pressed; a plain one turns `--surface-2`.
 - The badge pops (scale 0.8 → 1.1 → 1) when the count changes.
 - Accessible name: "Duvel, 3 in round". The − button: "Remove one Duvel".
 

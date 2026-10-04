@@ -1,4 +1,6 @@
+import { useMemo, type CSSProperties } from 'react'
 import type { Item } from '../items/catalog.ts'
+import { emojiColour } from './emojiColour.ts'
 
 interface TileProps {
   item: Item
@@ -18,8 +20,11 @@ function buzz() {
 }
 
 export function Tile({ item, count, label, removeLabel, onAdd, onRemove }: TileProps) {
+  /** The emoji's main colour for the tile's gradient (#83); null keeps the plain tile. */
+  const colour = useMemo(() => emojiColour(item.emoji), [item.emoji])
+  const className = ['tile', colour && 'has-colour', count > 0 && 'has-count'].filter(Boolean).join(' ')
   return (
-    <div className={count ? 'tile has-count' : 'tile'}>
+    <div className={className} style={colour ? ({ '--emoji': colour } as CSSProperties) : undefined}>
       <button
         type="button"
         className="tile-add"

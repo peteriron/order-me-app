@@ -4,13 +4,13 @@ A phone app for the person getting the round. Friends call out what they want, y
 
 **Open it:** <https://peteriron.github.io/order-me-app/>
 
-**Latest release:** [5.0.0](https://github.com/peteriron/order-me-app/releases/tag/v5.0.0), the first published release. What changed in each version: [CHANGELOG.md](CHANGELOG.md).
+**Latest release:** [5.1.0](https://github.com/peteriron/order-me-app/releases/tag/v5.1.0): tiles tinted in their emoji's colour. What changed in each version: [CHANGELOG.md](CHANGELOG.md).
 
 It's a web app you install on your home screen. It works offline, so bad bar Wi-Fi doesn't matter, and everything stays on your phone: no account, no server, no prices or payments. Sharing a Round or your Items puts them in the link itself, so they never pass through a server either. It speaks English and Dutch.
 
 ## What it does
 
-- **Tap to count.** Big tiles for every drink and snack; each tap adds one, and a small − takes one off. The Round is saved on every tap, so locking the phone or closing the app loses nothing.
+- **Tap to count.** Big tiles for every drink and snack, each softly tinted in its emoji's colour so you spot drinks at a glance; each tap adds one, and a small − takes one off. Tiles in the Round get a stronger tint and an amber border. The Round is saved on every tap, so locking the phone or closing the app loses nothing.
 - **Search.** Type a few letters to find a drink in a long list: the tiles filter as you type ("rose" finds "Rosé wine"), and tapping one still counts it.
 - **Show page.** One tap or swipe shows the whole Round in large type ("3 × 🍺 Duvel") with the total, and keeps the screen awake while you read it out. Counts can still be fixed there, a **Table** number (next to the table icon, under Text and QR) and a **Remark** (below the total) go along with the Round, and the bar at the bottom has **Clear**, the item count and **✓ Ordered**, like the Round page's.
 - **Pass the Round on.** Whoever goes to the counter can take over your Round: tap **QR** on the Show page, they scan it, and their app opens with the same drinks and counts, in your order. You can also copy the link, or tap **Text** to send the Round as plain text to a chat.
@@ -118,7 +118,7 @@ npm run build && npm run preview   # the production build, as deployed
 
 ### Versions and releases
 
-- The version shown at the bottom of Settings is `version` in `package.json` (semantic: currently 5.0.0). Every release is in [CHANGELOG.md](CHANGELOG.md) and on [GitHub Releases](https://github.com/peteriron/order-me-app/releases).
+- The version shown at the bottom of Settings is `version` in `package.json` (semantic: currently 5.1.0). Every release is in [CHANGELOG.md](CHANGELOG.md) and on [GitHub Releases](https://github.com/peteriron/order-me-app/releases).
 - Bump it in every PR that changes the app: minor for a feature, patch for a fix, major for a big milestone. Docs- or CI-only changes don't bump it. Always bump with `npm version`, which changes only the app's own version in `package.json` and `package-lock.json` (a text replace can also hit a dependency that happens to have the same version, and CI's `npm ci` then refuses the lock file):
 
   ```sh

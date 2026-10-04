@@ -76,3 +76,39 @@ describe.each([
     expect(contrast(palette[fg], palette[bg])).toBeGreaterThanOrEqual(minimum)
   })
 })
+
+/** `--name: 12%` from a token block: how much of the emoji's colour a coloured tile mixes in (#83). */
+function percent(selector: string, name: string): number {
+  const start = css.indexOf(`${selector} {`)
+  const block = css.slice(start, css.indexOf('}', start))
+  const match = block.match(new RegExp(`--${name}:\\s*([\\d.]+)%`))
+  if (!match) throw new Error(`No percentage token --${name} in ${selector}`)
+  return Number(match[1]) / 100
+}
+
+/** `color-mix(in srgb, colour p, surface)`, as CSS draws the top of a coloured tile. */
+function mix(colour: number[], surface: string, p: number): string {
+  const base = [1, 3, 5].map((i) => parseInt(surface.slice(i, i + 2), 16))
+  return `#${colour.map((c, i) => Math.round(c * p + base[i] * (1 - p)).toString(16).padStart(2, '0')).join('')}`
+}
+
+/** Every colour an emoji could have, in steps of 51 per channel: 216 colours, black to white. */
+const anyColour = [0, 51, 102, 153, 204, 255].flatMap((r) =>
+  [0, 51, 102, 153, 204, 255].flatMap((g) => [0, 51, 102, 153, 204, 255].map((b) => [r, g, b])),
+)
+
+describe.each([
+  ['dark', ':root'],
+  ['light', ":root[data-theme='light']"],
+])('%s theme: coloured tiles', (_theme, selector) => {
+  const palette = { ...tokens(':root'), ...tokens(selector) }
+  it('keeps the tile name at 4.5:1 on the strongest tint, whatever the emoji colour', () => {
+    const strongest = percent(selector, 'tint-counted')
+    const worst = Math.min(...anyColour.map((c) => contrast(palette.text, mix(c, palette.surface, strongest))))
+    expect(worst).toBeGreaterThanOrEqual(TEXT)
+  })
+
+  it('tints a counted tile more than a resting one', () => {
+    expect(percent(selector, 'tint-counted')).toBeGreaterThan(percent(selector, 'tint-rest'))
+  })
+})

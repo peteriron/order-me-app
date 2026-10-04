@@ -2,6 +2,15 @@
 
 All notable changes to OrderMe ("This round is on me" / "Dit rondje is van mij"). Versions follow [semantic versioning](https://semver.org/): the version is shown at the bottom of the Settings page, with the build number and date.
 
+## 5.1.0 (2026-10-04)
+
+### Coloured tiles (#83)
+
+- Each tile on the Round tab is softly tinted in its emoji's main colour, as a gradient from the top, so you spot drinks at a glance. The colour is measured on your phone from its own emoji style; white, grey and black parts are ignored.
+- A tile in the Round gets a stronger tint (fading in) with the amber border and count badge, instead of the amber background.
+- Pressing a tile keeps its colour. Both themes are tuned to stay subtle, and the drink names stay as readable as before.
+- "+ New", the Settings list, the Show page and History stay as they were.
+
 ## 5.0.0 (2026-10-04)
 
 The first published release: everything OrderMe does today, from the first tile tap (V1) through V4 and 4.2.0.
