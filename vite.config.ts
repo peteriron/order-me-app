@@ -1,39 +1,45 @@
 /// <reference types="vitest/config" />
 import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 import react from '@vitejs/plugin-react'
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig, type HtmlTagDescriptor, type Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // Served from GitHub Pages at https://peteriron.github.io/order-me-app/
 const BASE = '/order-me-app/'
 
+/** Applies a saved light theme before first paint; inlined, since a separate file would load too late. */
+const THEME_SCRIPT = readFileSync(new URL('./src/settings/themeBeforePaint.js', import.meta.url), 'utf8')
+
 /**
- * A Content-Security-Policy in the built page (GitHub Pages can't send headers): only the app's own scripts, styles
- * and connections, so injected markup could never run code or send data elsewhere. The inline theme script in
- * index.html is allowed by its hash. Build only: the dev server injects inline styles.
+ * Inlines the theme script into the page's <head> and, in the build, adds a Content-Security-Policy (GitHub Pages
+ * can't send headers): only the app's own scripts, styles and connections, so injected markup could never run code
+ * or send data elsewhere. The inline theme script is allowed by its hash. No policy on the dev server: it injects
+ * inline styles.
  */
-function contentSecurityPolicy(): Plugin {
+function themeScriptAndPolicy(): Plugin {
+  let build = false
   return {
-    name: 'content-security-policy',
-    apply: 'build',
-    transformIndexHtml: {
-      order: 'post',
-      handler(html) {
-        const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(
-          ([, code]) => `'sha256-${createHash('sha256').update(code!).digest('base64')}'`,
-        )
-        const policy = [
-          "default-src 'self'",
-          `script-src 'self' ${hashes.join(' ')}`,
-          "style-src 'self'",
-          // The QR codes are data: images.
-          "img-src 'self' data:",
-          "object-src 'none'",
-          "base-uri 'none'",
-          "form-action 'none'",
-        ].join('; ')
-        return html.replace('<meta charset="UTF-8" />', `<meta charset="UTF-8" />\n    <meta http-equiv="Content-Security-Policy" content="${policy}" />`)
-      },
+    name: 'theme-script-and-policy',
+    configResolved(config) {
+      build = config.command === 'build'
+    },
+    transformIndexHtml() {
+      const tags: HtmlTagDescriptor[] = [{ tag: 'script', children: THEME_SCRIPT, injectTo: 'head' }]
+      if (!build) return tags
+      const themeHash = `'sha256-${createHash('sha256').update(THEME_SCRIPT).digest('base64')}'`
+      const policy = [
+        "default-src 'self'",
+        `script-src 'self' ${themeHash}`,
+        "style-src 'self'",
+        // The QR codes are data: images.
+        "img-src 'self' data:",
+        "object-src 'none'",
+        "base-uri 'none'",
+        "form-action 'none'",
+      ].join('; ')
+      // First in <head>: a <meta> policy only covers what comes after it.
+      return [{ tag: 'meta', attrs: { 'http-equiv': 'Content-Security-Policy', content: policy }, injectTo: 'head-prepend' }, ...tags]
     },
   }
 }
@@ -42,7 +48,7 @@ export default defineConfig({
   base: BASE,
   plugins: [
     react(),
-    contentSecurityPolicy(),
+    themeScriptAndPolicy(),
     VitePWA({
       // Register with a plain script. The new service worker takes over as soon as it installs (skipWaiting +
       // clientsClaim) but never reloads the open page: everything is saved on every tap, and a surprise reload
