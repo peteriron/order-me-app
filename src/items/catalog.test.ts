@@ -170,3 +170,24 @@ describe('deleting an Item, with Undo', () => {
     expect({ ...later, ...undo(later) }.round.counts).toEqual({ a: 1, b: 2, c: 1 })
   })
 })
+
+describe('deleting an Item keeps the Round’s table and remark', () => {
+  const item = (id: string): Item => ({ id, name: id, category: 'drink', emoji: '🍺' })
+  const noted = {
+    catalog: [item('a'), item('b')],
+    round: { counts: { b: 2 }, table: '12', remark: 'No ice' },
+    pins: [],
+    showOrder: [],
+  }
+
+  it('keeps them when the Item is deleted, also one that isn’t in the Round', () => {
+    expect(deleteWithUndo(noted, 'b').next.round).toEqual({ counts: {}, table: '12', remark: 'No ice' })
+    expect(deleteWithUndo(noted, 'a').next.round).toEqual(noted.round)
+  })
+
+  it('keeps them when the delete is undone', () => {
+    const { next, undo } = deleteWithUndo(noted, 'b')
+    const later = { ...noted, ...next }
+    expect({ ...later, ...undo(later) }.round).toEqual(noted.round)
+  })
+})
