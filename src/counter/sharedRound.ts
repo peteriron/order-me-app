@@ -1,6 +1,6 @@
 import type { Catalog, Item } from '../items/catalog.ts'
 import type { Pins } from '../items/pins.ts'
-import { fragmentLink, itemLine, pack, parseItemLine, unpack, type SharedItem } from '../items/sharedCatalog.ts'
+import { fragmentLink, itemLine, MAX_LINK_ITEMS, pack, parseItemLine, unpack, type SharedItem } from '../items/sharedCatalog.ts'
 import { starterRow } from '../items/starter.ts'
 import { noteOf, type ComposingRound, type RoundLine, type RoundNote } from '../round/round.ts'
 import type { ShowOrder } from './showOrder.ts'
@@ -61,7 +61,7 @@ export async function decodeRound(payload: string): Promise<SharedRound | null> 
       const tab = row.indexOf('\t')
       const count = Number(row.slice(0, tab))
       const item = tab > 0 ? parseItemLine(row.slice(tab + 1)) : null
-      if (!item || !Number.isInteger(count) || count < 1 || count > MAX_COUNT) return null
+      if (!item || !Number.isInteger(count) || count < 1 || count > MAX_COUNT || lines.length >= MAX_LINK_ITEMS) return null
       lines.push({ item, count })
     }
     return lines.length > 0 ? { lines, ...noteOf(note) } : null
