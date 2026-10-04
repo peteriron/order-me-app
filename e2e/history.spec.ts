@@ -165,3 +165,19 @@ test('Order again skips Items that were deleted since, and says so', async ({ pa
   await expect(page.getByRole('button', { name: 'Chips, 2 in round' })).toBeVisible()
   await expect(page.getByRole('region', { name: 'Round total' })).toContainText('2 items')
 })
+
+test('with the app left open, Today becomes Yesterday at midnight', async ({ page }) => {
+  await page.clock.install({ time: new Date(2026, 9, 4, 23, 58) })
+  await page.reload()
+  await page.getByRole('button', { name: /^Duvel(,|$)/ }).tap()
+  await page.getByRole('region', { name: 'Round total' }).getByRole('button', { name: 'Show' }).tap()
+  await page.getByRole('button', { name: 'Ordered' }).tap()
+  await goToHistory(page)
+  await expect(historyPage(page).getByRole('heading', { level: 2 })).toHaveText(['Today'])
+  // Let the "Round placed" toast go first: its leaving re-renders the page, which would hide a stale "Today".
+  await page.clock.fastForward('00:06')
+  await expect(page.getByRole('status').filter({ hasText: 'Round placed' })).toHaveCount(0)
+
+  await page.clock.fastForward('03:00')
+  await expect(historyPage(page).getByRole('heading', { level: 2 })).toHaveText(['Yesterday'])
+})
