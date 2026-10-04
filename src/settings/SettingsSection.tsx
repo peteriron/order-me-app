@@ -1,6 +1,7 @@
 import type { LanguageSetting, Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
 import type { AppActions } from '../useAppState.ts'
+import { useInstall } from './install.ts'
 import type { Settings, ThemeSetting } from './settings.ts'
 
 interface SettingsSectionProps {
@@ -9,10 +10,13 @@ interface SettingsSectionProps {
   t: Messages
   actions: Pick<AppActions, 'setLanguage' | 'setTheme' | 'clearHistory' | 'resetApp'>
   overlays: Overlays
+  /** Opens the Add to Home Screen guide (iPhone and iPad). */
+  onInstallGuide: () => void
 }
 
 /** The few rarely-used options, at the bottom of the Items page (PRD). */
-export function SettingsSection({ settings, hasHistory, t, actions, overlays }: SettingsSectionProps) {
+export function SettingsSection({ settings, hasHistory, t, actions, overlays, onInstallGuide }: SettingsSectionProps) {
+  const install = useInstall()
   const confirmClearHistory = () =>
     overlays.confirm({ text: t.clearHistoryConfirm, confirmLabel: t.clearHistory, onConfirm: actions.clearHistory })
 
@@ -74,12 +78,29 @@ export function SettingsSection({ settings, hasHistory, t, actions, overlays }: 
         </div>
       </fieldset>
 
-      <button type="button" className="btn btn-danger-text settings-clear" disabled={!hasHistory} onClick={confirmClearHistory}>
-        {t.clearHistory}
-      </button>
-      <button type="button" className="btn btn-danger-text settings-clear" onClick={confirmReset}>
-        {t.resetApp}
-      </button>
+      {/* Only where the app can be installed and isn't yet: Chrome's own prompt, or the guide on an iPhone. */}
+      {install.mode !== 'none' && (
+        <button
+          type="button"
+          className="btn btn-outline settings-button"
+          onClick={install.mode === 'prompt' ? install.prompt : onInstallGuide}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+            <path d="M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM12 8v6M9 11h6" />
+          </svg>
+          {t.addToHome}
+        </button>
+      )}
+
+      {/* Filled red, the shape of Ordered: both ask for confirmation first. */}
+      <div className="settings-danger">
+        <button type="button" className="btn btn-danger" disabled={!hasHistory} onClick={confirmClearHistory}>
+          {t.clearHistory}
+        </button>
+        <button type="button" className="btn btn-danger" onClick={confirmReset}>
+          {t.resetApp}
+        </button>
+      </div>
     </section>
   )
 }

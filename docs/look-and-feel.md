@@ -150,7 +150,9 @@ The fourth page, titled "Settings". It holds two sections: **Items** (the Catalo
 - **Swipe to delete** (#54): swiping a row from right to left slides it with the finger and reveals a 72 px red button (`--danger`, with an `--on-danger` ×) on the right; past half its width, or with a quick flick, it snaps open, otherwise back. One row is open at a time. Swiping it back, or tapping anywhere else, closes it (that tap does nothing else). Tapping × deletes at once, with the "{name} deleted · Undo" toast. A left-to-right swipe on a closed row still goes back to Show, and a swipe on a pinned row's drag handle always reorders.
 - For keyboard and screen-reader users, each pinned row also has "Move up" / "Move down" buttons ("Move Duvel up" / "Duvel omhoog"). They are visually hidden until focused, then appear as a pill over the handle. At the ends of the list they are marked unavailable rather than removed, so focus stays put.
 - "Add Item" (accent-filled) and "Share" (outline, with a QR glyph) sit side by side at the top of the Items section.
-- Below the list is the **General** section: Language (System / Nederlands / English), Theme (Dark / Light / System) as segmented controls, then two danger text buttons: "Clear history" and "Reset app". Reset app asks first, with "Reset" as the confirm button. With no connection it changes nothing and shows the "No connection" toast.
+- Below the list is the **General** section: Language (System / Nederlands / English), Theme (Dark / Light / System) as segmented controls, then an outline **Add to Home Screen** button (phone-with-plus icon) and, side by side, two filled red buttons in the shape of Ordered: "Clear history" (disabled with no History) and "Reset app".
+- **Add to Home Screen** shows only where the app can be installed and isn't yet; once it runs from the home screen it's gone. In Chrome on Android it appears when Chrome offers to install, and opens Chrome's own install prompt (Chrome's mini-bar is kept away). On an iPhone or iPad, which have no install prompt, it opens a bottom sheet with three numbered steps (step 1 with Safari's accent Share icon) and a Close button. Elsewhere (e.g. desktop Firefox) it isn't shown.
+- Reset app asks first, with "Reset" as the confirm button. With no connection it changes nothing and shows the "No connection" toast.
 
 ### Item sheet (add / edit / "+ New")
 A bottom sheet containing:
@@ -220,6 +222,8 @@ Short, friendly and practical, with no exclamation marks except in the empty sta
 | Drinks / Snacks | Drinks / Snacks | Dranken / Snacks |
 | Item deleted toast | {name} deleted · Undo | {name} verwijderd · Ongedaan maken |
 | Delete button (screen readers) | Delete {name} | {name} verwijderen |
+| Add to Home Screen (button, guide title) | Add to Home Screen | Zet op beginscherm |
+| Add to Home Screen guide | 1. In Safari, tap Share (on newer iPhones it’s under •••). 2. Scroll down and choose “Add to Home Screen”. 3. Tap Add. OrderMe now opens full-screen from your home screen. | 1. Tik in Safari op Deel (op nieuwere iPhones zit die onder •••). 2. Scroll omlaag en kies “Zet op beginscherm”. 3. Tik op Voeg toe. OrderMe opent nu schermvullend vanaf je beginscherm. |
 | Clear history confirm | Delete all past Rounds? | Alle vorige rondjes verwijderen? |
 | Reset app / Reset | Reset app / Reset | App resetten / Resetten |
 | Reset app confirm | Reset the app to how it was first installed? This deletes your Items, pins, the Round, all History and your settings, and loads the newest version. | De app terugzetten zoals bij de installatie? Je items, vastgezette items, het rondje, de hele geschiedenis en je instellingen worden gewist, en de nieuwste versie wordt geladen. |

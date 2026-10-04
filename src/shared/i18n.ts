@@ -118,6 +118,8 @@ export interface Messages {
   system: string
   dark: string
   light: string
+  addToHome: string
+  installSteps: string[]
   clearHistory: string
   clearHistoryConfirm: string
   resetApp: string
@@ -224,6 +226,12 @@ export const messages: Record<Locale, Messages> = {
     system: 'System',
     dark: 'Dark',
     light: 'Light',
+    addToHome: 'Add to Home Screen',
+    installSteps: [
+      'In Safari, tap Share (on newer iPhones it’s under •••).',
+      'Scroll down and choose “Add to Home Screen”.',
+      'Tap Add. OrderMe now opens full-screen from your home screen.',
+    ],
     clearHistory: 'Clear history',
     clearHistoryConfirm: 'Delete all past Rounds?',
     resetApp: 'Reset app',
@@ -330,6 +338,12 @@ export const messages: Record<Locale, Messages> = {
     system: 'Systeem',
     dark: 'Donker',
     light: 'Licht',
+    addToHome: 'Zet op beginscherm',
+    installSteps: [
+      'Tik in Safari op Deel (op nieuwere iPhones zit die onder •••).',
+      'Scroll omlaag en kies “Zet op beginscherm”.',
+      'Tik op Voeg toe. OrderMe opent nu schermvullend vanaf je beginscherm.',
+    ],
     clearHistory: 'Geschiedenis wissen',
     clearHistoryConfirm: 'Alle vorige rondjes verwijderen?',
     resetApp: 'App resetten',
