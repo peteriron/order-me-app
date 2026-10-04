@@ -20,6 +20,7 @@ import { Toast, type ToastMessage } from '../shared/ui/Toast.tsx'
 import { ShareRoundSheet } from '../show/ShareRoundSheet.tsx'
 import { showSections } from '../show/showOrder.ts'
 import { ShowPage } from '../show/ShowPage.tsx'
+import { useUpdate } from './updates.ts'
 import { useAppState } from './useAppState.ts'
 import { useSharedLinks } from './useSharedLinks.ts'
 
@@ -55,6 +56,13 @@ export function App() {
     () => ({ confirm: setConfirmation, notify: (text, action) => setToast({ id: Date.now(), text, action }) }),
     [],
   )
+  const { ready: updateReady, update } = useUpdate()
+  /** After Later the pop-up stays away; Settings then offers the update next to the version. */
+  const [updateLater, setUpdateLater] = useState(false)
+  const overlayOpen = sheet !== null || sharing !== null || installGuide || confirmation !== null
+  /** The update pop-up, never over an open sheet or dialog: it waits until the Operator is done there. */
+  const offerUpdate = updateReady && !updateLater && !overlayOpen
+
   useSharedLinks({
     firstLaunch,
     catalogSize: catalog.length,
@@ -128,12 +136,13 @@ export function App() {
         overlays,
         onInstallGuide: () => setInstallGuide(true),
       }}
+      version={{ dateLocale: formattingLocale(locale, navigator.language), updateReady, onUpdate: update }}
     />,
   ]
 
   return (
     <>
-      <div className="shell" inert={sheet !== null || sharing !== null || installGuide || confirmation !== null}>
+      <div className="shell" inert={overlayOpen || offerUpdate}>
         <Pager pages={pages} page={page} onPageChange={setPage} />
         <TabBar
           tabs={[
@@ -168,6 +177,17 @@ export function App() {
       {installGuide && <InstallGuideSheet t={t} onClose={closeInstallGuide} />}
 
       {toast && <Toast key={toast.id} toast={toast} onDone={closeToast} />}
+
+      {offerUpdate && (
+        <ConfirmDialog
+          text={t.updateAvailable}
+          confirmLabel={t.update}
+          cancelLabel={t.later}
+          tone="primary"
+          onConfirm={update}
+          onClose={() => setUpdateLater(true)}
+        />
+      )}
 
       {confirmation && <ConfirmDialog {...confirmation} cancelLabel={t.cancel} onClose={closeConfirmation} />}
     </>

@@ -17,6 +17,7 @@ It's a web app you install on your home screen. It works offline, so bad bar Wi-
 - **Order that suits you.** The drinks your group orders most move to the front over time, but never while you're tapping. Pin your favourites to keep them first, in the order you drag them into.
 - **Share your Items.** Show a QR code (or copy a link) and a friend opens the app with the same drinks and snacks.
 - **Undo for the quick actions.** Clearing the Round, deleting an Item, marking a Round as ordered and receiving a friend's Round all happen at once, with **Undo** for 5 seconds instead of an "Are you sure?".
+- **Always up to date.** When you're online the app checks for a new version, also while it stays open, and asks whether to update: one tap, and nothing is lost. The bottom of Settings shows which version you're running.
 - **Settings.** Language (follows the phone, or pick Nederlands or English), theme (dark by default, light, or follow the phone), an **Add to Home Screen** button, clear history, and reset the app to a fresh install.
 
 ## How to use it
@@ -54,6 +55,7 @@ Swipe sideways between the four pages, or tap their tabs at the bottom of the sc
   - Tap the pin on a row to pin it. Pinned Items come first; drag them by their handle (⠿) to change the order.
   - **Share** shows your Items as a QR code, with **Copy link**.
   - **General**, at the bottom: language, theme, **Add to Home Screen** (only while the app isn't installed yet), and the red **Clear history** and **Reset app** buttons.
+  - At the very bottom: the version, build number and date of the app.
 
 ### Pass the Round to a friend
 
@@ -80,12 +82,21 @@ Only the Items travel: not your History, Round, pins or settings. Starter drinks
 
 > **iPhone note:** a link or QR code always opens in Safari, and a home-screen app on iPhone keeps its data separate from Safari. So a friend who already installed the app on an iPhone gets your Round or Items in Safari, not in their installed app. On Android, and for friends who don't have the app yet, it just works.
 
+### Stay up to date
+
+When a new version of OrderMe is out, the app notices by itself while you're online: when you open it, when you come back to it, when the connection returns, and every half hour while it stays open. It then asks **"A new version of OrderMe is available."**
+
+- **Update** loads the new version straight away. Your Round, Items and History are kept.
+- **Later** closes the question. The bottom of the Settings page then shows **Update available · Update**, and the next time you open the app it's on the new version anyway.
+
+Without a connection there's nothing to check, and the app keeps working as it is. The bottom of the Settings page always shows the version you're running, its build number and date (for example "Version 4.2.0 · build 112 · 4 Oct 2026").
+
 ### Start fresh
 
 In **General**, at the bottom of the Settings page:
 
 - **Clear history** deletes all past Rounds and keeps your Items.
-- **Reset app** puts everything back to a fresh install with the newest version: starter Items, no pins, Round, History or settings. It needs an internet connection and asks first.
+- **Reset app** puts everything back to a fresh install with the newest version (to just get a new version, see [Stay up to date](#stay-up-to-date)): starter Items, no pins, Round, History or settings. It needs an internet connection and asks first.
 
 ## For developers
 

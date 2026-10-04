@@ -8,6 +8,13 @@ import { VitePWA } from 'vite-plugin-pwa'
 // Served from GitHub Pages at https://peteriron.github.io/order-me-app/
 const BASE = '/order-me-app/'
 
+/** Shown at the bottom of Settings: package.json's version, the CI run number ("dev" locally) and the build date. */
+const BUILD = {
+  version: (JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string }).version,
+  number: process.env.GITHUB_RUN_NUMBER ?? 'dev',
+  date: new Date().toISOString(),
+}
+
 /** Applies a saved light theme before first paint; inlined, since a separate file would load too late. */
 const THEME_SCRIPT = readFileSync(new URL('./src/settings/themeBeforePaint.js', import.meta.url), 'utf8')
 
@@ -46,14 +53,15 @@ function themeScriptAndPolicy(): Plugin {
 
 export default defineConfig({
   base: BASE,
+  define: { __BUILD__: JSON.stringify(BUILD) },
   plugins: [
     react(),
     themeScriptAndPolicy(),
     VitePWA({
       // Register with a plain script. The new service worker takes over as soon as it installs (skipWaiting +
-      // clientsClaim) but never reloads the open page: everything is saved on every tap, and a surprise reload
-      // while the bartender reads the Counter view would be worse than running the old version a little longer.
-      // The next launch after a deploy gets the new version.
+      // clientsClaim) but never reloads the open page by itself: a surprise reload while the bartender reads the
+      // Counter view would be worse than running the old version a little longer. The app checks for new versions
+      // and offers to reload (app/updates.ts); the next launch after a deploy gets the new version anyway.
       injectRegister: 'script-defer',
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
