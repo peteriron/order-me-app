@@ -8,6 +8,10 @@ updates:
     groups:
       npm:
         patterns: ['*']
+    ignore:
+      # @types/node follows the Node major that CI and the build run on (node-version in ci.yml), not the newest.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
   - package-ecosystem: github-actions
     directory: /
     schedule:
