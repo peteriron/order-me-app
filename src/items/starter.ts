@@ -75,7 +75,7 @@ export function starterRow(key: string): Readonly<StarterRow> | undefined {
 }
 
 /** The starter row's name in a language, or undefined for a key this version doesn't know. */
-export function starterName(key: string, locale: Locale): string | undefined {
+function starterName(key: string, locale: Locale): string | undefined {
   return BY_KEY.get(key)?.[locale]
 }
 

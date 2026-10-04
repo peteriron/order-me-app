@@ -2,7 +2,7 @@ import { useRef, useState, type MouseEvent, type PointerEvent } from 'react'
 import { classify, releaseVelocity, rowOffset, settleRow, type GestureIntent, type Sample } from '../shared/ui/swipe.ts'
 
 /** Width of the red delete button a row reveals, in px. */
-export const DELETE_BUTTON = 72
+const DELETE_BUTTON = 72
 /** How long after a swipe or a closing tap its own click may arrive. */
 const SWALLOW_CLICK_MS = 600
 

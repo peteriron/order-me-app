@@ -10,23 +10,24 @@ It's a web app you install on your home screen. It works offline, so bad bar Wi-
 
 - **Tap to count.** Big tiles for every drink and snack; each tap adds one, and a small − takes one off. The Round is saved on every tap, so locking the phone or closing the app loses nothing.
 - **Search.** Type a few letters to find a drink in a long list: the tiles filter as you type ("rose" finds "Rosé wine"), and tapping one still counts it.
-- **Show page.** One tap or swipe shows the whole Round in large type ("3 × 🍺 Duvel") with the total, and keeps the screen awake while you read it out. Counts can still be fixed there, and the bar at the bottom has **Clear**, the item count and **✓ Ordered**, like the Round page's.
+- **Show page.** One tap or swipe shows the whole Round in large type ("3 × 🍺 Duvel") with the total, and keeps the screen awake while you read it out. Counts can still be fixed there, a **Table** number (next to the table icon, under Text and QR) and a **Remark** (below the total) go along with the Round, and the bar at the bottom has **Clear**, the item count and **✓ Ordered**, like the Round page's.
 - **Pass the Round on.** Whoever goes to the counter can take over your Round: tap **QR** on the Show page, they scan it, and their app opens with the same drinks and counts, in your order. You can also copy the link, or tap **Text** to send the Round as plain text to a chat.
 - **History.** Placed Rounds are kept, grouped by day. "Order again" repeats last week's Round in one tap.
 - **Your own Items.** Add, rename or delete drinks and snacks, each with an emoji; swipe a row left to delete it. It starts with a list of common Belgian bar drinks, shown in the app's language: switch to Dutch and "Still water" becomes "Water plat". Drinks you add or rename keep the name you typed.
 - **Order that suits you.** The drinks your group orders most move to the front over time, but never while you're tapping. Pin your favourites to keep them first, in the order you drag them into.
 - **Share your Items.** Show a QR code (or copy a link) and a friend opens the app with the same drinks and snacks.
 - **Undo for the quick actions.** Clearing the Round, deleting an Item, marking a Round as ordered and receiving a friend's Round all happen at once, with **Undo** for 5 seconds instead of an "Are you sure?".
-- **Settings.** Language (follows the phone, or pick Nederlands or English), theme (dark by default, light, or follow the phone), clear history, and reset the app to a fresh install.
+- **Settings.** Language (follows the phone, or pick Nederlands or English), theme (dark by default, light, or follow the phone), an **Add to Home Screen** button, clear history, and reset the app to a fresh install.
 
 ## How to use it
 
 ### Install it
 
 1. Open <https://peteriron.github.io/order-me-app/> on your phone.
-2. Add it to the home screen:
-   - **iPhone (Safari):** Share button, then **Add to Home Screen**.
-   - **Android (Chrome):** menu (⋮), then **Install app** or **Add to Home screen**.
+2. Add it to the home screen. The quickest way is the **Add to Home Screen** button at the bottom of the **Settings** page:
+   - **Android (Chrome):** the button opens Chrome's install prompt; tap **Install**. The button shows once Chrome offers to install the app, which may not be on your very first visit. Without it: menu (⋮), then **Install app** or **Add to Home screen**.
+   - **iPhone (Safari):** the button shows the steps: tap **Share** (on newer iPhones it's under •••), choose **Add to Home Screen**, then tap **Add**.
+   - Once the app runs from the home screen, the button is gone.
 3. Open **OrderMe** from the home screen. From now on it also works without a connection.
 
 ### Get a round
@@ -35,7 +36,7 @@ It's a web app you install on your home screen. It works offline, so bad bar Wi-
 2. Can't spot a drink in a long list? Tap the **search** icon next to the title and type a few letters: the tiles filter as you type, and tapping one still counts it. The **×** closes the search.
 3. Something missing? Tap **+ New** at the end of the grid to add it to your Items and to the Round in one go.
 4. At the counter, tap **Show** (or swipe to it). Read the list out, or show the screen to the bartender. Fix counts with − and + if someone changes their mind.
-5. Optionally, fill in the **Table** number and a **Remark** at the top of the Show page. They're kept in History and sent along when you share the Round as **Text** or **QR**; **Clear** empties them.
+5. Optionally, fill in the **Table** number (the field next to the table icon, under **Text** and **QR**) and a **Remark** (below the total) on the Show page. They're kept in History and sent along when you share the Round as **Text** or **QR**; **Clear** empties them.
 6. Tap **✓ Ordered** at the bottom of the Show page when it's done. The Round moves to History and you're back on an empty grid. Tapped it too early? **Undo** appears for 5 seconds.
 
 ### Move around
@@ -52,7 +53,7 @@ Swipe sideways between the four pages, or tap their tabs at the bottom of the sc
   - Swipe a row to the left and tap the red **×** to delete it (or use **Delete** in its edit sheet). Deleted by mistake? Tap **Undo** in the message within 5 seconds.
   - Tap the pin on a row to pin it. Pinned Items come first; drag them by their handle (⠿) to change the order.
   - **Share** shows your Items as a QR code, with **Copy link**.
-  - **General**, at the bottom: language, theme, Clear history and Reset app.
+  - **General**, at the bottom: language, theme, **Add to Home Screen** (only while the app isn't installed yet), and the red **Clear history** and **Reset app** buttons.
 
 ### Pass the Round to a friend
 
