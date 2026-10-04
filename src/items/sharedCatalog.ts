@@ -21,6 +21,11 @@ const CATEGORY_CODES = { drink: 'd', snack: 's' } as const
 const CATEGORIES: Record<string, Category> = { d: 'drink', s: 'snack' }
 /** Far beyond any real Catalog; guards against a crafted link that inflates into something huge. */
 const MAX_TEXT_BYTES = 64 * 1024
+/** Limits on what a link may bring, far beyond any real Catalog or Round, so a crafted link can't flood the app. */
+export const MAX_LINK_ITEMS = 200
+const MAX_NAME = 60
+/** The Item sheet's limit for a typed emoji (in UTF-16 units): one emoji, even a multi-part one, fits. */
+const MAX_EMOJI = 16
 
 /** An Item as it arrives from a shared link: what it looks like, and whether it's a starter Item. */
 export type SharedItem = ItemDraft & { starter?: string }
@@ -59,7 +64,7 @@ export async function decodeCatalog(payload: string): Promise<SharedItem[] | nul
   try {
     const text = await unpack(payload)
     const [version, ...lines] = text.split('\n')
-    if ((version !== '1' && version !== VERSION) || lines.length === 0) return null
+    if ((version !== '1' && version !== VERSION) || lines.length === 0 || lines.length > MAX_LINK_ITEMS) return null
     const items: SharedItem[] = []
     for (const line of lines) {
       const item = parseItemLine(line, version === VERSION)
@@ -94,7 +99,8 @@ function starterLine(text: string): SharedItem | null {
 function checkedItem(draft: ItemDraft): SharedItem | null {
   const checked = checkDraft(draft)
   // The emoji must be exactly one, not merely start with one; the name must already be tidy.
-  return checked.ok && checked.value.emoji === draft.emoji ? checked.value : null
+  if (!checked.ok || checked.value.emoji !== draft.emoji) return null
+  return checked.value.name.length <= MAX_NAME && checked.value.emoji.length <= MAX_EMOJI ? checked.value : null
 }
 
 /** The app's address with the Shared Catalog in its fragment. */

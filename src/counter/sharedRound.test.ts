@@ -58,6 +58,7 @@ describe('Round link', () => {
       '1\nx\t*cola', // no count
       '1\n3\t*no-such-drink', // unknown starter mark
       '1\n3\tx🍺\tDuvel', // unknown category
+      ['2', ...Array.from({ length: 201 }, (_, i) => `1\td🍺\tBeer ${i}`)].join('\n'), // more lines than any real Round
     ]) {
       expect(await decodeRound(await pack(text)), text).toBeNull()
     }
