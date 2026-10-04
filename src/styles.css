@@ -18,6 +18,9 @@
   --on-danger: #1c0707;
   --scrim: rgb(0 0 0 / 0.6);
   --tile-shadow: none;
+  /* Coloured tiles (#83): how much of the emoji's colour the top of a tile mixes in, at rest and in the Round. */
+  --tint-rest: 14%;
+  --tint-counted: 28%;
 
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --font: -apple-system, 'SF Pro Text', Roboto, 'Segoe UI', system-ui, sans-serif;
@@ -42,6 +45,8 @@
   --scrim: rgb(28 25 23 / 0.4);
   /* Light surfaces are close to the background, so tiles and cards get a hairline lift (look-and-feel.md). */
   --tile-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+  --tint-rest: 12%;
+  --tint-counted: 24%;
 }
 
 *,
@@ -264,12 +269,39 @@ button {
 .tile:has(.tile-add:active) {
   transform: scale(0.94);
   transition-duration: 80ms;
+}
+
+/* A plain tile flashes grey while pressed; a coloured one keeps its colour and only shrinks. */
+.tile:not(.has-colour):has(.tile-add:active) {
   background: var(--surface-2);
 }
 
 .tile.has-count {
   background: var(--accent-soft);
   border-color: var(--accent-line);
+}
+
+/*
+ * Coloured tiles (#83): the emoji's main colour (--emoji, measured on the phone) fades from the top edge into the
+ * tile colour at the bottom. In the Round it's a step stronger instead of the amber background; the amber border
+ * stays. --tint is registered below so the step fades. Emoji without colour keep the plain tile.
+ */
+@property --tint {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
+.tile.has-colour {
+  --tint: var(--tint-rest);
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--emoji) var(--tint), var(--surface)), var(--surface));
+  transition:
+    transform 160ms var(--ease-out),
+    --tint 160ms;
+}
+
+.tile.has-colour.has-count {
+  --tint: var(--tint-counted);
 }
 
 .tile-add {
