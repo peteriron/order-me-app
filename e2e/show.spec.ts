@@ -33,7 +33,7 @@ test('Show slides to the Show page: drinks then snacks in grid order, with the t
   await expect(footerTab(page, 'Show')).toHaveAttribute('aria-current', 'page')
   await expect(showPage(page).getByRole('listitem')).toHaveText([/^1\s*×\s*🥤\s*Cola/, /^2\s*×\s*🍺\s*Duvel/, /^1\s*×\s*🥔\s*Chips/])
   await expect(showPage(page).getByRole('heading', { name: 'Snacks' })).toBeVisible()
-  await expect(showPage(page).getByTestId('counter-total')).toHaveText('4')
+  await expect(showPage(page).getByTestId('show-total')).toHaveText('4')
 })
 
 test('Show is a swipe page between Round and Items, with the Round bar but no Back to Round', async ({ page }) => {
@@ -72,7 +72,7 @@ test('−/+ on a line adjust the Round, and removing the last Item shows the emp
   await showPage(page).getByRole('button', { name: 'Add one Duvel' }).tap()
   await showPage(page).getByRole('button', { name: 'Remove one Cola' }).tap()
   await expect(showPage(page).getByRole('listitem')).toHaveText([/^2\s*×\s*🍺\s*Duvel/])
-  await expect(showPage(page).getByTestId('counter-total')).toHaveText('2')
+  await expect(showPage(page).getByTestId('show-total')).toHaveText('2')
 
   await showPage(page).getByRole('button', { name: 'Remove one Duvel' }).tap()
   await showPage(page).getByRole('button', { name: 'Remove one Duvel' }).tap()
@@ -148,11 +148,11 @@ test.describe('on a Dutch phone', () => {
     await expect(toon.getByRole('listitem')).toHaveCount(2)
 
     const overflowing = await toon
-      .locator('.counter-what')
+      .locator('.show-what')
       .evaluateAll((els) => els.filter((el) => el.scrollWidth > el.clientWidth).map((el) => el.textContent))
     expect(overflowing).toEqual([])
     // Still one piece: the name wasn't split across lines inside a word.
-    const bitterballen = toon.getByRole('listitem').filter({ hasText: 'Bitterballen' }).locator('.counter-what')
+    const bitterballen = toon.getByRole('listitem').filter({ hasText: 'Bitterballen' }).locator('.show-what')
     const lineHeight = await bitterballen.evaluate((el) => parseFloat(getComputedStyle(el).lineHeight))
     expect((await bitterballen.boundingBox())!.height).toBeLessThan(lineHeight * 1.5)
   })
