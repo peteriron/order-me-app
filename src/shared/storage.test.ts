@@ -85,6 +85,14 @@ describe('app state storage', () => {
     expect(state.catalog).toHaveLength(28)
   })
 
+  it('starts fresh, instead of failing, when the saved data has an unknown version or shape', () => {
+    for (const saved of [{ version: 99, catalog: [] }, { version: 6, catalog: 'x' }, { version: 6, catalog: [], round: null }, 42, null]) {
+      const store = memoryStore()
+      store.setItem('order-me', JSON.stringify(saved))
+      expect(loadAppState(store, { locale: 'en', newId: ids() }).catalog, JSON.stringify(saved)).toHaveLength(28)
+    }
+  })
+
   it('restores placed Rounds after a restart', () => {
     const store = memoryStore()
     const first = loadAppState(store, { locale: 'en', newId: ids() })

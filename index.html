@@ -12,14 +12,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="description" content="Collect your friends' drink and snack requests and read the Round out at the counter." />
     <title>OrderMe</title>
-    <script>
-      // Apply a saved light theme before first paint, so it doesn't flash dark while the app loads.
-      try {
-        var theme = JSON.parse(localStorage.getItem('order-me') || '{}').settings?.theme
-        if (theme === 'system') theme = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
-        if (theme === 'light') document.documentElement.dataset.theme = 'light'
-      } catch {}
-    </script>
   </head>
   <body>
     <div id="root"></div>

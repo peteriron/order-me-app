@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { add, emptyRound } from '../round/round.ts'
 import type { PlacedRound } from '../history/history.ts'
 import { seedCatalog, type Item } from './catalog.ts'
-import { decodeCatalog, encodeCatalog, replaceCatalog, sharedPayload, shareLink } from './sharedCatalog.ts'
+import { decodeCatalog, encodeCatalog, pack, replaceCatalog, sharedPayload, shareLink } from './sharedCatalog.ts'
 import { localizeCatalog } from './starter.ts'
 
 const ids = () => {
@@ -90,6 +90,15 @@ describe('Shared Catalog link', () => {
     expect(await decodeCatalog(await raw('1\nd🍺\t   '))).toBeNull() // no name
     expect(await decodeCatalog(await raw('1\nd\tDuvel'))).toBeNull() // no emoji
     expect(await decodeCatalog(await raw('1\nd🍺🍺\tDuvel'))).toBeNull() // two emoji
+  })
+
+  it('rejects a crafted link with an overlong name or emoji, or more Items than any real Catalog', async () => {
+    const lines = (n: number) => Array.from({ length: n }, (_, i) => `d🍺\tBeer ${i}`)
+    expect(await decodeCatalog(await pack(`2\nd🍺\t${'x'.repeat(60)}`))).toHaveLength(1)
+    expect(await decodeCatalog(await pack(`2\nd🍺\t${'x'.repeat(61)}`))).toBeNull()
+    expect(await decodeCatalog(await pack(`2\nd🍺${'\u0301'.repeat(40)}\tDuvel`))).toBeNull() // one huge grapheme
+    expect(await decodeCatalog(await pack(['2', ...lines(200)].join('\n')))).toHaveLength(200)
+    expect(await decodeCatalog(await pack(['2', ...lines(201)].join('\n')))).toBeNull()
   })
 })
 

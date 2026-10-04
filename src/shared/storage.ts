@@ -141,11 +141,32 @@ function upgradeToV4(saved: Exclude<Stored, StoredV5 | StoredV6>): Omit<AppState
   }
 }
 
+/**
+ * The saved state, or null when there is none or it can't be used: unreadable, or not the shape of any version (the
+ * origin is shared with other GitHub Pages projects, so the key could hold anything). The app then starts fresh
+ * rather than failing to open.
+ */
 function read(store: KeyValueStore): Stored | null {
   try {
     const raw = store.getItem(KEY)
-    return raw === null ? null : (JSON.parse(raw) as Stored)
+    const saved: unknown = raw === null ? null : JSON.parse(raw)
+    return isStored(saved) ? saved : null
   } catch {
     return null
   }
+}
+
+/** A light check of what every version has: a known version, a Catalog list and a Round with counts. */
+function isStored(saved: unknown): saved is Stored {
+  if (typeof saved !== 'object' || saved === null) return false
+  const { version, catalog, round } = saved as Record<string, unknown>
+  return (
+    typeof version === 'number' &&
+    version >= 1 &&
+    version <= 6 &&
+    Array.isArray(catalog) &&
+    typeof round === 'object' &&
+    round !== null &&
+    typeof (round as Record<string, unknown>).counts === 'object'
+  )
 }
