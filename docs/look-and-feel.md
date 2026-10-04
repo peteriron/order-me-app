@@ -153,6 +153,8 @@ The fourth page, titled "Settings". It holds two sections: **Items** (the Catalo
 - Below the list is the **General** section: Language (System / Nederlands / English), Theme (Dark / Light / System) as segmented controls, then an outline **Add to Home Screen** button (phone-with-plus icon) and, side by side, two filled red buttons in the shape of Ordered: "Clear history" (disabled with no History) and "Reset app".
 - **Add to Home Screen** shows only where the app can be installed and isn't yet; once it runs from the home screen it's gone. In Chrome on Android it appears when Chrome offers to install, and opens Chrome's own install prompt (Chrome's mini-bar is kept away). On an iPhone or iPad, which have no install prompt, it opens a bottom sheet with three numbered steps (step 1 with Safari's accent Share icon) and a Close button. Elsewhere (e.g. desktop Firefox) it isn't shown.
 - Reset app asks first, with "Reset" as the confirm button. With no connection it changes nothing and shows the "No connection" toast.
+- At the very bottom, centred, 12 px muted: "Version 4.2.0 · build 112 · 4 Oct 2026" (the date in the app's language). When a new version is ready and its pop-up got "Later", a second line reads "Update available · Update", with Update as an underlined accent link.
+- **Update pop-up** (any page): when a new version has taken over, the confirm dialog shows "A new version of OrderMe is available." with a quiet Later (focused first) and an accent-filled Update instead of the red confirm button. It never opens over a sheet or another dialog; it waits until they close. Update reloads the app.
 
 ### Item sheet (add / edit / "+ New")
 A bottom sheet containing:
@@ -223,6 +225,8 @@ Short, friendly and practical, with no exclamation marks except in the empty sta
 | Item deleted toast | {name} deleted · Undo | {name} verwijderd · Ongedaan maken |
 | Delete button (screen readers) | Delete {name} | {name} verwijderen |
 | Add to Home Screen (button, guide title) | Add to Home Screen | Zet op beginscherm |
+| Update pop-up / buttons | A new version of OrderMe is available. / Later / Update | Er is een nieuwe versie van OrderMe beschikbaar. / Later / Bijwerken |
+| Version (Settings) | Version {version} · build {build} · {date} / Update available · Update | Versie {version} · build {build} · {date} / Update beschikbaar · Bijwerken |
 | Add to Home Screen guide | 1. In Safari, tap Share (on newer iPhones it’s under •••). 2. Scroll down and choose “Add to Home Screen”. 3. Tap Add. OrderMe now opens full-screen from your home screen. | 1. Tik in Safari op Deel (op nieuwere iPhones zit die onder •••). 2. Scroll omlaag en kies “Zet op beginscherm”. 3. Tik op Voeg toe. OrderMe opent nu schermvullend vanaf je beginscherm. |
 | Clear history confirm | Delete all past Rounds? | Alle vorige rondjes verwijderen? |
 | Reset app / Reset | Reset app / Reset | App resetten / Resetten |

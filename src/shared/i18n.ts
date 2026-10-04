@@ -119,6 +119,11 @@ export interface Messages {
   dark: string
   light: string
   addToHome: string
+  updateAvailable: string
+  update: string
+  later: string
+  updateReady: string
+  versionLine: (version: string, build: string, date: string) => string
   installSteps: string[]
   clearHistory: string
   clearHistoryConfirm: string
@@ -227,6 +232,11 @@ export const messages: Record<Locale, Messages> = {
     dark: 'Dark',
     light: 'Light',
     addToHome: 'Add to Home Screen',
+    updateAvailable: 'A new version of OrderMe is available.',
+    update: 'Update',
+    later: 'Later',
+    updateReady: 'Update available',
+    versionLine: (version, build, date) => `Version ${version} · build ${build} · ${date}`,
     installSteps: [
       'In Safari, tap Share (on newer iPhones it’s under •••).',
       'Scroll down and choose “Add to Home Screen”.',
@@ -339,6 +349,11 @@ export const messages: Record<Locale, Messages> = {
     dark: 'Donker',
     light: 'Licht',
     addToHome: 'Zet op beginscherm',
+    updateAvailable: 'Er is een nieuwe versie van OrderMe beschikbaar.',
+    update: 'Bijwerken',
+    later: 'Later',
+    updateReady: 'Update beschikbaar',
+    versionLine: (version, build, date) => `Versie ${version} · build ${build} · ${date}`,
     installSteps: [
       'Tik in Safari op Deel (op nieuwere iPhones zit die onder •••).',
       'Scroll omlaag en kies “Zet op beginscherm”.',

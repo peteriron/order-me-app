@@ -487,6 +487,28 @@ button {
   color: var(--text-muted);
 }
 
+/* The bottom of Settings: version · build · date, small and muted, with Update when a new version is ready. */
+.app-version {
+  padding: 1rem 0 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.app-version p {
+  margin: 0.25rem 0;
+}
+
+.app-version-update {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 /* Settings: Add to Home Screen, then Clear history and Reset app side by side. */
 .settings-button {
   align-self: flex-start;

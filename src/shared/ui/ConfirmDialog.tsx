@@ -8,14 +8,16 @@ export interface Confirmation {
 
 interface ConfirmDialogProps extends Confirmation {
   cancelLabel: string
+  /** `danger` (the default) for destructive actions: a red button; `primary` for others, like Update. */
+  tone?: 'danger' | 'primary'
   onClose: () => void
 }
 
 /**
- * In-app "are you sure?" for destructive actions. Cancel is focused first, so an accidental Enter never deletes.
- * (Native confirm() is avoided: it looks foreign in an installed app and is blocked in some embedded views.)
+ * In-app "are you sure?", mostly for destructive actions. Cancel is focused first, so an accidental Enter never
+ * deletes. (Native confirm() is avoided: it looks foreign in an installed app and is blocked in some embedded views.)
  */
-export function ConfirmDialog({ text, confirmLabel, cancelLabel, onConfirm, onClose }: ConfirmDialogProps) {
+export function ConfirmDialog({ text, confirmLabel, cancelLabel, tone = 'danger', onConfirm, onClose }: ConfirmDialogProps) {
   const cancelRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -40,7 +42,7 @@ export function ConfirmDialog({ text, confirmLabel, cancelLabel, onConfirm, onCl
           </button>
           <button
             type="button"
-            className="btn btn-danger"
+            className={tone === 'danger' ? 'btn btn-danger' : 'btn btn-primary'}
             onClick={() => {
               onConfirm()
               onClose()
