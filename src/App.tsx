@@ -10,6 +10,7 @@ import { catalogSections, type Item } from './items/catalog.ts'
 import { localizeCatalog } from './items/starter.ts'
 import { RoundPage } from './round/RoundPage.tsx'
 import { useTileOrder } from './round/useTileOrder.ts'
+import { InstallGuideSheet } from './settings/InstallGuideSheet.tsx'
 import { SettingsSection } from './settings/SettingsSection.tsx'
 import { useTheme } from './settings/useTheme.ts'
 import { detectLocale, formattingLocale, messages, resolveLocale } from './shared/i18n.ts'
@@ -47,6 +48,8 @@ export function App() {
   const [sheet, setSheet] = useState<{ item?: Item; forRound?: boolean } | null>(null)
   /** Which share sheet is open: the Catalog (Settings page) or the Round (Show page). */
   const [sharing, setSharing] = useState<'items' | 'round' | null>(null)
+  /** The Add to Home Screen guide (Settings page, iPhone and iPad). */
+  const [installGuide, setInstallGuide] = useState(false)
   const [toast, setToast] = useState<ToastMessage | null>(null)
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null)
   const overlays = useMemo<Overlays>(
@@ -69,6 +72,7 @@ export function App() {
 
   const closeSheet = useCallback(() => setSheet(null), [])
   const closeSharing = useCallback(() => setSharing(null), [])
+  const closeInstallGuide = useCallback(() => setInstallGuide(false), [])
   const closeToast = useCallback(() => setToast(null), [])
   const closeConfirmation = useCallback(() => setConfirmation(null), [])
 
@@ -123,13 +127,14 @@ export function App() {
         t={t}
         actions={actions}
         overlays={overlays}
+        onInstallGuide={() => setInstallGuide(true)}
       />
     </ItemsPage>,
   ]
 
   return (
     <>
-      <div className="shell" inert={sheet !== null || sharing !== null || confirmation !== null}>
+      <div className="shell" inert={sheet !== null || sharing !== null || installGuide || confirmation !== null}>
         <Pager pages={pages} page={page} onPageChange={setPage} />
         <TabBar
           tabs={[
@@ -160,6 +165,8 @@ export function App() {
           )}
         </div>
       )}
+
+      {installGuide && <InstallGuideSheet t={t} onClose={closeInstallGuide} />}
 
       {toast && <Toast key={toast.id} toast={toast} onDone={closeToast} />}
 
