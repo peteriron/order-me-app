@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { catalogSections, type Item } from '../items/catalog.ts'
 import { add, emptyRound, totalOf, withNote } from '../round/round.ts'
-import { deletePlacedRound, groupByDay, markOrdered, orderAgain, placedTotal } from './history.ts'
+import { deletePlacedRound, groupByDay, markOrdered, msUntilNextDay, orderAgain, placedTotal } from './history.ts'
 
 describe('marking a Round as ordered', () => {
   const duvel: Item = { id: 'duvel', name: 'Duvel', category: 'drink', emoji: '🍺' }
@@ -76,6 +76,19 @@ describe('history grouped by day', () => {
 
   it('has no groups when nothing has been placed', () => {
     expect(groupByDay([], now)).toEqual([])
+  })
+})
+
+describe('when "Today" moves on', () => {
+  it('is the time left until the next local midnight', () => {
+    expect(msUntilNextDay(new Date(2026, 8, 23, 23, 59, 30))).toBe(30_000)
+    expect(msUntilNextDay(new Date(2026, 8, 23, 12, 0))).toBe(12 * 3_600_000)
+    expect(msUntilNextDay(new Date(2026, 8, 23, 0, 0))).toBe(24 * 3_600_000)
+  })
+
+  it('counts from the calendar, so it ends on midnight across month and year ends', () => {
+    const now = new Date(2026, 11, 31, 22, 15)
+    expect(new Date(now.getTime() + msUntilNextDay(now))).toEqual(new Date(2027, 0, 1))
   })
 })
 

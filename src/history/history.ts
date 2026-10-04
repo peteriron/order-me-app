@@ -60,6 +60,11 @@ export interface HistoryDay {
 
 const startOfLocalDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate())
 
+/** Time until the next local midnight, from the calendar: right on days that are 23 or 25 hours long too. */
+export function msUntilNextDay(now: Date): number {
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() - now.getTime()
+}
+
 /** Placed Rounds grouped by the local calendar day they were placed on, newest first. */
 export function groupByDay(history: PlacedRound[], now: Date): HistoryDay[] {
   const today = startOfLocalDay(now).getTime()

@@ -4,6 +4,7 @@ import type { Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
 import type { AppActions } from '../app/useAppState.ts'
 import { groupByDay, orderAgain, placedTotal, type HistoryDay, type PlacedRound } from './history.ts'
+import { useToday } from './useToday.ts'
 
 interface HistoryPageProps {
   history: PlacedRound[]
@@ -21,7 +22,7 @@ interface HistoryPageProps {
 /** Past Rounds by day, newest first. Everything shown comes from the placed snapshot, never the live Catalog. */
 export function HistoryPage({ history, catalog, dateLocale, t, actions, overlays, onOrderedAgain }: HistoryPageProps) {
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set())
-  const now = new Date()
+  const now = useToday()
   const time = new Intl.DateTimeFormat(dateLocale, { hour: '2-digit', minute: '2-digit' })
 
   const dayLabel = ({ daysAgo, day }: HistoryDay) => {
