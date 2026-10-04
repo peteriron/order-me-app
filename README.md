@@ -4,6 +4,8 @@ A phone app for the person getting the round. Friends call out what they want, y
 
 **Open it:** <https://peteriron.github.io/order-me-app/>
 
+**Latest release:** [5.0.0](https://github.com/peteriron/order-me-app/releases/tag/v5.0.0), the first published release. What changed in each version: [CHANGELOG.md](CHANGELOG.md).
+
 It's a web app you install on your home screen. It works offline, so bad bar Wi-Fi doesn't matter, and everything stays on your phone: no account, no server, no prices or payments. Sharing a Round or your Items puts them in the link itself, so they never pass through a server either. It speaks English and Dutch.
 
 ## What it does
@@ -116,9 +118,19 @@ npm run build && npm run preview   # the production build, as deployed
 
 ### Versions and releases
 
-- The version shown at the bottom of Settings is `version` in `package.json` (semantic: currently 5.0.0; every release is in [CHANGELOG.md](CHANGELOG.md) and on [GitHub Releases](https://github.com/peteriron/order-me-app/releases)). Bump it in every PR that changes the app: minor for a feature, patch for a fix, major for a big milestone. Docs- or CI-only changes don't bump it. A release adds its notes to `CHANGELOG.md`; after the PR is merged, the GitHub release `vX.Y.Z` is published from `main`, which creates the tag on the merged commit.
+- The version shown at the bottom of Settings is `version` in `package.json` (semantic: currently 5.0.0). Every release is in [CHANGELOG.md](CHANGELOG.md) and on [GitHub Releases](https://github.com/peteriron/order-me-app/releases).
+- Bump it in every PR that changes the app: minor for a feature, patch for a fix, major for a big milestone. Docs- or CI-only changes don't bump it. Always bump with `npm version`, which changes only the app's own version in `package.json` and `package-lock.json` (a text replace can also hit a dependency that happens to have the same version, and CI's `npm ci` then refuses the lock file):
+
+  ```sh
+  npm version 5.1.0 --no-git-tag-version
+  npm ci   # check the lock file still installs
+  ```
 - The build number is the GitHub Actions run number of the deploy (`dev` locally) and the date is the build date; both are filled in at build time (`__BUILD__` in `vite.config.ts`).
 - Every push to `main` that passes CI deploys. Open apps notice the new version on their next check (start, coming back to the app, coming back online, or every 30 minutes) and offer **Update**; see `src/app/updates.ts`.
+- Making a GitHub release: PRs are squash-merged, which creates a new commit on `main`, so the tag must be made after the merge.
+  1. In the release PR, bump the version, add its notes at the top of `CHANGELOG.md`, and update the **Latest release** line at the top of this README.
+  2. Create a draft release (no tag yet): `gh release create v5.1.0 --draft --target main --title "OrderMe 5.1.0" --notes-file notes.md`.
+  3. After the PR is merged and deployed, publish it on the merge commit, which creates the tag there: `gh release edit v5.1.0 --target <merge commit> --draft=false --latest`.
 
 ### Security
 
