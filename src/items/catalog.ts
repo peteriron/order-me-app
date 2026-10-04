@@ -85,7 +85,8 @@ export function deleteItem(
   const { [itemId]: _removed, ...counts } = state.round.counts
   return {
     catalog: state.catalog.filter((i) => i.id !== itemId),
-    round: { counts },
+    // Only the count goes: the Round's table and remark stay.
+    round: { ...state.round, counts },
     pins: state.pins.filter((id) => id !== itemId),
   }
 }
@@ -116,7 +117,7 @@ export function deleteWithUndo(state: Deletable, itemId: string): { next: Deleta
       if (!item || current.catalog.some((i) => i.id === itemId)) return {}
       return {
         catalog: [...current.catalog.slice(0, index), item, ...current.catalog.slice(index)],
-        round: count ? { counts: { ...current.round.counts, [itemId]: count } } : current.round,
+        round: count ? { ...current.round, counts: { ...current.round.counts, [itemId]: count } } : current.round,
         pins: reinsert(current.pins, itemId, pinAt),
         showOrder: reinsert(current.showOrder, itemId, showAt),
       }
