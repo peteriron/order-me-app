@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { qrCode } from '../../items/qr.ts'
+import { qrCode } from './qr.ts'
 import type { Messages } from '../i18n.ts'
 
 interface QrSheetProps {

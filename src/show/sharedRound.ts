@@ -1,8 +1,9 @@
 import type { Catalog, Item } from '../items/catalog.ts'
 import type { Pins } from '../items/pins.ts'
-import { fragmentLink, itemLine, MAX_LINK_ITEMS, pack, parseItemLine, unpack, type SharedItem } from '../items/sharedCatalog.ts'
+import { itemLine, parseItemLine, type SharedItem } from '../items/sharedCatalog.ts'
 import { starterRow } from '../items/starter.ts'
 import { noteOf, type ComposingRound, type RoundLine, type RoundNote } from '../round/round.ts'
+import { fragmentLink, MAX_LINK_ITEMS, pack, unpack } from '../shared/shareLink.ts'
 import type { ShowOrder } from './showOrder.ts'
 
 /**
@@ -12,7 +13,7 @@ import type { ShowOrder } from './showOrder.ts'
  * Format v2: the text "2"; then the table and remark when set, as `t` or `r`, a tab and the text as a JSON string
  * (so line breaks and quotes survive); then one line per Round line, in the sender's Show order: the count, a tab,
  * then the Item as an Item line of the Items link (sharedCatalog.ts: a starter mark, or category, emoji and name).
- * Packed the same way as the Items link. Format v1 (no table or remark) is still read.
+ * Packed by shared/shareLink.ts, like the Items link. Format v1 (no table or remark) is still read.
  */
 const FRAGMENT = '#round='
 const VERSION = '2'

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Catalog } from '../items/catalog.ts'
 import type { Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
-import type { AppActions } from '../useAppState.ts'
+import type { AppActions } from '../app/useAppState.ts'
 import { groupByDay, orderAgain, placedTotal, type HistoryDay, type PlacedRound } from './history.ts'
 
 interface HistoryPageProps {

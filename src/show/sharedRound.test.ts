@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { seedCatalog, type Item } from '../items/catalog.ts'
-import { pack } from '../items/sharedCatalog.ts'
 import { localizeCatalog } from '../items/starter.ts'
 import { add, emptyRound, roundLines } from '../round/round.ts'
+import { pack } from '../shared/shareLink.ts'
 import { gridSections } from '../round/tileOrder.ts'
 import { decodeRound, encodeRound, receiveRound, roundLink, roundPayload } from './sharedRound.ts'
 

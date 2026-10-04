@@ -36,7 +36,7 @@ export interface Messages {
   noMatch: (query: string) => string
   clear: string
   show: string
-  counterTitle: string
+  showTitle: string
   backToRound: string
   showEmpty: string
   addOne: (name: string) => string
@@ -144,7 +144,7 @@ export const messages: Record<Locale, Messages> = {
     noMatch: (query) => `No drinks or snacks match “${query}”`,
     clear: 'Clear',
     show: 'Show',
-    counterTitle: 'Round for the counter',
+    showTitle: 'Round for the counter',
     backToRound: 'Back to Round',
     showEmpty: 'Nothing in this Round yet. Tap drinks on the Round page.',
     addOne: (name) => `Add one ${name}`,
@@ -255,7 +255,7 @@ export const messages: Record<Locale, Messages> = {
     noMatch: (query) => `Geen drankjes of snacks gevonden voor “${query}”`,
     clear: 'Wissen',
     show: 'Toon',
-    counterTitle: 'Rondje voor de toog',
+    showTitle: 'Rondje voor de toog',
     backToRound: 'Terug naar rondje',
     showEmpty: 'Nog niets in dit rondje. Tik drankjes aan op de pagina Rondje.',
     addOne: (name) => `Eén ${name} meer`,

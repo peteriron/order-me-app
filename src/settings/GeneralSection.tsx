@@ -1,10 +1,10 @@
 import type { LanguageSetting, Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
-import type { AppActions } from '../useAppState.ts'
+import type { AppActions } from '../app/useAppState.ts'
 import { useInstall } from './install.ts'
 import type { Settings, ThemeSetting } from './settings.ts'
 
-interface SettingsSectionProps {
+export interface GeneralSectionProps {
   settings: Settings
   hasHistory: boolean
   t: Messages
@@ -14,8 +14,8 @@ interface SettingsSectionProps {
   onInstallGuide: () => void
 }
 
-/** The few rarely-used options, at the bottom of the Items page (PRD). */
-export function SettingsSection({ settings, hasHistory, t, actions, overlays, onInstallGuide }: SettingsSectionProps) {
+/** The General section of the Settings page, below the Items: the few rarely-used options (PRD). */
+export function GeneralSection({ settings, hasHistory, t, actions, overlays, onInstallGuide }: GeneralSectionProps) {
   const install = useInstall()
   const confirmClearHistory = () =>
     overlays.confirm({ text: t.clearHistoryConfirm, confirmLabel: t.clearHistory, onConfirm: actions.clearHistory })

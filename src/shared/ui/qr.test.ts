@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { seedCatalog } from './catalog.ts'
+import { seedCatalog } from '../../items/catalog.ts'
 import { qrCode } from './qr.ts'
-import { encodeCatalog, shareLink } from './sharedCatalog.ts'
+import { encodeCatalog, shareLink } from '../../items/sharedCatalog.ts'
 
 describe('QR code for a Shared Catalog', () => {
   it('fits the starter Catalog in a small, easily scanned code', async () => {

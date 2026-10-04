@@ -2,10 +2,10 @@ import type { PlacedRound } from '../history/history.ts'
 import { seedCatalog, type Catalog } from '../items/catalog.ts'
 import type { Pins } from '../items/pins.ts'
 import { recognizeStarters } from '../items/starter.ts'
-import type { ShowOrder } from '../counter/showOrder.ts'
+import type { ShowOrder } from '../show/showOrder.ts'
 import { emptyRound, type ComposingRound } from '../round/round.ts'
 import { DEFAULT_SETTINGS, type Settings } from '../settings/settings.ts'
-import type { Locale } from './i18n.ts'
+import type { Locale } from '../shared/i18n.ts'
 
 /** The slice of the Web Storage API this module needs; window.localStorage satisfies it. */
 export interface KeyValueStore {

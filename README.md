@@ -91,7 +91,7 @@ In **General**, at the bottom of the Settings page:
 A React + TypeScript + Vite PWA, deployed to GitHub Pages by GitHub Actions on every push to `main`.
 
 - What and why: [docs/prd.md](docs/prd.md). Words used in code and docs: [CONTEXT.md](CONTEXT.md). Design: [docs/look-and-feel.md](docs/look-and-feel.md). Decisions: [docs/adr/](docs/adr/).
-- Code is grouped by feature: `src/round/`, `src/counter/`, `src/history/`, `src/items/`, `src/settings/`, plus `src/shared/`.
+- Code is grouped by feature, one folder per tab: `src/round/`, `src/show/`, `src/history/`, `src/settings/` (with the Items section and Catalog rules in `src/items/`). `src/app/` wires them together (app state, saved state, share links); `src/shared/` holds i18n, link packing and common UI.
 
 ```sh
 npm install
