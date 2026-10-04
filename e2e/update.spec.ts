@@ -28,7 +28,9 @@ test.beforeEach(async ({ page }) => {
 
 test('Settings shows the version, build and date at the bottom', async ({ page }) => {
   await tab(page, 'Settings').tap()
-  await expect(page.getByText(new RegExp(`^Version ${version.replace(/\./g, '\\.')} · build \\S+ · \\d{1,2} \\w+ \\d{4}$`))).toBeVisible()
+  const line = page.getByText(`Version ${version} · build`)
+  await expect(line).toBeVisible()
+  await expect(line).toHaveText(/ · build \S+ · \d{1,2} \w+ \d{4}$/)
 })
 
 test('a new version offers Update; Later moves the offer to Settings, where Update reloads', async ({ page }) => {
