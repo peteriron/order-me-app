@@ -1,13 +1,13 @@
-import { useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react'
+import { useState, type CSSProperties, type PointerEvent } from 'react'
 import type { Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
 import { CategorySection } from '../shared/ui/CategorySection.tsx'
-import type { AppActions } from '../useAppState.ts'
+import type { AppActions } from '../app/useAppState.ts'
 import type { Category, Item, Sections } from './catalog.ts'
 import type { Pins } from './pins.ts'
 import { useRowSwipe } from './useRowSwipe.ts'
 
-interface ItemsPageProps {
+export interface ItemsSectionProps {
   /** The Catalog per category, Pinned Items first, then A–Z (catalogSections), independent of the grid's order. */
   sections: Sections
   pins: Pins
@@ -18,8 +18,6 @@ interface ItemsPageProps {
   onAdd: () => void
   onShare: () => void
   onEdit: (item: Item) => void
-  /** The Settings section, shown below the Catalog. */
-  children?: ReactNode
 }
 
 /** A pinned row being dragged by its handle. */
@@ -39,11 +37,11 @@ interface Drag {
 }
 
 /**
- * The Settings page: first the Operator's Catalog (the Items section), every Item by category, each row opening the
- * edit sheet and pinning the Item; then the general settings passed in as children. Pinned Items come first and are
- * reordered by dragging their handle, or with Move up / Move down for keyboard and screen readers.
+ * The Items section of the Settings page: the Operator's Catalog, every Item by category, each row opening the edit
+ * sheet and pinning the Item. Pinned Items come first and are reordered by dragging their handle, or with Move up /
+ * Move down for keyboard and screen readers.
  */
-export function ItemsPage({ sections, pins, count, t, actions, overlays, onAdd, onShare, onEdit, children }: ItemsPageProps) {
+export function ItemsSection({ sections, pins, count, t, actions, overlays, onAdd, onShare, onEdit }: ItemsSectionProps) {
   const rows = useRowSwipe()
   /** Deletes at once; the toast's Undo puts it back where it was (#54). */
   const remove = (item: Item) => {
@@ -204,35 +202,29 @@ export function ItemsPage({ sections, pins, count, t, actions, overlays, onAdd, 
   }
 
   return (
-    <section className="page" aria-labelledby="settings-page-title">
-      <h1 className="page-title" id="settings-page-title">
-        {t.settings}
-      </h1>
-      <section className="items-section" aria-labelledby="items-title">
-        <header className="page-head">
-          <h2 className="section-title" id="items-title">
-            {t.items}
-          </h2>
-          <span className="page-sub">{t.catalogCount(count)}</span>
-        </header>
-        <div className="items-actions">
-          <button type="button" className="btn btn-primary" onClick={onAdd}>
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            {t.addItem}
-          </button>
-          <button type="button" className="btn btn-outline" onClick={onShare}>
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
-              <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2" />
-            </svg>
-            {t.shareItems}
-          </button>
-        </div>
-        {section('drink', t.drinks)}
-        {section('snack', t.snacks)}
-      </section>
-      {children}
+    <section className="items-section" aria-labelledby="items-title">
+      <header className="page-head">
+        <h2 className="section-title" id="items-title">
+          {t.items}
+        </h2>
+        <span className="page-sub">{t.catalogCount(count)}</span>
+      </header>
+      <div className="items-actions">
+        <button type="button" className="btn btn-primary" onClick={onAdd}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          {t.addItem}
+        </button>
+        <button type="button" className="btn btn-outline" onClick={onShare}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+            <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2" />
+          </svg>
+          {t.shareItems}
+        </button>
+      </div>
+      {section('drink', t.drinks)}
+      {section('snack', t.snacks)}
     </section>
   )
 }

@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
-import { decodeRound, roundPayload } from './counter/sharedRound.ts'
-import { decodeCatalog, sharedPayload } from './items/sharedCatalog.ts'
-import type { Messages } from './shared/i18n.ts'
-import type { Overlays } from './shared/ui/overlays.ts'
+import { decodeRound, roundPayload } from '../show/sharedRound.ts'
+import { decodeCatalog, sharedPayload } from '../items/sharedCatalog.ts'
+import type { Messages } from '../shared/i18n.ts'
+import type { Overlays } from '../shared/ui/overlays.ts'
 import type { AppActions } from './useAppState.ts'
 
 interface SharedLinkOptions {

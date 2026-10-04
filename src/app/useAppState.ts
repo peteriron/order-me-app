@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
-import { deletePlacedRound, markOrdered } from './history/history.ts'
-import { addToCatalog, deleteWithUndo, editItem, type ItemDraft, type Sections } from './items/catalog.ts'
-import { movePin, pinsAfterEdit, togglePin } from './items/pins.ts'
-import { replaceCatalog, type SharedItem } from './items/sharedCatalog.ts'
-import { receiveRound, type SharedRound } from './counter/sharedRound.ts'
-import { add, clearWithUndo, remove, withNote, type ComposingRound, type RoundNote } from './round/round.ts'
-import type { ThemeSetting } from './settings/settings.ts'
-import type { LanguageSetting, Locale } from './shared/i18n.ts'
-import { resetApp } from './settings/reset.ts'
+import { deletePlacedRound, markOrdered } from '../history/history.ts'
+import { addToCatalog, deleteWithUndo, editItem, type ItemDraft, type Sections } from '../items/catalog.ts'
+import { movePin, pinsAfterEdit, togglePin } from '../items/pins.ts'
+import { replaceCatalog, type SharedItem } from '../items/sharedCatalog.ts'
+import { receiveRound, type SharedRound } from '../show/sharedRound.ts'
+import { add, clearWithUndo, remove, withNote, type ComposingRound, type RoundNote } from '../round/round.ts'
+import type { ThemeSetting } from '../settings/settings.ts'
+import type { LanguageSetting, Locale } from '../shared/i18n.ts'
+import { resetApp } from '../settings/reset.ts'
 import {
   forgetAppState,
   isFirstLaunch,
@@ -15,7 +15,7 @@ import {
   saveAppState,
   type AppState,
   type KeyValueStore,
-} from './shared/storage.ts'
+} from './storage.ts'
 
 /** window.localStorage, or an in-memory stand-in when the browser refuses access (e.g. some private modes). */
 function browserStore(): KeyValueStore {
