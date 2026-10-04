@@ -3,6 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
+    # A push to main that only changes docs doesn't rebuild or deploy: every build gets a new build number and date,
+    # which would offer installed apps an "update" with nothing new in it. The PR has already run the checks.
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE', '.github/dependabot.yml']
   pull_request:
 
 permissions:

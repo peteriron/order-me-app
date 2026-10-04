@@ -126,7 +126,7 @@ npm run build && npm run preview   # the production build, as deployed
   npm ci   # check the lock file still installs
   ```
 - The build number is the GitHub Actions run number of the deploy (`dev` locally) and the date is the build date; both are filled in at build time (`__BUILD__` in `vite.config.ts`).
-- Every push to `main` that passes CI deploys. Open apps notice the new version on their next check (start, coming back to the app, coming back online, or every 30 minutes) and offer **Update**; see `src/app/updates.ts`.
+- Every push to `main` that passes CI deploys, except one that only changes docs (Markdown files, `docs/`, `LICENSE`, `.github/dependabot.yml`): that would give installed apps an update pop-up with nothing new in it. Open apps notice the new version on their next check (start, coming back to the app, coming back online, or every 30 minutes) and offer **Update**; see `src/app/updates.ts`.
 - Making a GitHub release: PRs are squash-merged, which creates a new commit on `main`, so the tag must be made after the merge.
   1. In the release PR, bump the version, add its notes at the top of `CHANGELOG.md`, and update the **Latest release** line at the top of this README.
   2. Create a draft release (no tag yet): `gh release create v5.1.0 --draft --target main --title "OrderMe 5.1.0" --notes-file notes.md`.
