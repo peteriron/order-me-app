@@ -555,19 +555,42 @@ button {
   gap: 0.75rem;
 }
 
-/* Table and remark at the top of the Show page: a short field, and a taller one below it. */
-.round-note {
+/* The title line's right side: Text and QR, with the table field right below them. */
+.show-tools {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  align-items: flex-end;
+  gap: 0.375rem;
+}
+
+.show-table {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+}
+
+.show-table label {
+  display: flex;
+}
+
+.show-table .btn-icon {
+  width: 24px;
+  height: 24px;
 }
 
 .input-table {
-  width: 8rem;
+  width: 6rem;
+  min-height: 40px;
+}
+
+/* The remark, below the total. */
+.round-remark {
+  padding-top: 0.75rem;
 }
 
 .input-remark {
-  min-height: 4.5rem;
+  min-height: 3.5rem;
   padding-top: 0.625rem;
   padding-bottom: 0.625rem;
   resize: vertical;

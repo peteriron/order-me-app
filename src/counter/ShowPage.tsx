@@ -110,20 +110,41 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
           {t.counterTitle}
         </h1>
         {total > 0 && (
-          // Short labels to fit beside the title; the accessible names say what each shares, and contain the label.
-          <div className="show-share">
-            <button type="button" className="btn btn-quiet" aria-label={t.shareAsText} onClick={shareAsText}>
-              <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
-                <path d="M12 15V3M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
-              </svg>
-              {t.textShort}
-            </button>
-            <button type="button" className="btn btn-quiet" aria-label={t.shareAsQr} onClick={onShare}>
-              <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
-                <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2" />
-              </svg>
-              QR
-            </button>
+          <div className="show-tools">
+            {/* Short labels to fit beside the title; the accessible names say what each shares, and contain the label. */}
+            <div className="show-share">
+              <button type="button" className="btn btn-quiet" aria-label={t.shareAsText} onClick={shareAsText}>
+                <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+                  <path d="M12 15V3M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
+                </svg>
+                {t.textShort}
+              </button>
+              <button type="button" className="btn btn-quiet" aria-label={t.shareAsQr} onClick={onShare}>
+                <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+                  <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2" />
+                </svg>
+                QR
+              </button>
+            </div>
+            {/* The table, right under Text and QR: a table icon as its label. Kept with the Round, saved in History,
+                sent with Text and QR; Clear empties it. */}
+            <div className="show-table">
+              <label htmlFor="round-table">
+                <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+                  <path d="M7 9l1.5-4h7L17 9M3 9h18M5 9v10M19 9v10" />
+                </svg>
+                <span className="visually-hidden">{t.tableLabel}</span>
+              </label>
+              <input
+                id="round-table"
+                className="input input-table"
+                value={round.table ?? ''}
+                maxLength={10}
+                autoComplete="off"
+                enterKeyHint="done"
+                onChange={(e) => actions.setRoundNote({ table: e.target.value })}
+              />
+            </div>
           </div>
         )}
       </header>
@@ -137,32 +158,6 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
         </div>
       ) : (
         <>
-          {/* Table and remark: kept with the Round, saved in History, sent with Text and QR; Clear empties them. */}
-          <div className="round-note">
-            <div className="field">
-              <label htmlFor="round-table">{t.tableLabel}</label>
-              <input
-                id="round-table"
-                className="input input-table"
-                value={round.table ?? ''}
-                maxLength={10}
-                autoComplete="off"
-                enterKeyHint="done"
-                onChange={(e) => actions.setRoundNote({ table: e.target.value })}
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="round-remark">{t.remarkLabel}</label>
-              <textarea
-                id="round-remark"
-                className="input input-remark"
-                value={round.remark ?? ''}
-                rows={2}
-                maxLength={200}
-                onChange={(e) => actions.setRoundNote({ remark: e.target.value })}
-              />
-            </div>
-          </div>
           <div className="counter-body" ref={bodyRef}>
             {list('drink')}
             {hasSnacks && (
@@ -178,6 +173,18 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
               <span>{t.total}</span>
               <span data-testid="counter-total">{total}</span>
             </p>
+            {/* The remark, below the total: kept with the Round, saved in History, sent with Text and QR. */}
+            <div className="field round-remark">
+              <label htmlFor="round-remark">{t.remarkLabel}</label>
+              <textarea
+                id="round-remark"
+                className="input input-remark"
+                value={round.remark ?? ''}
+                rows={2}
+                maxLength={200}
+                onChange={(e) => actions.setRoundNote({ remark: e.target.value })}
+              />
+            </div>
           </div>
 
           {/* The same bar as the Round page's (#55); none while the Round is empty. */}
