@@ -1,26 +1,25 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ShareRoundSheet } from './counter/ShareRoundSheet.tsx'
-import { ShowPage } from './counter/ShowPage.tsx'
-import { showSections } from './counter/showOrder.ts'
-import { HistoryPage } from './history/HistoryPage.tsx'
-import { ItemSheet } from './items/ItemSheet.tsx'
-import { ItemsPage } from './items/ItemsPage.tsx'
-import { ShareItemsSheet } from './items/ShareItemsSheet.tsx'
-import { catalogSections, type Item } from './items/catalog.ts'
-import { localizeCatalog } from './items/starter.ts'
-import { RoundPage } from './round/RoundPage.tsx'
-import { useTileOrder } from './round/useTileOrder.ts'
-import { InstallGuideSheet } from './settings/InstallGuideSheet.tsx'
-import { SettingsSection } from './settings/SettingsSection.tsx'
-import { useTheme } from './settings/useTheme.ts'
-import { detectLocale, formattingLocale, messages, resolveLocale } from './shared/i18n.ts'
-import { ConfirmDialog, type Confirmation } from './shared/ui/ConfirmDialog.tsx'
-import { TabBar } from './shared/ui/TabBar.tsx'
-import { TAB_ICONS } from './shared/ui/tabIcons.tsx'
-import { Pager } from './shared/ui/Pager.tsx'
-import { Toast, type ToastMessage } from './shared/ui/Toast.tsx'
-import type { Overlays } from './shared/ui/overlays.ts'
-import { noteOf, roundLines } from './round/round.ts'
+import { HistoryPage } from '../history/HistoryPage.tsx'
+import { catalogSections, type Item } from '../items/catalog.ts'
+import { ItemSheet } from '../items/ItemSheet.tsx'
+import { ShareItemsSheet } from '../items/ShareItemsSheet.tsx'
+import { localizeCatalog } from '../items/starter.ts'
+import { noteOf, roundLines } from '../round/round.ts'
+import { RoundPage } from '../round/RoundPage.tsx'
+import { useTileOrder } from '../round/useTileOrder.ts'
+import { InstallGuideSheet } from '../settings/InstallGuideSheet.tsx'
+import { SettingsPage } from '../settings/SettingsPage.tsx'
+import { useTheme } from '../settings/useTheme.ts'
+import { detectLocale, formattingLocale, messages, resolveLocale } from '../shared/i18n.ts'
+import { ConfirmDialog, type Confirmation } from '../shared/ui/ConfirmDialog.tsx'
+import type { Overlays } from '../shared/ui/overlays.ts'
+import { Pager } from '../shared/ui/Pager.tsx'
+import { TabBar } from '../shared/ui/TabBar.tsx'
+import { TAB_ICONS } from '../shared/ui/tabIcons.tsx'
+import { Toast, type ToastMessage } from '../shared/ui/Toast.tsx'
+import { ShareRoundSheet } from '../show/ShareRoundSheet.tsx'
+import { showSections } from '../show/showOrder.ts'
+import { ShowPage } from '../show/ShowPage.tsx'
 import { useAppState } from './useAppState.ts'
 import { useSharedLinks } from './useSharedLinks.ts'
 
@@ -109,27 +108,27 @@ export function App() {
       onGoToRound={() => setPage(ROUND_PAGE)}
       onShare={() => setSharing('round')}
     />,
-    <ItemsPage
-      key="items"
-      sections={catalogSections(catalog, state.pins)}
-      pins={state.pins}
-      count={catalog.length}
+    <SettingsPage
+      key="settings"
       t={t}
-      actions={actions}
-      overlays={overlays}
-      onAdd={() => setSheet({})}
-      onShare={() => setSharing('items')}
-      onEdit={(item) => setSheet({ item })}
-    >
-      <SettingsSection
-        settings={state.settings}
-        hasHistory={state.history.length > 0}
-        t={t}
-        actions={actions}
-        overlays={overlays}
-        onInstallGuide={() => setInstallGuide(true)}
-      />
-    </ItemsPage>,
+      items={{
+        sections: catalogSections(catalog, state.pins),
+        pins: state.pins,
+        count: catalog.length,
+        actions,
+        overlays,
+        onAdd: () => setSheet({}),
+        onShare: () => setSharing('items'),
+        onEdit: (item) => setSheet({ item }),
+      }}
+      general={{
+        settings: state.settings,
+        hasHistory: state.history.length > 0,
+        actions,
+        overlays,
+        onInstallGuide: () => setInstallGuide(true),
+      }}
+    />,
   ]
 
   return (

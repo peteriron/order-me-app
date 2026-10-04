@@ -5,7 +5,7 @@ import type { Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
 import { RoundBar } from '../round/RoundBar.tsx'
 import { shareOrCopy, shareText } from './share.ts'
-import type { AppActions } from '../useAppState.ts'
+import type { AppActions } from '../app/useAppState.ts'
 import { browserHost, keepScreenAwake } from './wakeLock.ts'
 
 interface ShowPageProps {
@@ -53,7 +53,7 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
   const bodyRef = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => {
-    const fitAll = () => bodyRef.current?.querySelectorAll<HTMLElement>('.counter-what').forEach(fitName)
+    const fitAll = () => bodyRef.current?.querySelectorAll<HTMLElement>('.show-what').forEach(fitName)
     fitAll()
     window.addEventListener('resize', fitAll)
     return () => window.removeEventListener('resize', fitAll)
@@ -76,20 +76,20 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
   }
 
   const list = (category: 'drink' | 'snack') => (
-    <ul className="counter-lines">
+    <ul className="show-lines">
       {lines
         .filter((l) => l.item.category === category)
         .map(({ item, count }) => (
-          <li key={item.id} className="counter-line">
-            <span className="counter-count">{count}</span>
-            <span className="counter-times">×</span>
-            <span className="counter-what">
+          <li key={item.id} className="show-line">
+            <span className="show-count">{count}</span>
+            <span className="show-times">×</span>
+            <span className="show-what">
               {/* Non-breaking space keeps the emoji on the name's line; long names hyphenate instead. */}
               <span aria-hidden="true">{item.emoji}</span>
               {' '}
               {item.name}
             </span>
-            <span className="counter-controls">
+            <span className="show-controls">
               <button type="button" aria-label={t.removeOne(item.name)} onClick={() => actions.removeFromRound(item.id)}>
                 −
               </button>
@@ -107,7 +107,7 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
     <section className="page show-page" aria-labelledby="show-title">
       <header className="page-head">
         <h1 className="page-title" id="show-title">
-          {t.counterTitle}
+          {t.showTitle}
         </h1>
         {total > 0 && (
           <div className="show-tools">
@@ -158,20 +158,20 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
         </div>
       ) : (
         <>
-          <div className="counter-body" ref={bodyRef}>
+          <div className="show-body" ref={bodyRef}>
             {list('drink')}
             {hasSnacks && (
               <>
-                <h2 className="section-label counter-divider">
+                <h2 className="section-label show-divider">
                   <span className="dot dot-snack" aria-hidden="true" />
                   {t.snacks}
                 </h2>
                 {list('snack')}
               </>
             )}
-            <p className="counter-total">
+            <p className="show-total">
               <span>{t.total}</span>
-              <span data-testid="counter-total">{total}</span>
+              <span data-testid="show-total">{total}</span>
             </p>
             {/* The remark, below the total: kept with the Round, saved in History, sent with Text and QR. */}
             <div className="field round-remark">

@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { add, emptyRound } from '../round/round.ts'
 import type { PlacedRound } from '../history/history.ts'
 import { seedCatalog, type Item } from './catalog.ts'
-import { decodeCatalog, encodeCatalog, pack, replaceCatalog, sharedPayload, shareLink } from './sharedCatalog.ts'
+import { pack } from '../shared/shareLink.ts'
+import { decodeCatalog, encodeCatalog, replaceCatalog, sharedPayload, shareLink } from './sharedCatalog.ts'
 import { localizeCatalog } from './starter.ts'
 
 const ids = () => {

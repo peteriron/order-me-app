@@ -1,6 +1,7 @@
 import { emptyRound, type ComposingRound } from '../round/round.ts'
 import { checkDraft, type Catalog, type Category, type Item, type ItemDraft } from './catalog.ts'
 import type { Pins } from './pins.ts'
+import { fragmentLink, MAX_LINK_ITEMS, pack, unpack } from '../shared/shareLink.ts'
 import { starterRow } from './starter.ts'
 
 /**
@@ -12,17 +13,13 @@ import { starterRow } from './starter.ts'
  *   language. If its category or emoji was changed: a tab, then `d`/`s` and the emoji.
  * - Any other Item: `d` or `s` (drink or snack), the emoji, a tab, the name. Names can't hold tabs or newlines
  *   (checkDraft collapses whitespace).
- * The text is deflated and written as base64url: the 28-Item starter Catalog makes a link of under 300 bytes, a QR
- * code that scans easily. Format v1 (names only, the first version) is still read.
+ * The text is packed by shareLink.ts: the 28-Item starter Catalog makes a link of under 300 bytes, a QR code that
+ * scans easily. Format v1 (names only, the first version) is still read.
  */
 const FRAGMENT = '#items='
 const VERSION = '2'
 const CATEGORY_CODES = { drink: 'd', snack: 's' } as const
 const CATEGORIES: Record<string, Category> = { d: 'drink', s: 'snack' }
-/** Far beyond any real Catalog; guards against a crafted link that inflates into something huge. */
-const MAX_TEXT_BYTES = 64 * 1024
-/** Limits on what a link may bring, far beyond any real Catalog or Round, so a crafted link can't flood the app. */
-export const MAX_LINK_ITEMS = 200
 const MAX_NAME = 60
 /** The Item sheet's limit for a typed emoji (in UTF-16 units): one emoji, even a multi-part one, fits. */
 const MAX_EMOJI = 16
@@ -46,17 +43,6 @@ export function itemLine(item: Item): string {
 /** Reads an Item line; `starterMarks` is false for format v1, which had none. Null when anything is invalid. */
 export function parseItemLine(line: string, starterMarks = true): SharedItem | null {
   return line.startsWith('*') ? (starterMarks ? starterLine(line.slice(1)) : null) : plainLine(line)
-}
-
-/** Deflates and base64url-encodes a link's text. */
-export async function pack(text: string): Promise<string> {
-  const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('deflate-raw'))
-  return toBase64Url(new Uint8Array(await new Response(stream).arrayBuffer()))
-}
-
-/** The text of a link payload. Throws when it isn't valid base64url, deflate or UTF-8, or inflates too large. */
-export async function unpack(payload: string): Promise<string> {
-  return inflate(fromBase64Url(payload))
 }
 
 /** The Items in a shared link, or null when it can't be read in full: a link is used whole or not at all. */
@@ -113,13 +99,6 @@ export function sharedPayload(hash: string): string | null {
   return hash.startsWith(FRAGMENT) ? hash.slice(FRAGMENT.length) : null
 }
 
-/** The app's address with `fragment` and `payload` after it, replacing any fragment it had. */
-export function fragmentLink(appUrl: string, fragment: string, payload: string): string {
-  const url = new URL(appUrl)
-  url.hash = ''
-  return `${url.href.replace(/#$/, '')}${fragment}${payload}`
-}
-
 /**
  * The state after accepting a Shared Catalog: its Items with fresh ids, an empty Round (its counts pointed at the
  * old Items) and no pins. History isn't touched: placed Rounds keep their snapshots (ADR-0001).
@@ -131,32 +110,3 @@ export function replaceCatalog(
   return { catalog: items.map((draft) => ({ id: newId(), ...draft })), round: emptyRound(), pins: [] }
 }
 
-async function inflate(bytes: Uint8Array): Promise<string> {
-  const reader = new Blob([bytes as BlobPart]).stream().pipeThrough(new DecompressionStream('deflate-raw')).getReader()
-  const chunks: Uint8Array[] = []
-  let size = 0
-  for (;;) {
-    const { done, value } = await reader.read()
-    if (done) break
-    size += value.length
-    if (size > MAX_TEXT_BYTES) {
-      await reader.cancel()
-      throw new Error('Shared link too large')
-    }
-    chunks.push(value)
-  }
-  // fatal: a cut-off multi-byte character is an error, not a replacement character.
-  return new TextDecoder('utf-8', { fatal: true }).decode(await new Blob(chunks as BlobPart[]).arrayBuffer())
-}
-
-function toBase64Url(bytes: Uint8Array): string {
-  let binary = ''
-  for (const byte of bytes) binary += String.fromCharCode(byte)
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-}
-
-function fromBase64Url(text: string): Uint8Array {
-  if (!/^[\w-]+$/.test(text)) throw new Error('Not base64url')
-  const binary = atob(text.replace(/-/g, '+').replace(/_/g, '/'))
-  return Uint8Array.from(binary, (c) => c.charCodeAt(0))
-}
