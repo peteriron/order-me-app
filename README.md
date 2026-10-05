@@ -35,7 +35,7 @@ It's a web app you install on your home screen. It works offline, so bad bar Wi-
 
 ### Get a round
 
-1. The app opens on the **Round** page. As friends call out their order, tap the tiles: one tap is one drink. Tap − on a tile to take one off, or **Clear** to start over (**Undo** brings it back for 5 seconds).
+1. The app opens on the **Round** page. As friends call out their order, tap the tiles: one tap is one drink. Each tile is softly tinted in its emoji's colour; once a drink is in the Round, its tile's colour gets stronger and it gets an amber border and a count. Tap − on a tile to take one off, or **Clear** to start over (**Undo** brings it back for 5 seconds).
 2. Can't spot a drink in a long list? Tap the **search** icon next to the title and type a few letters: the tiles filter as you type, and tapping one still counts it. The **×** closes the search.
 3. Something missing? Tap **+ New** at the end of the grid to add it to your Items and to the Round in one go.
 4. At the counter, tap **Show** (or swipe to it). Read the list out, or show the screen to the bartender. Fix counts with − and + if someone changes their mind.
@@ -91,7 +91,7 @@ When a new version of OrderMe is out, the app notices by itself while you're onl
 - **Update** loads the new version straight away. Your Round, Items and History are kept.
 - **Later** closes the question. The bottom of the Settings page then shows **Update available · Update**, and the next time you open the app it's on the new version anyway.
 
-Without a connection there's nothing to check, and the app keeps working as it is. The bottom of the Settings page always shows the version you're running, its build number and date (for example "Version 5.0.0 · build 112 · 4 Oct 2026").
+Without a connection there's nothing to check, and the app keeps working as it is. The bottom of the Settings page always shows the version you're running, its build number and date (for example "Version 5.1.0 · build 117 · 4 Oct 2026").
 
 ### Start fresh
 
@@ -122,15 +122,16 @@ npm run build && npm run preview   # the production build, as deployed
 - Bump it in every PR that changes the app: minor for a feature, patch for a fix, major for a big milestone. Docs- or CI-only changes don't bump it. Always bump with `npm version`, which changes only the app's own version in `package.json` and `package-lock.json` (a text replace can also hit a dependency that happens to have the same version, and CI's `npm ci` then refuses the lock file):
 
   ```sh
-  npm version 5.1.0 --no-git-tag-version
+  # e.g. the next feature release after 5.1.0
+  npm version 5.2.0 --no-git-tag-version
   npm ci   # check the lock file still installs
   ```
 - The build number is the GitHub Actions run number of the deploy (`dev` locally) and the date is the build date; both are filled in at build time (`__BUILD__` in `vite.config.ts`).
 - Every push to `main` that passes CI deploys, except one that only changes docs (Markdown files, `docs/`, `LICENSE`, `.github/dependabot.yml`): that would give installed apps an update pop-up with nothing new in it. Open apps notice the new version on their next check (start, coming back to the app, coming back online, or every 30 minutes) and offer **Update**; see `src/app/updates.ts`.
 - Making a GitHub release: PRs are squash-merged, which creates a new commit on `main`, so the tag must be made after the merge.
   1. In the release PR, bump the version, add its notes at the top of `CHANGELOG.md`, and update the **Latest release** line at the top of this README.
-  2. Create a draft release (no tag yet): `gh release create v5.1.0 --draft --target main --title "OrderMe 5.1.0" --notes-file notes.md`.
-  3. After the PR is merged and deployed, publish it on the merge commit, which creates the tag there: `gh release edit v5.1.0 --target <merge commit> --draft=false --latest`.
+  2. Create a draft release (no tag yet): `gh release create v5.2.0 --draft --target main --title "OrderMe 5.2.0" --notes-file notes.md`.
+  3. After the PR is merged and deployed, publish it on the merge commit, which creates the tag there: `gh release edit v5.2.0 --target <merge commit> --draft=false --latest`.
 
 ### Security
 
