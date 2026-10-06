@@ -1,6 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import { add, countOf } from '../round/round.ts'
-import { forgetAppState, isFirstLaunch, loadAppState, saveAppState, type KeyValueStore } from './storage.ts'
+import {
+  BACKUP_KEY,
+  BACKUP_ROUND_KEY,
+  ROUND_KEY,
+  forgetAppState,
+  isFirstLaunch,
+  loadAppState,
+  saveAppState,
+  saveData,
+  saveRound,
+  type KeyValueStore,
+} from './storage.ts'
 
 /** In-memory stand-in for window.localStorage. */
 function memoryStore(): KeyValueStore & { data: Map<string, string> } {
@@ -41,8 +52,14 @@ describe('app state storage', () => {
     store.setItem('another-app', 'kept')
     const first = loadAppState(store, { locale: 'en', newId: ids() })
     saveAppState(store, { ...first, catalog: [], pins: ['x'] })
+    // Every key the app owns, including the Round and both backups; nothing of another app on the origin.
+    store.setItem(BACKUP_KEY, 'old')
+    store.setItem(BACKUP_ROUND_KEY, 'old')
     forgetAppState(store)
     expect(isFirstLaunch(store)).toBe(true)
+    expect(store.getItem(ROUND_KEY)).toBeNull()
+    expect(store.getItem(BACKUP_KEY)).toBeNull()
+    expect(store.getItem(BACKUP_ROUND_KEY)).toBeNull()
     expect(loadAppState(store, { locale: 'en', newId: ids() }).catalog).toHaveLength(28)
     expect(store.getItem('another-app')).toBe('kept')
   })
@@ -74,7 +91,8 @@ describe('app state storage', () => {
     }
     const state = loadAppState(blocked, { locale: 'en', newId: ids() })
     expect(state.catalog).toHaveLength(28)
-    expect(() => saveAppState(blocked, state)).not.toThrow()
+    // Reported, not thrown, so the app can tell the Operator this phone won't save.
+    expect(saveAppState(blocked, state)).toBe(false)
     expect(() => forgetAppState(blocked)).not.toThrow()
   })
 
@@ -93,14 +111,23 @@ describe('app state storage', () => {
     }
   })
 
+  it('starts fresh on a fractional version, keeping the save, instead of crashing in the upgrade', () => {
+    // A version like 4.5 matched no upgrade path and crashed the app before the integer check.
+    const saved = JSON.stringify({ version: 4.5, catalog: [{ id: 'x', name: 'Future' }], round: { counts: {} } })
+    const store = memoryStore()
+    store.setItem('order-me', saved)
+    expect(loadAppState(store, { locale: 'en', newId: ids() }).catalog).toHaveLength(28)
+    expect(store.getItem('order-me.unreadable')).toBe(saved)
+  })
+
   it('keeps a save it cannot use under another key, instead of overwriting it with the fresh start', () => {
-    const newer = JSON.stringify({ version: 7, catalog: [{ id: 'x', name: 'Future' }], round: { counts: {} }, history: ['kept'] })
+    const newer = JSON.stringify({ version: 8, catalog: [{ id: 'x', name: 'Future' }], round: { counts: {} }, history: ['kept'] })
     for (const saved of [newer, '{not json']) {
       const store = memoryStore()
       store.setItem('order-me', saved)
       expect(loadAppState(store, { locale: 'en', newId: ids() }).catalog).toHaveLength(28)
       expect(store.getItem('order-me.unreadable'), saved).toBe(saved)
-      expect(JSON.parse(store.getItem('order-me')!).version).toBe(6)
+      expect(JSON.parse(store.getItem('order-me')!).version).toBe(7)
     }
   })
 
@@ -109,7 +136,52 @@ describe('app state storage', () => {
     const first = loadAppState(store, { locale: 'en', newId: ids() })
     loadAppState(store, { locale: 'en', newId: ids() })
     expect(first.catalog).toHaveLength(28)
-    expect(store.getItem('order-me.unreadable')).toBeNull()
+    expect(store.getItem(BACKUP_KEY)).toBeNull()
+    expect(store.getItem(BACKUP_ROUND_KEY)).toBeNull()
+  })
+
+  it('saves the Round on its own, without rewriting the Catalog or History', () => {
+    const store = memoryStore()
+    const state = loadAppState(store, { locale: 'en', newId: ids() })
+    const dataBefore = store.getItem('order-me')
+    const duvel = state.catalog.find((i) => i.name === 'Duvel')!
+
+    expect(saveRound(store, { ...state.round, counts: { [duvel.id]: 2 } })).toBe(true)
+    expect(store.getItem('order-me')).toBe(dataBefore)
+    expect(JSON.parse(store.getItem(ROUND_KEY)!).round.counts).toEqual({ [duvel.id]: 2 })
+
+    const roundBefore = store.getItem(ROUND_KEY)
+    const changed = { ...state, catalog: [] }
+    expect(saveData(store, changed)).toBe(true)
+    expect(store.getItem(ROUND_KEY)).toBe(roundBefore)
+  })
+
+  it('migrates a single-key save to the split format, keeping the composing Round', () => {
+    const store = memoryStore()
+    const catalog = [{ id: 'd', name: 'Duvel', category: 'drink', emoji: '🍺' }]
+    const settings = { language: 'en', theme: 'dark' }
+    store.setItem(
+      'order-me',
+      JSON.stringify({ version: 6, catalog, round: { counts: { d: 2 } }, history: [], settings, pins: [], showOrder: [] }),
+    )
+
+    const state = loadAppState(store, { locale: 'en', newId: ids() })
+    expect(countOf(state.round, 'd')).toBe(2)
+    const data = JSON.parse(store.getItem('order-me')!)
+    expect(data.version).toBe(7)
+    expect(data.round).toBeUndefined()
+    expect(JSON.parse(store.getItem(ROUND_KEY)!).round).toEqual({ counts: { d: 2 } })
+    expect(store.getItem(BACKUP_KEY)).toBeNull()
+  })
+
+  it('keeps a Round it cannot use under its own key, and starts with an empty one', () => {
+    const store = memoryStore()
+    loadAppState(store, { locale: 'en', newId: ids() })
+    store.setItem(ROUND_KEY, '{not json')
+
+    const state = loadAppState(store, { locale: 'en', newId: ids() })
+    expect(state.round).toEqual({ counts: {} })
+    expect(store.getItem(BACKUP_ROUND_KEY)).toBe('{not json')
   })
 
   it('drops only the damaged entries of a save, keeps the rest and the original under another key', () => {

@@ -1,0 +1,21 @@
+name: Dependency review
+
+# Refuses a pull request that introduces a dependency with a known high or critical advisory, before it can be
+# merged. The weekly npm audit in ci.yml catches advisories that land after a dependency is already in.
+
+on: [pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
+        with:
+          fail-on-severity: high

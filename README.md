@@ -4,7 +4,7 @@ A phone app for the person getting the round. Friends call out what they want, y
 
 **Open it:** <https://peteriron.github.io/order-me-app/>
 
-**Latest release:** [5.1.0](https://github.com/peteriron/order-me-app/releases/tag/v5.1.0): tiles tinted in their emoji's colour. What changed in each version: [CHANGELOG.md](CHANGELOG.md).
+**Latest release:** [5.2.0](https://github.com/peteriron/order-me-app/releases/tag/v5.2.0): faster saves and a hardened supply chain. What changed in each version: [CHANGELOG.md](CHANGELOG.md).
 
 It's a web app you install on your home screen. It works offline, so bad bar Wi-Fi doesn't matter, and everything stays on your phone: no account, no server, no prices or payments. Sharing a Round or your Items puts them in the link itself, so they never pass through a server either. It speaks English and Dutch.
 
@@ -111,7 +111,7 @@ A React + TypeScript + Vite PWA, deployed to GitHub Pages by GitHub Actions on e
 npm install
 npm run dev        # local dev server
 npm test           # unit tests (Vitest)
-npm run test:e2e   # end-to-end tests (Playwright, phone viewport), against a production build
+npm run test:e2e   # end-to-end tests (Playwright: Chromium phone and iPhone/WebKit), against a production build
 npm run typecheck && npm run lint
 npm run build && npm run preview   # the production build, as deployed
 ```
@@ -138,4 +138,6 @@ npm run build && npm run preview   # the production build, as deployed
 - Share links are untrusted input: `src/shared/shareLink.ts` and the two link formats accept a link whole or not at all, with limits on size, Items, names and counts.
 - The built page carries a Content-Security-Policy (`vite.config.ts`): only the app's own scripts, styles and connections, plus `data:` images for the QR codes. The inline theme script, `src/settings/themeBeforePaint.js`, is allowed by its hash, so editing it needs nothing else.
 - CI's GitHub Actions are pinned to commits; Dependabot proposes npm and Actions updates monthly (`.github/dependabot.yml`), keeping `@types/node` on the Node major CI runs on.
+- Pull requests are checked for vulnerable dependencies (dependency review), CI fails on known advisories in shipped packages, and zizmor, CodeQL, gitleaks and OpenSSF Scorecard guard the workflows and the history. Every run attaches a CycloneDX SBOM.
+- Node and npm are pinned (`.node-version`, `engines`, `packageManager`), and CI reads the same version file.
 - More in the PRD's *Security* and *Updates and version* notes.

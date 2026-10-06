@@ -16,12 +16,24 @@ interface ShareRoundSheetProps {
 /** "Share Round": the Round as a QR code and link for a friend's phone (the Show page's QR button). */
 export function ShareRoundSheet({ lines, note, t, onClose }: ShareRoundSheetProps) {
   const [link, setLink] = useState<string | null>(null)
+  const [failed, setFailed] = useState(false)
   const total = lines.reduce((sum, line) => sum + line.count, 0)
 
   useEffect(() => {
     let current = true
     const appUrl = new URL(import.meta.env.BASE_URL, location.href).href
-    void encodeRound(lines, note).then((payload) => current && setLink(roundLink(appUrl, payload)))
+    void encodeRound(lines, note)
+      .then((payload) => {
+        if (!current) return
+        setFailed(false)
+        setLink(roundLink(appUrl, payload))
+      })
+      .catch(() => {
+        if (!current) return
+        // A stale link must not sit next to the error: the two would disagree.
+        setLink(null)
+        setFailed(true)
+      })
     return () => {
       current = false
     }
@@ -32,6 +44,7 @@ export function ShareRoundSheet({ lines, note, t, onClose }: ShareRoundSheetProp
       title={t.shareRound}
       hint={t.shareRoundHint}
       link={link}
+      failed={failed}
       alt={t.qrRoundAlt(total)}
       t={t}
       onClose={onClose}

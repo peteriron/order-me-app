@@ -7,6 +7,8 @@ declare global {
 }
 
 const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'
+const ANDROID_CHROME =
+  'Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36'
 
 const addToHome = (page: Page) => page.getByRole('button', { name: 'Add to Home Screen' })
 
@@ -16,6 +18,9 @@ async function openSettings(page: Page) {
 }
 
 test.describe('Chrome on Android', () => {
+  // The button's behaviour is chosen from the user agent, so the engine doesn't matter: run it on both.
+  test.use({ userAgent: ANDROID_CHROME })
+
   test('the button appears once Chrome offers to install, and opens Chrome’s own prompt', async ({ page }) => {
     await openSettings(page)
     await expect(page.getByRole('button', { name: 'Reset app' })).toBeVisible()

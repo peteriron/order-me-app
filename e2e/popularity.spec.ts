@@ -1,7 +1,16 @@
 import { expect, test, type Page } from '@playwright/test'
 
+/**
+ * The app sets the title from an effect; waiting for it means the mount save has run, so a write straight into
+ * localStorage won't be overwritten by it (WebKit exposed that race; Chromium usually won it by timing).
+ */
+async function waitForMounted(page: Page) {
+  await expect(page).toHaveTitle('This round is on me')
+}
+
 /** Writes placed Rounds (each a list of catalog Item names, placed `daysAgo`) into the saved app state, then reloads. */
 async function seedHistory(page: Page, rounds: { daysAgo: number; items: string[] }[]) {
+  await waitForMounted(page)
   await page.evaluate((rounds) => {
     const state = JSON.parse(localStorage.getItem('order-me')!)
     state.history = rounds.map((r, n) => ({
@@ -15,6 +24,7 @@ async function seedHistory(page: Page, rounds: { daysAgo: number; items: string[
     localStorage.setItem('order-me', JSON.stringify(state))
   }, rounds)
   await page.reload()
+  await waitForMounted(page)
 }
 
 const firstDrinks = (page: Page) =>

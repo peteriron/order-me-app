@@ -37,7 +37,7 @@ describe('marking a Round as ordered', () => {
     const { next } = markOrdered({ round: composed, history: [] }, catalogSections([editable, chips]), meta)
     editable.name = 'Duvel Tripel Hop'
     editable.emoji = '🍻'
-    expect(next.history[0].lines[0]).toMatchObject({ itemId: 'duvel', name: 'Duvel', emoji: '🍺' })
+    expect(next.history[0]!.lines[0]!).toMatchObject({ itemId: 'duvel', name: 'Duvel', emoji: '🍺' })
   })
 
   it('undo takes the Round back out of history and restores what was being composed', () => {

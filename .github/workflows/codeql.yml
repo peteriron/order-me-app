@@ -12,6 +12,11 @@ on:
 permissions:
   contents: read
 
+# A new push replaces the older scan of the same ref: no queue of stale analyses.
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})

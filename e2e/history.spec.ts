@@ -7,8 +7,17 @@ interface SeedRound {
   lines: [string, number, string?][]
 }
 
+/**
+ * The app sets the title from an effect; waiting for it means the mount save has run, so a write straight into
+ * localStorage won't be overwritten by it (WebKit exposed that race; Chromium usually won it by timing).
+ */
+async function waitForMounted(page: Page) {
+  await expect(page).toHaveTitle('This round is on me')
+}
+
 /** Writes placed Rounds straight into the saved app state (dates relative to the browser's today), then reloads. */
 async function seedHistory(page: Page, rounds: SeedRound[]) {
+  await waitForMounted(page)
   await page.evaluate((rounds) => {
     const state = JSON.parse(localStorage.getItem('order-me')!)
     const byName = (name: string) => state.catalog.find((i: { name: string }) => i.name === name)
@@ -28,6 +37,7 @@ async function seedHistory(page: Page, rounds: SeedRound[]) {
     localStorage.setItem('order-me', JSON.stringify(state))
   }, rounds)
   await page.reload()
+  await waitForMounted(page)
 }
 
 const historyPage = (page: Page) => page.getByRole('region', { name: 'History' })
@@ -157,6 +167,7 @@ test('Order again skips Items that were deleted since, and says so', async ({ pa
     localStorage.setItem('order-me', JSON.stringify(state))
   })
   await page.reload()
+  await waitForMounted(page)
   await goToHistory(page)
 
   await historyPage(page).getByRole('button', { name: 'Order again' }).tap()

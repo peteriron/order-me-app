@@ -25,6 +25,7 @@ dist-ssr
 test-results
 playwright-report
 coverage
+sbom.cdx.json
 
 # Agent skills: installed locally per developer, not part of the app
 .agents/skills/

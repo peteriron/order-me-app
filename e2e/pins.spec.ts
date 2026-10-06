@@ -59,7 +59,12 @@ test('dragging a pinned Item’s handle reorders it, without swiping the page', 
     { steps: 16, durationMs: 400 },
   )
 
-  await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeInViewport({ ratio: 1 })
+  // No page swipe happened. (Not "the heading is in view": tapping the pins scrolled the list, and the viewport
+  // is shorter on the iPhone project.)
+  await expect(page.getByRole('navigation', { name: 'Pages' }).getByRole('button', { name: 'Settings' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  )
   await expect(listedDrinks(page).nth(0)).toHaveText(/Mint tea/)
   await expect(listedDrinks(page).nth(1)).toHaveText(/Lager/)
   await expect(listedDrinks(page).nth(2)).toHaveText(/Cola/)

@@ -2,6 +2,22 @@
 
 All notable changes to OrderMe ("This round is on me" / "Dit rondje is van mij"). Versions follow [semantic versioning](https://semver.org/): the version is shown at the bottom of the Settings page, with the build number and date.
 
+## 5.2.0 (2026-10-06)
+
+### Faster saves, safer edges
+
+- The composing Round is saved on its own key, so a tap no longer rewrites the whole Catalog and History; on a phone with a long History the app stays quick, and the big save happens only when your Items, History, settings or pins change. Older saves are migrated on first launch.
+- A Round that can't be read is kept under its own backup key (`order-me.unreadable.round`), like the rest of the saved state already was.
+- A share link can no longer make the app allocate more than it should before it is rejected, and an empty Items list no longer offers a Share link the app itself would refuse to read.
+- Reset app gives up after five seconds when the connection hangs, instead of waiting forever.
+
+### Tooling and supply chain
+
+- CI refuses pull requests that add a known high or critical advisory (dependency review), fails on known advisories in shipped packages (`npm audit`), scans the workflows with zizmor, and attaches a CycloneDX SBOM to every run; OpenSSF Scorecard runs weekly.
+- The end-to-end tests run on WebKit (iPhone) as well as Chromium, since iPhone is a first-class target.
+- Node and npm are pinned (`.node-version`, `engines`, `packageManager`), and CI reads the same version file.
+- The app is type-checked with `noUncheckedIndexedAccess`.
+
 ## 5.1.0 (2026-10-04)
 
 ### Coloured tiles (#83)

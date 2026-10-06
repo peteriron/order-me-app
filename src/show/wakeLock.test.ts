@@ -39,7 +39,7 @@ describe('keeping the screen awake', () => {
 
     release()
     await settle()
-    expect(sentinels[0].release).toHaveBeenCalled()
+    expect(sentinels[0]!.release).toHaveBeenCalled()
   })
 
   it('takes the lock again when the Operator comes back to the app', async () => {
@@ -50,7 +50,20 @@ describe('keeping the screen awake', () => {
     setVisible(true)
     await settle()
     expect(sentinels).toHaveLength(2)
-    expect(sentinels[1].released).toBe(false)
+    expect(sentinels[1]!.released).toBe(false)
+  })
+
+  it('takes a fresh lock when the page comes back while the first request is still in flight', async () => {
+    const { host, sentinels, setVisible } = fakeHost()
+    keepScreenAwake(host)
+    setVisible(false)
+    setVisible(true)
+    await settle()
+    await settle()
+    // One request at a time, and no lock leaked: the dropped one is replaced, not overwritten.
+    expect(host.wakeLock!.request).toHaveBeenCalledTimes(2)
+    expect(sentinels).toHaveLength(2)
+    expect(sentinels[1]!.released).toBe(false)
   })
 
   it('stops listening once released', async () => {
@@ -65,7 +78,7 @@ describe('keeping the screen awake', () => {
     const release = keepScreenAwake(host)
     release()
     await settle()
-    expect(sentinels[0].release).toHaveBeenCalled()
+    expect(sentinels[0]!.release).toHaveBeenCalled()
   })
 
   it('does nothing where wake locks are unsupported or refused', async () => {

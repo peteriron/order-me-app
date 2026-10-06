@@ -6,27 +6,42 @@ OrderMe is a static web app: no server, no account, no tokens, no network calls 
 
 | Input | Where it comes from | Defence |
 | --- | --- | --- |
-| A shared link (`#items=…`, `#round=…`) | Anyone who can show a QR code or send a link | `shareLink.ts` accepts only base64url that inflates to at most 64 KB and decodes as UTF-8; `MAX_LINK_ITEMS` (200) caps the Items. A link is used whole or not at all. Names and emoji are rendered as text by React, never as HTML. |
-| The saved state (`localStorage`, key `order-me`) | An older or newer version of the app, another project on the same GitHub Pages origin, or damage | `storage.ts` checks the version and shape, then `validate.ts` checks every Item, placed Round, count, pin and setting. Bad entries are dropped, the rest is kept, so one bad entry can't crash the app on every launch. |
+| A shared link (`#items=…`, `#round=…`) | Anyone who can show a QR code or send a link | `shareLink.ts` accepts only base64url of at most 96 KB that inflates to at most 64 KB and decodes as UTF-8; `MAX_LINK_ITEMS` (200) caps the Items. A link is used whole or not at all. Names and emoji are rendered as text by React, never as HTML. |
+| The saved state (`localStorage`: `order-me`, `order-me.round`) | An older or newer version of the app, another project on the same GitHub Pages origin, or damage | `storage.ts` checks the version and shape of both keys, then `validate.ts` checks every Item, placed Round, count, pin and setting. Bad entries are dropped, the rest is kept, so one bad entry can't crash the app on every launch. |
+
+## Two saves, so a tap stays cheap
+
+The composing Round (`order-me.round`) is written on every tap; the slow-changing state (`order-me`: Catalog, History, settings, pins, Show order) only when one of those changes. A tap therefore never rewrites History, and a phone with a long History still saves quickly. Saves from before v7 (everything in one key) are migrated on load: the Round is written first, so a failed write leaves the old save untouched.
 
 ## Never lose the Operator's data silently
 
-When a saved state can't be used (unknown version after a rollback, unreadable JSON) or something had to be dropped from it, the original text is first copied to `order-me.unreadable`, then the app carries on. Reset app removes that copy too, so a reset leaves nothing behind. Only one copy is kept: a later unusable save replaces it.
+When a saved state can't be used (unknown version after a rollback, unreadable JSON) or something had to be dropped from it, the original text is first copied to a backup key (`order-me.unreadable`, `order-me.unreadable.round`), then the app carries on. Reset app removes those copies too, so a reset leaves nothing behind. Only one copy per key is kept: a later unusable save replaces it.
 
 ## Content-Security-Policy
 
 GitHub Pages can't send headers, so `vite.config.ts` adds a `<meta>` policy to the build: only the app's own scripts, styles and connections, `data:` images (the QR codes), no objects, no `<base>`, no forms. The one inline script (the theme, applied before first paint) is allowed by its hash. `e2e/security.spec.ts` fails if the policy blocks anything the app itself does.
 
-What a `<meta>` policy can't do: `frame-ancestors` is ignored there, so the page can be framed by another site. Fixing that needs response headers, which means hosting that can send them.
+What a `<meta>` policy can't do: `frame-ancestors` is ignored there, so the page can be framed by another site. Fixing that needs response headers, which means hosting that can send them. Accepted for now: there are no sessions or credentials to steal, and the worst a framed tap can reach is an in-app action with its own confirm or Undo.
+
+## The shared origin
+
+GitHub Pages serves every project of an account from one origin (`peteriron.github.io`), which shares storage, Cache Storage and service workers. The app defends the data it can: it validates everything it reads (above), and a reset only touches its own scope and keys. A sibling project at the account root could, however, register a service worker that controls this app's pages; that is a hosting-level risk accepted for now, and the reason a per-app domain would be the better long-term home. ADR-0004 records the related iOS storage-separation limitation.
 
 ## Crashes
 
-`ErrorBoundary` (in `src/shared/ui/`) sits above the app. A render error shows a message and a Reload button instead of a blank screen. The Round is saved on every tap, so reloading loses nothing.
+`ErrorBoundary` (in `src/shared/ui/`) sits above the app. A render error shows a message, a Reload button and a **Reset the app** button instead of a blank screen. The Round is saved on every tap, so reloading loses nothing; Reset clears only this app's keys (`APP_KEYS` in `src/app/storage.ts`) and reloads, which is the way out when the crash comes from the saved state itself.
+
+When a save fails (storage blocked or full), the app says so once with a toast instead of silently not saving.
 
 ## In CI
 
 - **CodeQL** (`.github/workflows/codeql.yml`): JavaScript/TypeScript and the workflow files, with the `security-extended` queries, on pull requests, on `main` and weekly.
 - **Gitleaks** (`.github/workflows/gitleaks.yml`): scans the full history for secrets. The binary is downloaded and checked against its published SHA-256.
+- **Dependency review** (`.github/workflows/dependency-review.yml`): refuses a pull request that adds a high or critical advisory.
+- **npm audit** (`ci.yml`): known advisories in anything we ship fail the build; Dependabot proposes the fix.
+- **zizmor** (`ci.yml`): static analysis of the workflow files themselves, on top of actionlint and CodeQL.
+- **OpenSSF Scorecard** (`.github/workflows/scorecard.yml`): grades the repository's supply-chain practices weekly and on `main`.
+- **SBOM** (`ci.yml`): every run attaches a CycloneDX SBOM of the dependency tree.
 - **actionlint**: lints the workflow files in `ci.yml`.
 - **Actions pinned to commits**, with Dependabot proposing updates monthly.
 - **Accessibility** (`e2e/a11y.spec.ts`): axe-core on all four pages in both themes, failing on serious or critical violations.

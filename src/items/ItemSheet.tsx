@@ -1,7 +1,8 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import type { Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
 import type { AppActions } from '../app/useAppState.ts'
+import { useFocusTrap } from '../shared/ui/useFocusTrap.ts'
 import { checkDraft, type Category, type DraftProblem, type Item, type ItemDraft } from './catalog.ts'
 import { EMOJI_CHOICES } from './emoji.ts'
 
@@ -28,6 +29,10 @@ export function ItemSheet({ item, forRound, t, actions, overlays, onClose }: Ite
   const [picked, setPicked] = useState(item && isChoice(item.emoji) ? item.emoji : item ? '' : EMOJI_CHOICES[0])
   const [typed, setTyped] = useState(item && !isChoice(item.emoji) ? item.emoji : '')
   const [problem, setProblem] = useState<DraftProblem | null>(null)
+  const boxRef = useRef<HTMLFormElement>(null)
+  const nameRef = useRef<HTMLInputElement>(null)
+  // Only adding focuses the name field (and opens the keyboard); editing starts on the sheet itself.
+  useFocusTrap(boxRef, item ? undefined : nameRef)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
@@ -57,7 +62,16 @@ export function ItemSheet({ item, forRound, t, actions, overlays, onClose }: Ite
   const title = item ? t.editItem : forRound ? t.newItem : t.addItem
   return (
     <div className="sheet-scrim" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <form className="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" onSubmit={submit} noValidate>
+      <form
+        ref={boxRef}
+        className="sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="sheet-title"
+        tabIndex={-1}
+        onSubmit={submit}
+        noValidate
+      >
         <div className="sheet-grab" aria-hidden="true" />
         <h2 className="sheet-title" id="sheet-title">
           {title}
@@ -66,14 +80,13 @@ export function ItemSheet({ item, forRound, t, actions, overlays, onClose }: Ite
         <div className="field">
           <label htmlFor="item-name">{t.name}</label>
           <input
+            ref={nameRef}
             id="item-name"
             className="input"
             value={name}
             placeholder={t.namePlaceholder}
             maxLength={30}
             autoComplete="off"
-            // Only when adding: opening an existing Item shouldn't pop the keyboard over the emoji picker.
-            autoFocus={!item}
             aria-invalid={problem === 'nameRequired'}
             aria-describedby={problem === 'nameRequired' ? 'item-name-problem' : undefined}
             onChange={(e) => {
@@ -128,12 +141,18 @@ export function ItemSheet({ item, forRound, t, actions, overlays, onClose }: Ite
             value={typed}
             maxLength={16}
             autoComplete="off"
+            aria-invalid={problem === 'emojiRequired'}
+            aria-describedby={problem === 'emojiRequired' ? 'item-emoji-problem' : undefined}
             onChange={(e) => {
               setTyped(e.target.value)
               if (problem === 'emojiRequired') setProblem(null)
             }}
           />
-          {problem === 'emojiRequired' && <p className="field-problem">{t.emojiRequired}</p>}
+          {problem === 'emojiRequired' && (
+            <p className="field-problem" id="item-emoji-problem">
+              {t.emojiRequired}
+            </p>
+          )}
         </fieldset>
 
         <div className="sheet-actions">

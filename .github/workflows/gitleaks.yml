@@ -11,6 +11,11 @@ on:
 permissions:
   contents: read
 
+# A new push replaces the older scan of the same ref: no queue of stale scans.
+concurrency:
+  group: gitleaks-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   gitleaks:
     runs-on: ubuntu-latest

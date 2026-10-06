@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { qrCode } from './qr.ts'
+import { useFocusTrap } from './useFocusTrap.ts'
 import type { Messages } from '../i18n.ts'
 
 interface QrSheetProps {
@@ -8,6 +9,8 @@ interface QrSheetProps {
   hint: string
   /** The link the QR code holds; null while it's still being made. */
   link: string | null
+  /** True when the link couldn't be built at all: the sheet says so instead of waiting forever. */
+  failed?: boolean
   /** The QR code's description for screen readers. */
   alt: string
   /** More buttons after Copy link (e.g. Share as text). */
@@ -24,10 +27,13 @@ const QR_COLOURS = { on: [0, 0, 0, 255], off: [255, 255, 255, 255], pad: 4 } as 
  * Bottom sheet with a link as a QR code, then full-width buttons: Copy link, whatever the caller adds, and Close.
  * Copy link answers in its own label ("✓ Copied" or "Couldn't copy") for 2 seconds, where the thumb is (#56).
  */
-export function QrSheet({ title, hint, link, alt, children, t, onClose }: QrSheetProps) {
+export function QrSheet({ title, hint, link, failed = false, alt, children, t, onClose }: QrSheetProps) {
   const code = useMemo(() => (link ? qrCode(link) : null), [link])
   const [copied, setCopied] = useState<'copied' | 'failed' | null>(null)
   const resetTimer = useRef<number>(undefined)
+  const boxRef = useRef<HTMLDivElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
+  useFocusTrap(boxRef, closeRef)
   useEffect(() => () => window.clearTimeout(resetTimer.current), [])
 
   useEffect(() => {
@@ -53,7 +59,7 @@ export function QrSheet({ title, hint, link, alt, children, t, onClose }: QrShee
 
   return (
     <div className="sheet-scrim" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="sheet" role="dialog" aria-modal="true" aria-labelledby="qr-sheet-title">
+      <div ref={boxRef} className="sheet" role="dialog" aria-modal="true" aria-labelledby="qr-sheet-title" tabIndex={-1}>
         <div className="sheet-grab" aria-hidden="true" />
         <h2 className="sheet-title" id="qr-sheet-title">
           {title}
@@ -68,13 +74,14 @@ export function QrSheet({ title, hint, link, alt, children, t, onClose }: QrShee
           ) : (
             <p className="share-hint">{t.tooBigForQr}</p>
           ))}
+        {failed && <p className="share-hint">{t.shareFailed}</p>}
 
         <div className="share-actions">
           <button type="button" className="btn btn-outline" disabled={!link} onClick={copyLink}>
             {copyLabel}
           </button>
           {children}
-          <button type="button" className="btn btn-neutral" autoFocus onClick={onClose}>
+          <button ref={closeRef} type="button" className="btn btn-neutral" onClick={onClose}>
             {t.close}
           </button>
         </div>

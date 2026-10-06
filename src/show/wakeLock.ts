@@ -26,16 +26,30 @@ export function keepScreenAwake(host: WakeLockHost): () => void {
   if (!host.wakeLock) return () => {}
   let active = true
   let sentinel: { release(): Promise<void>; released: boolean } | null = null
+  /** One request at a time: two in flight would leak the first lock (its sentinel gets overwritten). */
+  let pending = false
 
-  const acquire = async () => {
+  const acquire = async (retriesLeft = 3) => {
+    if (pending) return
     if (sentinel && !sentinel.released) return
+    pending = true
+    let dropped = false
     try {
       const next = await host.wakeLock!.request('screen')
-      // Released while the request was in flight: give it straight back.
-      if (active) sentinel = next
-      else void next.release()
+      if (!active) {
+        // Released while the request was in flight: give it straight back.
+        void next.release().catch(() => {})
+      } else if (next.released) {
+        // The page was hidden while the request was in flight, and the browser dropped the lock.
+        dropped = true
+      } else {
+        sentinel = next
+      }
     } catch {
       // Refused or unsupported: the screen may sleep, and that's all.
+    } finally {
+      pending = false
+      if (dropped && active && retriesLeft > 0 && host.visibilityState === 'visible') void acquire(retriesLeft - 1)
     }
   }
   const onVisibility = () => {

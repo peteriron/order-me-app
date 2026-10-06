@@ -86,6 +86,8 @@ export interface Messages {
   roundReceived: string
   qrAlt: (n: number) => string
   tooBigForQr: string
+  /** The link could not be built at all (e.g. compression failed): shown in the share sheet. */
+  shareFailed: string
   copiedShort: string
   copyFailed: string
   copyLink: string
@@ -131,9 +133,12 @@ export interface Messages {
   resetAppConfirm: string
   reset: string
   resetOffline: string
+  /** Shown once when saving to this phone fails (storage blocked or full). */
+  storageFull: string
   crashTitle: string
   crashBody: string
   crashReload: string
+  crashReset: string
 }
 
 export const messages: Record<Locale, Messages> = {
@@ -203,6 +208,7 @@ export const messages: Record<Locale, Messages> = {
     roundReceived: 'Round received',
     qrAlt: (n) => `QR code with your ${n} Items`,
     tooBigForQr: 'Too many Items for a QR code that scans reliably. Copy the link instead.',
+    shareFailed: 'Couldn’t prepare the link. Close this and try again.',
     copiedShort: 'Copied',
     copyFailed: 'Couldn’t copy',
     copyLink: 'Copy link',
@@ -252,9 +258,11 @@ export const messages: Record<Locale, Messages> = {
       'Reset the app to how it was first installed? This deletes your Items, pins, the Round, all History and your settings, and loads the newest version.',
     reset: 'Reset',
     resetOffline: 'No connection. Resetting needs internet to load the newest version.',
+    storageFull: 'This phone won’t let the app save. The Round works now, but changes may be gone after a reload.',
     crashTitle: 'Something went wrong',
     crashBody: 'The app hit an unexpected error. Your Round and Items are saved on this phone.',
     crashReload: 'Reload',
+    crashReset: 'Reset the app',
   },
   nl: {
     appName: 'Dit rondje is van mij',
@@ -322,6 +330,7 @@ export const messages: Record<Locale, Messages> = {
     roundReceived: 'Rondje ontvangen',
     qrAlt: (n) => `QR-code met je ${n} items`,
     tooBigForQr: 'Te veel items voor een QR-code die vlot scant. Kopieer de link.',
+    shareFailed: 'De link maken lukte niet. Sluit dit en probeer opnieuw.',
     copiedShort: 'Gekopieerd',
     copyFailed: 'Kopiëren mislukt',
     copyLink: 'Link kopiëren',
@@ -372,8 +381,10 @@ export const messages: Record<Locale, Messages> = {
       'De app terugzetten zoals bij de installatie? Je items, vastgezette items, het rondje, de hele geschiedenis en je instellingen worden gewist, en de nieuwste versie wordt geladen.',
     reset: 'Resetten',
     resetOffline: 'Geen verbinding. Om te resetten is internet nodig voor de nieuwste versie.',
+    storageFull: 'Deze telefoon laat de app niet opslaan. Het rondje werkt nu, maar wijzigingen kunnen weg zijn na het herladen.',
     crashTitle: 'Er ging iets mis',
     crashBody: 'De app liep tegen een onverwachte fout aan. Je Rondje en Items staan veilig op deze telefoon.',
     crashReload: 'Opnieuw laden',
+    crashReset: 'App resetten',
   },
 }

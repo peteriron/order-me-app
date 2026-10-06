@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { HistoryPage } from '../history/HistoryPage.tsx'
 import { catalogSections, type Item } from '../items/catalog.ts'
 import { ItemSheet } from '../items/ItemSheet.tsx'
@@ -29,7 +29,7 @@ const SHOW_PAGE = 2
 
 /** The four swipe pages plus the overlays on top of them. Each feature wires its own handlers. */
 export function App() {
-  const { state, firstLaunch, placements, actions, placeRound } = useAppState(detectLocale(navigator.language))
+  const { state, firstLaunch, placements, actions, placeRound, saveFailed } = useAppState(detectLocale(navigator.language))
   const locale = resolveLocale(state.settings.language, navigator.language)
   const t = messages[locale]
   useTheme(state.settings.theme)
@@ -50,12 +50,28 @@ export function App() {
   const [sharing, setSharing] = useState<'items' | 'round' | null>(null)
   /** The Add to Home Screen guide (Settings page, iPhone and iPad). */
   const [installGuide, setInstallGuide] = useState(false)
-  const [toast, setToast] = useState<ToastMessage | null>(null)
+  /**
+   * A stack, not one slot: a second action (e.g. deleting two Items quickly) must never discard the first Undo.
+   * The newest is shown; dismissing it brings back the one before, whose Undo still works on the current state.
+   */
+  const [toasts, setToasts] = useState<ToastMessage[]>([])
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null)
-  const overlays = useMemo<Overlays>(
-    () => ({ confirm: setConfirmation, notify: (text, action) => setToast({ id: Date.now(), text, action }) }),
-    [],
-  )
+  const overlays = useMemo<Overlays>(() => {
+    let nextId = 0
+    return {
+      confirm: setConfirmation,
+      notify: (text, action) => setToasts((queue) => [...queue, { id: ++nextId, text, action }]),
+    }
+  }, [])
+  // Say it once: every later failed save (each tap) would just repeat the same message.
+  const warnedAboutSaving = useRef(false)
+  useEffect(() => {
+    if (saveFailed && !warnedAboutSaving.current) {
+      warnedAboutSaving.current = true
+      overlays.notify(t.storageFull)
+    }
+  }, [saveFailed, overlays, t])
+
   const { ready: updateReady, update } = useUpdate()
   /** After Later the pop-up stays away; Settings then offers the update next to the version. */
   const [updateLater, setUpdateLater] = useState(false)
@@ -80,7 +96,7 @@ export function App() {
   const closeSheet = useCallback(() => setSheet(null), [])
   const closeSharing = useCallback(() => setSharing(null), [])
   const closeInstallGuide = useCallback(() => setInstallGuide(false), [])
-  const closeToast = useCallback(() => setToast(null), [])
+  const closeToast = useCallback(() => setToasts((stack) => stack.slice(0, -1)), [])
   const closeConfirmation = useCallback(() => setConfirmation(null), [])
   const toRound = useCallback(() => setPage(ROUND_PAGE), [])
   const dateLocale = formattingLocale(locale, navigator.language)
@@ -106,6 +122,9 @@ export function App() {
     [state.settings, hasHistory, actions, overlays],
   )
   const settingsVersion = useMemo(() => ({ dateLocale, updateReady, onUpdate: update }), [dateLocale, updateReady, update])
+
+  /** Only the newest toast is shown; dismissing it brings back the one before (see `toasts`). */
+  const topToast = toasts.at(-1)
 
   const pages = [
     <HistoryPage
@@ -185,7 +204,7 @@ export function App() {
 
       {installGuide && <InstallGuideSheet t={t} onClose={closeInstallGuide} />}
 
-      {toast && <Toast key={toast.id} toast={toast} onDone={closeToast} />}
+      {topToast && <Toast key={topToast.id} toast={topToast} onDone={closeToast} />}
 
       {offerUpdate && (
         <ConfirmDialog

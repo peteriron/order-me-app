@@ -11,9 +11,16 @@ export default defineConfig({
     baseURL: `http://localhost:${PORT}/order-me-app/`,
     locale: 'en-GB',
   },
-  projects: [{ name: 'phone', use: { ...devices['Pixel 7'] } }],
+  projects: [
+    { name: 'chromium-phone', use: { ...devices['Pixel 7'] } },
+    // iPhone/Safari is a first-class target (install guide, storage separation, wake lock): test it too.
+    { name: 'webkit-phone', use: { ...devices['iPhone 15'] } },
+  ],
   webServer: {
-    command: `npm run build && npm run preview -- --port ${PORT} --strictPort`,
+    // CI has built already (for the size budget): build once, not twice.
+    command: process.env.CI
+      ? `npm run preview -- --port ${PORT} --strictPort`
+      : `npm run build && npm run preview -- --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}/order-me-app/`,
     reuseExistingServer: !process.env.CI,
   },

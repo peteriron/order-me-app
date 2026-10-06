@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import type { Messages } from '../shared/i18n.ts'
+import { useFocusTrap } from '../shared/ui/useFocusTrap.ts'
 
 interface InstallGuideSheetProps {
   t: Messages
@@ -18,6 +19,10 @@ const SHARE_ICON = (
  * prompt the app could open itself.
  */
 export function InstallGuideSheet({ t, onClose }: InstallGuideSheetProps) {
+  const boxRef = useRef<HTMLDivElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
+  useFocusTrap(boxRef, closeRef)
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
     document.addEventListener('keydown', onKey)
@@ -26,7 +31,7 @@ export function InstallGuideSheet({ t, onClose }: InstallGuideSheetProps) {
 
   return (
     <div className="sheet-scrim" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="sheet" role="dialog" aria-modal="true" aria-labelledby="install-title">
+      <div ref={boxRef} className="sheet" role="dialog" aria-modal="true" aria-labelledby="install-title" tabIndex={-1}>
         <div className="sheet-grab" aria-hidden="true" />
         <h2 className="sheet-title" id="install-title">
           {t.addToHome}
@@ -40,7 +45,7 @@ export function InstallGuideSheet({ t, onClose }: InstallGuideSheetProps) {
           ))}
         </ol>
         <div className="share-actions">
-          <button type="button" className="btn btn-neutral" autoFocus onClick={onClose}>
+          <button ref={closeRef} type="button" className="btn btn-neutral" onClick={onClose}>
             {t.close}
           </button>
         </div>

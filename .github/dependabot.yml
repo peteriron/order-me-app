@@ -6,8 +6,10 @@ updates:
     schedule:
       interval: monthly
     groups:
-      npm:
+      # Minor and patch updates arrive together; majors arrive on their own, so one can be reviewed and reverted alone.
+      npm-minor-patch:
         patterns: ['*']
+        update-types: ['minor', 'patch']
     ignore:
       # @types/node follows the Node major that CI and the build run on (node-version in ci.yml), not the newest.
       - dependency-name: '@types/node'
