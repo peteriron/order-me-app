@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { seedCatalog, type Item } from '../items/catalog.ts'
 import { localizeCatalog } from '../items/starter.ts'
 import { add, emptyRound, roundLines } from '../round/round.ts'
-import { pack } from '../shared/shareLink.ts'
+import { MAX_LINK_ITEMS, pack } from '../shared/shareLink.ts'
 import { gridSections } from '../round/tileOrder.ts'
-import { decodeRound, encodeRound, receiveRound, roundLink, roundPayload } from './sharedRound.ts'
+import { decodeRound, encodeRound, MAX_COUNT, receiveRound, roundLink, roundPayload, type SharedRound } from './sharedRound.ts'
 
 const ids = (prefix = 'id') => {
   let n = 0
@@ -87,6 +87,45 @@ describe('the table and remark in a Round link', () => {
     expect(next.round).toMatchObject({ table: '12' })
     expect(next.round).not.toHaveProperty('remark')
     expect({ ...friend, ...next, ...undo({ ...friend, ...next }) }.round).toEqual({ counts: {}, remark: 'theirs' })
+  })
+})
+
+describe('encoding a Round bigger than one line may carry', () => {
+  const kriek: Item = { id: 'kriek', name: 'Kriek', category: 'drink', emoji: '🍒' }
+
+  it('splits a count above the per-line limit into consecutive rows, and a receiver merges them', async () => {
+    const shared = (await decodeRound(await encodeRound([{ item: kriek, count: MAX_COUNT + 2 }])))!
+    expect(shared.lines.map((l) => l.count)).toEqual([MAX_COUNT, 2])
+
+    const friend = { catalog: seedCatalog('en', ids('friend')), round: emptyRound(), pins: [], showOrder: [] }
+    const { next } = receiveRound(friend, shared, ids('new'))
+    expect(next.round.counts[next.catalog.at(-1)!.id]).toBe(MAX_COUNT + 2)
+  })
+
+  it('keeps a count exactly at the limit as one row', async () => {
+    const shared = (await decodeRound(await encodeRound([{ item: kriek, count: MAX_COUNT }])))!
+    expect(shared.lines.map((l) => l.count)).toEqual([MAX_COUNT])
+  })
+
+  it('re-shares a Round whose count came from many received lines (#49 hand-over)', async () => {
+    // A crafted-but-valid link: every one of the 200 lines names the same Item at the maximum count.
+    const incoming: SharedRound = { lines: Array.from({ length: MAX_LINK_ITEMS }, () => ({ item: kriek, count: MAX_COUNT })) }
+    const friend = { catalog: seedCatalog('en', ids('friend')), round: emptyRound(), pins: [], showOrder: [] }
+    const { next } = receiveRound(friend, incoming, ids('new'))
+    const merged = next.round.counts[next.catalog.at(-1)!.id]!
+    expect(merged).toBe(MAX_LINK_ITEMS * MAX_COUNT)
+
+    // Before the split this re-encoded to one line the decoder rejects: the merged Round could not be shared again.
+    const reShared = (await decodeRound(await encodeRound([{ item: { ...kriek, id: 'x' }, count: merged }])))!
+    expect(reShared.lines).toHaveLength(MAX_LINK_ITEMS)
+    const again = receiveRound(friend, reShared, ids('again'))
+    expect(again.next.round.counts[again.next.catalog.at(-1)!.id]).toBe(merged)
+  })
+
+  it('refuses a Round whose counts need more rows than a link may carry, and bad counts', async () => {
+    await expect(encodeRound([{ item: kriek, count: MAX_LINK_ITEMS * MAX_COUNT + 1 }])).rejects.toThrow('Round too large')
+    await expect(encodeRound([{ item: kriek, count: 0 }])).rejects.toThrow('out of range')
+    await expect(encodeRound([{ item: kriek, count: 2.5 }])).rejects.toThrow('out of range')
   })
 })
 

@@ -77,7 +77,8 @@ export function QrSheet({ title, hint, link, failed = false, alt, children, t, o
         {failed && <p className="share-hint">{t.shareFailed}</p>}
 
         <div className="share-actions">
-          <button type="button" className="btn btn-outline" disabled={!link} onClick={copyLink}>
+          {/* void: the copy handles its own failure and reports it in the label, so the promise is fire-and-forget. */}
+          <button type="button" className="btn btn-outline" disabled={!link} onClick={() => void copyLink()}>
             {copyLabel}
           </button>
           {children}

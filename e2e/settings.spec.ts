@@ -79,6 +79,22 @@ test('System follows the phone’s light/dark preference live', async ({ page })
   await expect.poll(() => theme(page)).toBe('dark')
 })
 
+test('the theme and language radios work from the keyboard', async ({ page }) => {
+  await openSettings(page)
+
+  // Native radio groups: the arrow keys move focus and selection together, no pointer needed.
+  await setting(page, 'Theme', 'Dark').focus()
+  await page.keyboard.press('ArrowDown')
+  await expect(setting(page, 'Theme', 'Light')).toBeChecked()
+  await expect.poll(() => theme(page)).toBe('light')
+
+  await setting(page, 'Language', 'English').focus()
+  await page.keyboard.press('ArrowUp')
+  const dutch = page.getByRole('group', { name: 'Taal' }).getByRole('radio', { name: 'Nederlands' })
+  await expect(dutch).toBeChecked()
+  await expect(page.getByRole('heading', { name: 'Instellingen' })).toBeVisible()
+})
+
 test('Clear history asks first, empties history but not the Round or Catalog, then is disabled', async ({ page }) => {
   await page.getByRole('button', { name: /^Duvel(,|$)/ }).tap()
   await page.getByRole('region', { name: 'Round total' }).getByRole('button', { name: 'Show' }).tap()

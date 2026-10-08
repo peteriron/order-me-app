@@ -1,20 +1,11 @@
 import { readFileSync } from 'node:fs'
 import { expect, test, type Page } from '@playwright/test'
+import { waitForServiceWorker } from './helpers.ts'
 
 const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as { version: string }
 
 const updateDialog = (page: Page) => page.getByRole('alertdialog', { name: 'A new version of OrderMe is available.' })
 const tab = (page: Page, name: string) => page.getByRole('navigation').getByRole('button', { name })
-
-/** Waits until the service worker controls the page, as on any visit after the first. */
-async function waitForServiceWorker(page: Page) {
-  await page.evaluate(async () => {
-    await navigator.serviceWorker.ready
-    if (!navigator.serviceWorker.controller) {
-      await new Promise((resolve) => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }))
-    }
-  })
-}
 
 /** What the browser does when a newly deployed version's service worker takes over the open app. */
 const newVersionTakesOver = (page: Page) => page.evaluate(() => navigator.serviceWorker.dispatchEvent(new Event('controllerchange')))

@@ -11,3 +11,5 @@ Consequences:
 - The footer stays visible on Show. It's small and muted, so it doesn't distract the bartender.
 
 _Update (#55): the Show page now has the Round page's bottom bar, "Clear · x items · ✓ Ordered". Clear is back on Show: Clear now has a 5-second Undo on both pages, which removes the risk that kept it off the bartender's screen. "Mark as ordered" became "Ordered" in that bar._
+
+_Update: the fourth page is called **Settings** (it holds the Items, then the general settings); "Items" in the text above is the page's former name. The tab bar and the page's heading use "Settings"._

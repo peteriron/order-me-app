@@ -82,6 +82,25 @@ test('Clear empties them, and Undo brings them back', async ({ page }) => {
   await expect(table(page)).toHaveValue('')
 })
 
+test('Undo after Clear restores the earlier Round exactly, replacing anything added after', async ({ page }) => {
+  await composeAndShow(page)
+  await table(page).fill('12')
+
+  await roundBar(page).getByRole('button', { name: 'Clear' }).tap()
+  // While the "Round cleared · Undo" toast is up, start a new Round.
+  await tab(page, 'Round').tap()
+  await page.getByRole('button', { name: /^Chips(,|$)/ }).tap()
+  await expect(page.getByRole('button', { name: 'Chips, 1 in round' })).toBeVisible()
+
+  // The Undo restores the earlier Round whole; the later tap goes with it (not merged).
+  await page.getByRole('status').filter({ hasText: 'Round cleared' }).getByRole('button', { name: 'Undo' }).tap()
+  await expect(page.getByRole('button', { name: 'Duvel, 2 in round' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Chips', exact: true })).toBeVisible()
+  await tab(page, 'Show').tap()
+  await expect(table(page)).toHaveValue('12')
+  await expect(page.getByTestId('show-total')).toHaveText('3')
+})
+
 test('the QR link carries them to a friend’s phone', async ({ page, browser }) => {
   await composeAndShow(page)
   await table(page).fill('Terras 3')

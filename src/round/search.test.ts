@@ -25,6 +25,14 @@ describe('searching the Round page', () => {
     expect(names(searchSections(grid, 'rosé'))).toEqual(['Rosé wine'])
   })
 
+  it('folds case the same way on every device, whatever its locale', () => {
+    // The starter Catalog has "Ice Tea"; folding must not depend on a device locale's case rules.
+    const tea: Sections = { drink: [item('Ice Tea')], snack: [] }
+    expect(names(searchSections(tea, 'ice'))).toEqual(['Ice Tea'])
+    expect(names(searchSections(tea, 'ICE'))).toEqual(['Ice Tea'])
+    expect(names(searchSections(tea, 'Ice'))).toEqual(['Ice Tea'])
+  })
+
   it('finds nothing when nothing matches', () => {
     expect(searchSections(grid, 'Kriek')).toEqual({ drink: [], snack: [] })
   })

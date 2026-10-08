@@ -70,6 +70,16 @@ describe('Clear, with Undo', () => {
     expect(totalOf(next)).toBe(0)
     expect(undo()).toEqual(round)
   })
+
+  it('Undo restores the earlier Round exactly, replacing anything added after the Clear', () => {
+    // The intended shape: Clear empties it; a tap after that starts a new Round; Undo brings the old one back whole,
+    // so the tap that came after the Clear is gone with it. (Not a merge of the two.)
+    const before = withNote(add(add(emptyRound(), 'duvel'), 'duvel'), { table: '12', remark: 'No ice' })
+    const { next, undo } = clearWithUndo(before)
+    const afterClear = add(next, 'cola')
+    expect(afterClear.counts).toEqual({ cola: 1 })
+    expect(undo()).toEqual(before)
+  })
 })
 
 describe('the table and remark of the Round being composed', () => {

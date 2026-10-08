@@ -1,14 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-
-/** Waits until the service worker has installed and controls this page. */
-async function waitForServiceWorker(page: Page) {
-  await page.evaluate(async () => {
-    await navigator.serviceWorker.ready
-    if (!navigator.serviceWorker.controller) {
-      await new Promise((resolve) => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }))
-    }
-  })
-}
+import { waitForServiceWorker } from './helpers.ts'
 
 async function manifest(page: Page) {
   const href = await page.locator('link[rel="manifest"]').getAttribute('href')

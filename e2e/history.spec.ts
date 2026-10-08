@@ -1,44 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-
-interface SeedRound {
-  daysAgo: number
-  time: [hour: number, minute: number]
-  /** [catalog Item name, count, optional name as it was when placed] */
-  lines: [string, number, string?][]
-}
-
-/**
- * The app sets the title from an effect; waiting for it means the mount save has run, so a write straight into
- * localStorage won't be overwritten by it (WebKit exposed that race; Chromium usually won it by timing).
- */
-async function waitForMounted(page: Page) {
-  await expect(page).toHaveTitle('This round is on me')
-}
-
-/** Writes placed Rounds straight into the saved app state (dates relative to the browser's today), then reloads. */
-async function seedHistory(page: Page, rounds: SeedRound[]) {
-  await waitForMounted(page)
-  await page.evaluate((rounds) => {
-    const state = JSON.parse(localStorage.getItem('order-me')!)
-    const byName = (name: string) => state.catalog.find((i: { name: string }) => i.name === name)
-    state.history = rounds.map((r, n) => {
-      const placedAt = new Date()
-      placedAt.setDate(placedAt.getDate() - r.daysAgo)
-      placedAt.setHours(r.time[0], r.time[1], 0, 0)
-      return {
-        id: `seed-${n}`,
-        placedAt: placedAt.toISOString(),
-        lines: r.lines.map(([name, count, nameThen]) => {
-          const item = byName(name)
-          return { itemId: item.id, name: nameThen ?? item.name, category: item.category, emoji: item.emoji, count }
-        }),
-      }
-    })
-    localStorage.setItem('order-me', JSON.stringify(state))
-  }, rounds)
-  await page.reload()
-  await waitForMounted(page)
-}
+import { seedHistory, waitForMounted } from './helpers.ts'
 
 const historyPage = (page: Page) => page.getByRole('region', { name: 'History' })
 

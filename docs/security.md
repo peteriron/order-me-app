@@ -1,13 +1,17 @@
 # Security model
 
-OrderMe is a static web app: no server, no account, no tokens, no network calls of its own. Everything the Operator enters stays on the phone. That removes most of what a client-server app has to defend (credentials, API validation, rate limiting); what is left is below.
+OrderMe is a static web app: no app backend, account or tokens. Saved state stays on-device by default. When the Operator chooses to share a Catalog or Round, its selected contents are encoded in the link fragment; browsers omit fragments from HTTP requests to the app host. Before a reset, the app makes a cache-busted request to its own URL to check that the host is reachable; if it isn't, reset stops (`src/settings/reset.ts`). Normal page loads, Workbox precaching and service-worker update checks also make same-origin requests for app assets. That removes most of what a client-server app has to defend (credentials, API validation, rate limiting); what is left is below.
 
 ## What is untrusted
 
 | Input | Where it comes from | Defence |
 | --- | --- | --- |
-| A shared link (`#items=…`, `#round=…`) | Anyone who can show a QR code or send a link | `shareLink.ts` accepts only base64url of at most 96 KB that inflates to at most 64 KB and decodes as UTF-8; `MAX_LINK_ITEMS` (200) caps the Items. A link is used whole or not at all. Names and emoji are rendered as text by React, never as HTML. |
+| A shared link (`#items=…`, `#round=…`) | Anyone who can show a QR code or send a link | `shareLink.ts` accepts only base64url of at most 96 KB that inflates to at most 64 KB and decodes as UTF-8; `MAX_LINK_ITEMS` (200) caps the Items. A Round's count above 999 travels as repeated rows of the same Item, merged by the receiver and split again when re-shared; a Round whose counts would need more than 200 rows is not shareable. A link is used whole or not at all. Names and emoji are rendered as text by React, never as HTML. |
 | The saved state (`localStorage`: `order-me`, `order-me.round`) | An older or newer version of the app, another project on the same GitHub Pages origin, or damage | `storage.ts` checks the version and shape of both keys, then `validate.ts` checks every Item, placed Round, count, pin and setting. Bad entries are dropped, the rest is kept, so one bad entry can't crash the app on every launch. |
+
+## How a taken-in link is applied
+
+A recognized shared-link fragment is cleared immediately, so a reload won't take it in again. Decoding is whole-or-nothing; an invalid link is ignored with a toast (`src/app/useSharedLinks.ts`). A Shared Catalog silently replaces the starter Catalog only when the app is first opened directly from that link; otherwise, the app asks for confirmation (ADR-0004). A shared Round is applied without confirmation: it replaces the Round, Show order, table and remark, and adds any Items missing from the receiver's Catalog. The Undo toast restores the previous Round (including its table and remark), restores the Show order and removes those added Items.
 
 ## Two saves, so a tap stays cheap
 

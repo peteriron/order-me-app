@@ -2,6 +2,23 @@
 
 All notable changes to OrderMe ("This round is on me" / "Dit rondje is van mij"). Versions follow [semantic versioning](https://semver.org/): the version is shown at the bottom of the Settings page, with the build number and date.
 
+## 5.3.0 (2026-10-08)
+
+### Safer sharing, cleaner edges
+
+- Text sharing now says so when there is no share sheet and the clipboard is blocked, instead of the tap appearing to do nothing.
+- A Round can always be shared on again: a count above 999 (say, after receiving a friend's Round that listed one drink many times) travels as repeated rows and is merged back on the receiving phone. A Round too big to fit a link says so in the share sheet, instead of producing a link the app itself would refuse to read.
+- Search folds upper and lower case the same way on every phone, whatever its language setting.
+- The share-link limits have their own tests: exactly 64 KB decoded and 96 KB encoded are accepted, one more is refused before anything is allocated, and an oversized link is dropped as a whole.
+
+### Tooling and quality
+
+- Linting is type-aware (oxlint with tsgolint), adding the promise rules: the few fire-and-forget handlers say so explicitly with `void`, and a confirmation's `onConfirm` is typed to allow an async action. `no-floating-promises` and `await-thenable` report nothing.
+- The end-to-end tests share their service-worker and History-seeding helpers; new tests cover the keyboard alone (tab bar, Settings radios), Escape closing only the dialog over an open sheet, both share-failure paths, and Clear's Undo restoring the earlier Round exactly.
+- A CI run keeps the Playwright report, screenshots and a retry's trace as artifacts, and a push to `main` deploys only when every check has passed (workflow lint and zizmor included), not just the tests.
+- Vite 8.3.3. `@vitejs/plugin-react` stays at 6.1.1 for now: 6.1.2's optional Babel peer wants `@babel/core` 8, which conflicts with the tree's 7.
+- Docs: the README spells out Node 24, `npm ci` and `npx playwright install`, and no longer names a stale version; `CONTEXT.md` and ADR-0005 call the fourth page Settings; the security model documents how a taken-in link is applied, including the row-splitting above.
+
 ## 5.2.0 (2026-10-06)
 
 ### Faster saves, safer edges

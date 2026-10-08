@@ -141,3 +141,17 @@ test('pages stay aligned when something off screen is scrolled into view', async
   await page.getByRole('navigation', { name: 'Pages' }).getByRole('button', { name: 'History' }).tap()
   await expectOnPage(page, 'History', 'History')
 })
+
+test('the tab bar is operable with the keyboard alone', async ({ page }) => {
+  // Tab reaches the bar's buttons in order, and Enter activates one, without any pointer input.
+  const showTab = page.getByRole('navigation', { name: 'Pages' }).getByRole('button', { name: 'Show' })
+  await showTab.focus()
+  await expect(showTab).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expectOnPage(page, 'Round for the counter', 'Show')
+
+  const historyTab = page.getByRole('navigation', { name: 'Pages' }).getByRole('button', { name: 'History' })
+  await historyTab.focus()
+  await page.keyboard.press('Space')
+  await expectOnPage(page, 'History', 'History')
+})

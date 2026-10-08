@@ -4,7 +4,7 @@ A phone app for the person getting the round. Friends call out what they want, y
 
 **Open it:** <https://peteriron.github.io/order-me-app/>
 
-**Latest release:** [5.2.0](https://github.com/peteriron/order-me-app/releases/tag/v5.2.0): faster saves and a hardened supply chain. What changed in each version: [CHANGELOG.md](CHANGELOG.md).
+**Latest release:** [5.3.0](https://github.com/peteriron/order-me-app/releases/tag/v5.3.0): safer share edges and type-aware linting. What changed in each version: [CHANGELOG.md](CHANGELOG.md).
 
 It's a web app you install on your home screen. It works offline, so bad bar Wi-Fi doesn't matter, and everything stays on your phone: no account, no server, no prices or payments. Sharing a Round or your Items puts them in the link itself, so they never pass through a server either. It speaks English and Dutch.
 
@@ -91,7 +91,7 @@ When a new version of OrderMe is out, the app notices by itself while you're onl
 - **Update** loads the new version straight away. Your Round, Items and History are kept.
 - **Later** closes the question. The bottom of the Settings page then shows **Update available · Update**, and the next time you open the app it's on the new version anyway.
 
-Without a connection there's nothing to check, and the app keeps working as it is. The bottom of the Settings page always shows the version you're running, its build number and date (for example "Version 5.1.0 · build 117 · 4 Oct 2026").
+Without a connection there's nothing to check, and the app keeps working as it is. The bottom of the Settings page always shows the version you're running, its build number and date (for example "Version 5.3.0 · build 117 · 8 Oct 2026").
 
 ### Start fresh
 
@@ -108,7 +108,9 @@ A React + TypeScript + Vite PWA, deployed to GitHub Pages by GitHub Actions on e
 - Code is grouped by feature, one folder per tab: `src/round/`, `src/show/`, `src/history/`, `src/settings/` (with the Items section and Catalog rules in `src/items/`). `src/app/` wires them together (app state, saved state, opening share links, the update check); `src/shared/` holds i18n, link packing and common UI.
 
 ```sh
-npm install
+# Node 24 (see .node-version / package.json engines) and npm 11 are required.
+npm ci             # install exactly what package-lock.json pins
+npx playwright install chromium webkit   # once, before the e2e tests
 npm run dev        # local dev server
 npm test           # unit tests (Vitest)
 npm run test:e2e   # end-to-end tests (Playwright: Chromium phone and iPhone/WebKit), against a production build
@@ -118,20 +120,20 @@ npm run build && npm run preview   # the production build, as deployed
 
 ### Versions and releases
 
-- The version shown at the bottom of Settings is `version` in `package.json` (semantic: currently 5.1.0). Every release is in [CHANGELOG.md](CHANGELOG.md) and on [GitHub Releases](https://github.com/peteriron/order-me-app/releases).
+- The version shown at the bottom of Settings is `version` in `package.json` (semantic versioning; `package.json` is the source of truth). Every release is in [CHANGELOG.md](CHANGELOG.md) and on [GitHub Releases](https://github.com/peteriron/order-me-app/releases).
 - Bump it in every PR that changes the app: minor for a feature, patch for a fix, major for a big milestone. Docs- or CI-only changes don't bump it. Always bump with `npm version`, which changes only the app's own version in `package.json` and `package-lock.json` (a text replace can also hit a dependency that happens to have the same version, and CI's `npm ci` then refuses the lock file):
 
   ```sh
-  # e.g. the next feature release after 5.1.0
-  npm version 5.2.0 --no-git-tag-version
+  # e.g. the next feature release after 5.2.0
+  npm version 5.3.0 --no-git-tag-version
   npm ci   # check the lock file still installs
   ```
 - The build number is the GitHub Actions run number of the deploy (`dev` locally) and the date is the build date; both are filled in at build time (`__BUILD__` in `vite.config.ts`).
 - Every push to `main` that passes CI deploys, except one that only changes docs (Markdown files, `docs/`, `LICENSE`, `.github/dependabot.yml`): that would give installed apps an update pop-up with nothing new in it. Open apps notice the new version on their next check (start, coming back to the app, coming back online, or every 30 minutes) and offer **Update**; see `src/app/updates.ts`.
 - Making a GitHub release: PRs are squash-merged, which creates a new commit on `main`, so the tag must be made after the merge.
   1. In the release PR, bump the version, add its notes at the top of `CHANGELOG.md`, and update the **Latest release** line at the top of this README.
-  2. Create a draft release (no tag yet): `gh release create v5.2.0 --draft --target main --title "OrderMe 5.2.0" --notes-file notes.md`.
-  3. After the PR is merged and deployed, publish it on the merge commit, which creates the tag there: `gh release edit v5.2.0 --target <merge commit> --draft=false --latest`.
+  2. Create a draft release (no tag yet): `gh release create v5.3.0 --draft --target main --title "OrderMe 5.3.0" --notes-file notes.md`.
+  3. After the PR is merged and deployed, publish it on the merge commit, which creates the tag there: `gh release edit v5.3.0 --target <merge commit> --draft=false --latest`.
 
 ### Security
 

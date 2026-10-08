@@ -4,7 +4,8 @@ import { useFocusTrap } from './useFocusTrap.ts'
 export interface Confirmation {
   text: string
   confirmLabel: string
-  onConfirm: () => void
+  /** May be async: the dialog does not await it, and the action reports its own outcome (e.g. the offline toast). */
+  onConfirm: () => void | Promise<void>
 }
 
 interface ConfirmDialogProps extends Confirmation {
@@ -47,7 +48,8 @@ export function ConfirmDialog({ text, confirmLabel, cancelLabel, tone = 'danger'
             type="button"
             className={tone === 'danger' ? 'btn btn-danger' : 'btn btn-primary'}
             onClick={() => {
-              onConfirm()
+              // Not awaited: the dialog closes now, and the action reports its own outcome (see Confirmation).
+              void onConfirm()
               onClose()
             }}
           >

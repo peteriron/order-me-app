@@ -5,9 +5,9 @@
  */
 
 /** Far beyond any real Catalog; guards against a crafted link that inflates into something huge. */
-const MAX_TEXT_BYTES = 64 * 1024
+export const MAX_TEXT_BYTES = 64 * 1024
 /** The encoded payload before inflation: base64 of deflate that could inflate to MAX_TEXT_BYTES fits well within this. */
-const MAX_PAYLOAD_LENGTH = 96 * 1024
+export const MAX_PAYLOAD_LENGTH = 96 * 1024
 /** Limits on what a link may bring, far beyond any real Catalog or Round, so a crafted link can't flood the app. */
 export const MAX_LINK_ITEMS = 200
 

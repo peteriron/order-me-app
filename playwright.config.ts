@@ -6,10 +6,13 @@ export default defineConfig({
   testDir: 'e2e',
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? 'github' : 'list',
+  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: `http://localhost:${PORT}/order-me-app/`,
     locale: 'en-GB',
+    // Keep what a failure looked like: a trace on the retry, a screenshot when it finally fails.
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
   },
   projects: [
     { name: 'chromium-phone', use: { ...devices['Pixel 7'] } },

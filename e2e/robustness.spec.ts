@@ -69,8 +69,33 @@ test('a share sheet that can no longer build its link shows the error and drops 
   await expect(sheet.getByRole('button', { name: 'Copy link' })).toBeDisabled()
 })
 
+test('a confirmation over an open sheet starts on Cancel, and Escape closes only the dialog', async ({ page }) => {
+  await tab(page, 'Settings').tap()
+  await itemsPage(page).getByRole('button', { name: 'Share', exact: true }).tap()
+  const sheet = page.getByRole('dialog', { name: 'Share Items' })
+  await expect(sheet).toBeVisible()
+
+  // A shared Catalog link raises a confirmation while the sheet is open: the dialog is on top.
+  const payload = deflateRawSync(Buffer.from('2\nd🍺\tDuvel')).toString('base64url')
+  await page.evaluate((hash) => {
+    location.hash = hash
+  }, `#items=${payload}`)
+  const dialog = page.getByRole('alertdialog')
+  await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeFocused()
+
+  // Escape closes the dialog only: the sheet underneath survives the same keypress.
+  await page.keyboard.press('Escape')
+  await expect(dialog).toHaveCount(0)
+  await expect(sheet).toBeVisible()
+
+  // The sheet's own Escape still closes it.
+  await page.keyboard.press('Escape')
+  await expect(sheet).toHaveCount(0)
+})
+
 test('when this phone refuses to save, the app says so once', async ({ page }) => {
   await page.addInitScript(() => {
+    // oxlint-disable-next-line typescript/unbound-method -- invoked with .call(this), so `this` is not lost
     const original = Storage.prototype.setItem
     Storage.prototype.setItem = function (key: string, value: string) {
       if (key === 'order-me') throw new DOMException('Storage full', 'QuotaExceededError')
