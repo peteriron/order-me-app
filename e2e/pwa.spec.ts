@@ -1,14 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-
-/** Waits until the service worker has installed and controls this page. */
-async function waitForServiceWorker(page: Page) {
-  await page.evaluate(async () => {
-    await navigator.serviceWorker.ready
-    if (!navigator.serviceWorker.controller) {
-      await new Promise((resolve) => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }))
-    }
-  })
-}
+import { waitForServiceWorker } from './helpers.ts'
 
 async function manifest(page: Page) {
   const href = await page.locator('link[rel="manifest"]').getAttribute('href')
@@ -65,7 +56,8 @@ test('has an Apple touch icon and home-screen meta tags for iOS', async ({ page 
  * a service worker controls the page. (Page.getInstallabilityErrors would be the direct check, but headless Chrome
  * always answers it with an empty list, even for about:blank, so it proves nothing here.)
  */
-test('Chrome finds and parses the manifest without errors, and a service worker controls the page', async ({ page }) => {
+test('Chrome finds and parses the manifest without errors, and a service worker controls the page', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'Page.getAppManifest is a CDP (Chromium) API')
   await waitForServiceWorker(page)
   const cdp = await page.context().newCDPSession(page)
   const { url, errors, data } = await cdp.send('Page.getAppManifest')
@@ -76,7 +68,10 @@ test('Chrome finds and parses the manifest without errors, and a service worker 
   expect(await page.evaluate(() => navigator.serviceWorker.controller?.scriptURL)).toMatch(/\/order-me-app\/sw\.js$/)
 })
 
-test('after the first visit it loads and works with no network', async ({ page, context }) => {
+test('after the first visit it loads and works with no network', async ({ page, context, browserName }) => {
+  // Playwright's WebKit throws "internal error" reloading an offline page a service worker controls; real Safari
+  // serves it from the cache. The app's own offline path is the same on both engines, so it is covered on Chromium.
+  test.skip(browserName !== 'chromium', 'Playwright WebKit cannot reload offline under a service worker')
   await waitForServiceWorker(page)
   await context.setOffline(true)
   await page.reload()

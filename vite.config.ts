@@ -84,7 +84,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
@@ -93,5 +93,13 @@ export default defineConfig({
   ],
   test: {
     include: ['src/**/*.test.ts'],
+    coverage: {
+      provider: 'v8',
+      // The unit tests cover the logic (.ts); the screens (.tsx) are covered by the Playwright specs in e2e/.
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/*.test.ts', 'src/**/*.d.ts'],
+      // A floor just under today's numbers (65.7 / 72.2 / 58.4 / 66.7): it only stops coverage sliding. Raise it as it grows.
+      thresholds: { statements: 62, branches: 68, functions: 54, lines: 63 },
+    },
   },
 })

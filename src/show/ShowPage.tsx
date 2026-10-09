@@ -1,6 +1,7 @@
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import type { Sections } from '../items/catalog.ts'
 import { roundLines, totalOf, type ComposingRound } from '../round/round.ts'
+import { MAX_NOTE } from './sharedRound.ts'
 import type { Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
 import { RoundBar } from '../round/RoundBar.tsx'
@@ -48,16 +49,21 @@ function fitName(el: HTMLElement) {
  * as ordered. A swipe page between Round and Items; Clear lives on the Round page only.
  */
 export function ShowPage({ round, sections, active, t, actions, onPlace, overlays, onGoToRound, onShare }: ShowPageProps) {
-  const lines = roundLines(round, sections)
+  const lines = useMemo(() => roundLines(round, sections), [round, sections])
   const total = totalOf(round)
   const bodyRef = useRef<HTMLDivElement>(null)
+  /** What the line widths depend on: the names, and the counts beside them. Typing a remark changes neither. */
+  const fitKey = lines.map(({ item, count }) => `${item.id}\t${item.name}\t${count}`).join('\n')
 
+  // Fitting measures every line, which forces a layout: only on the page on screen, and only when a line changed.
+  // The Round page re-renders this page on every tap; off screen, it is fitted on arrival instead.
   useLayoutEffect(() => {
+    if (!active) return
     const fitAll = () => bodyRef.current?.querySelectorAll<HTMLElement>('.show-what').forEach(fitName)
     fitAll()
     window.addEventListener('resize', fitAll)
     return () => window.removeEventListener('resize', fitAll)
-  }, [lines])
+  }, [active, fitKey])
 
   // The screen stays on while the bartender reads it, and may sleep once the Operator swipes away.
   useEffect(() => (active ? keepScreenAwake(browserHost()) : undefined), [active])
@@ -68,6 +74,8 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
   const shareAsText = async () => {
     const outcome = await shareOrCopy(shareText(lines, t, round), navigator)
     if (outcome === 'copied') overlays.notify(t.copied)
+    // No share sheet and the copy failed: say so instead of the tap appearing to do nothing.
+    else if (outcome === 'failed') overlays.notify(t.copyFailed)
   }
   const markOrdered = () => {
     const undo = onPlace(sections)
@@ -113,7 +121,8 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
           <div className="show-tools">
             {/* Short labels to fit beside the title; the accessible names say what each shares, and contain the label. */}
             <div className="show-share">
-              <button type="button" className="btn btn-quiet" aria-label={t.shareAsText} onClick={shareAsText}>
+              {/* void: sharing reports its own failures with a toast, so the promise is fire-and-forget. */}
+              <button type="button" className="btn btn-quiet" aria-label={t.shareAsText} onClick={() => void shareAsText()}>
                 <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
                   <path d="M12 15V3M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
                 </svg>
@@ -139,7 +148,7 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
                 id="round-table"
                 className="input input-table"
                 value={round.table ?? ''}
-                maxLength={10}
+                maxLength={MAX_NOTE.t}
                 autoComplete="off"
                 enterKeyHint="done"
                 onChange={(e) => actions.setRoundNote({ table: e.target.value })}
@@ -181,7 +190,7 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
                 className="input input-remark"
                 value={round.remark ?? ''}
                 rows={2}
-                maxLength={200}
+                maxLength={MAX_NOTE.r}
                 onChange={(e) => actions.setRoundNote({ remark: e.target.value })}
               />
             </div>

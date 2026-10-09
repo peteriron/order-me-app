@@ -19,7 +19,11 @@ export interface ResetHost {
 export async function resetApp(host: ResetHost, appUrl: string): Promise<'reset' | 'offline'> {
   try {
     // A query the precache doesn't know, and no HTTP cache: only a real answer from the server counts.
-    const response = await host.fetch(`${appUrl}?reset-check=${Date.now()}`, { cache: 'no-store' })
+    // A hanging connection must not leave the Operator with no answer at all.
+    const response = await host.fetch(`${appUrl}?reset-check=${Date.now()}`, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(5000),
+    })
     if (!response.ok) return 'offline'
   } catch {
     return 'offline'

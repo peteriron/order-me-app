@@ -5,15 +5,14 @@ import { keepScreenAwake, type WakeLockHost } from './wakeLock.ts'
 function fakeHost(options: { refuse?: boolean } = {}) {
   const sentinels: { release: ReturnType<typeof vi.fn>; released: boolean }[] = []
   let onVisibility: (() => void) | null = null
+  const request = vi.fn(async () => {
+    if (options.refuse) throw new DOMException('low battery', 'NotAllowedError')
+    const sentinel = { released: false, release: vi.fn(async () => void (sentinel.released = true)) }
+    sentinels.push(sentinel)
+    return sentinel
+  })
   const host: WakeLockHost = {
-    wakeLock: {
-      request: vi.fn(async () => {
-        if (options.refuse) throw new DOMException('low battery', 'NotAllowedError')
-        const sentinel = { released: false, release: vi.fn(async () => void (sentinel.released = true)) }
-        sentinels.push(sentinel)
-        return sentinel
-      }),
-    },
+    wakeLock: { request },
     visibilityState: 'visible',
     addEventListener: (_type, listener) => void (onVisibility = listener),
     removeEventListener: () => void (onVisibility = null),
@@ -24,22 +23,22 @@ function fakeHost(options: { refuse?: boolean } = {}) {
     if (!visible) sentinels.forEach((s) => (s.released = true))
     onVisibility?.()
   }
-  return { host, sentinels, setVisible, listening: () => onVisibility !== null }
+  return { host, sentinels, setVisible, request, listening: () => onVisibility !== null }
 }
 
 const settle = () => new Promise((resolve) => setTimeout(resolve))
 
 describe('keeping the screen awake', () => {
   it('holds a wake lock until released', async () => {
-    const { host, sentinels } = fakeHost()
+    const { host, sentinels, request } = fakeHost()
     const release = keepScreenAwake(host)
     await settle()
     expect(sentinels).toHaveLength(1)
-    expect(host.wakeLock!.request).toHaveBeenCalledWith('screen')
+    expect(request).toHaveBeenCalledWith('screen')
 
     release()
     await settle()
-    expect(sentinels[0].release).toHaveBeenCalled()
+    expect(sentinels[0]!.release).toHaveBeenCalled()
   })
 
   it('takes the lock again when the Operator comes back to the app', async () => {
@@ -50,7 +49,20 @@ describe('keeping the screen awake', () => {
     setVisible(true)
     await settle()
     expect(sentinels).toHaveLength(2)
-    expect(sentinels[1].released).toBe(false)
+    expect(sentinels[1]!.released).toBe(false)
+  })
+
+  it('takes a fresh lock when the page comes back while the first request is still in flight', async () => {
+    const { host, sentinels, setVisible, request } = fakeHost()
+    keepScreenAwake(host)
+    setVisible(false)
+    setVisible(true)
+    await settle()
+    await settle()
+    // One request at a time, and no lock leaked: the dropped one is replaced, not overwritten.
+    expect(request).toHaveBeenCalledTimes(2)
+    expect(sentinels).toHaveLength(2)
+    expect(sentinels[1]!.released).toBe(false)
   })
 
   it('stops listening once released', async () => {
@@ -65,7 +77,7 @@ describe('keeping the screen awake', () => {
     const release = keepScreenAwake(host)
     release()
     await settle()
-    expect(sentinels[0].release).toHaveBeenCalled()
+    expect(sentinels[0]!.release).toHaveBeenCalled()
   })
 
   it('does nothing where wake locks are unsupported or refused', async () => {

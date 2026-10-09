@@ -216,7 +216,8 @@ export function ItemsSection({ sections, pins, count, t, actions, overlays, onAd
           </svg>
           {t.addItem}
         </button>
-        <button type="button" className="btn btn-outline" onClick={onShare}>
+        {/* An empty Catalog makes a link the app itself refuses to read, so it can't be shared. */}
+        <button type="button" className="btn btn-outline" disabled={count === 0} onClick={onShare}>
           <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
             <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2" />
           </svg>

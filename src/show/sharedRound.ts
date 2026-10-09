@@ -18,9 +18,9 @@ import type { ShowOrder } from './showOrder.ts'
 const FRAGMENT = '#round='
 const VERSION = '2'
 /** Longest table and remark taken from a link: the Show page's own limits. */
-const MAX_NOTE = { t: 10, r: 200 } as const
+export const MAX_NOTE = { t: 10, r: 200 } as const
 /** Far beyond any real Round; a bigger count is a broken or crafted link. */
-const MAX_COUNT = 999
+export const MAX_COUNT = 999
 
 export interface SharedLine {
   item: SharedItem
@@ -39,9 +39,26 @@ export async function encodeRound(lines: RoundLine[], note: RoundNote = {}): Pro
       VERSION,
       ...(table ? [`t\t${JSON.stringify(table)}`] : []),
       ...(remark ? [`r\t${JSON.stringify(remark)}`] : []),
-      ...lines.map(({ item, count }) => `${count}\t${itemLine(item)}`),
+      ...linkRows(lines),
     ].join('\n'),
   )
+}
+
+/**
+ * The Round's lines as link rows, in order. A count above `MAX_COUNT` becomes consecutive rows that the receiver
+ * merges back into one count (see `receiveRound`); a Round whose counts need more rows than a link may carry throws,
+ * so the share sheet shows its error instead of emitting a link its own decoder would reject.
+ */
+function linkRows(lines: RoundLine[]): string[] {
+  const out: string[] = []
+  for (const { item, count } of lines) {
+    if (!Number.isInteger(count) || count < 1) throw new Error('Round count out of range')
+    const itemRows = Math.ceil(count / MAX_COUNT)
+    if (out.length + itemRows > MAX_LINK_ITEMS) throw new Error('Round too large')
+    const line = itemLine(item)
+    for (let left = count; left > 0; left -= MAX_COUNT) out.push(`${Math.min(left, MAX_COUNT)}\t${line}`)
+  }
+  return out
 }
 
 /** A shared Round, or null when the link can't be read in full: used whole or not at all. */

@@ -1,34 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-
-interface SeedRound {
-  daysAgo: number
-  time: [hour: number, minute: number]
-  /** [catalog Item name, count, optional name as it was when placed] */
-  lines: [string, number, string?][]
-}
-
-/** Writes placed Rounds straight into the saved app state (dates relative to the browser's today), then reloads. */
-async function seedHistory(page: Page, rounds: SeedRound[]) {
-  await page.evaluate((rounds) => {
-    const state = JSON.parse(localStorage.getItem('order-me')!)
-    const byName = (name: string) => state.catalog.find((i: { name: string }) => i.name === name)
-    state.history = rounds.map((r, n) => {
-      const placedAt = new Date()
-      placedAt.setDate(placedAt.getDate() - r.daysAgo)
-      placedAt.setHours(r.time[0], r.time[1], 0, 0)
-      return {
-        id: `seed-${n}`,
-        placedAt: placedAt.toISOString(),
-        lines: r.lines.map(([name, count, nameThen]) => {
-          const item = byName(name)
-          return { itemId: item.id, name: nameThen ?? item.name, category: item.category, emoji: item.emoji, count }
-        }),
-      }
-    })
-    localStorage.setItem('order-me', JSON.stringify(state))
-  }, rounds)
-  await page.reload()
-}
+import { seedHistory, waitForMounted } from './helpers.ts'
 
 const historyPage = (page: Page) => page.getByRole('region', { name: 'History' })
 
@@ -157,6 +128,7 @@ test('Order again skips Items that were deleted since, and says so', async ({ pa
     localStorage.setItem('order-me', JSON.stringify(state))
   })
   await page.reload()
+  await waitForMounted(page)
   await goToHistory(page)
 
   await historyPage(page).getByRole('button', { name: 'Order again' }).tap()

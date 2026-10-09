@@ -12,7 +12,8 @@ import {
   forgetAppState,
   isFirstLaunch,
   loadAppState,
-  saveAppState,
+  saveData,
+  saveRound,
   type AppState,
   type KeyValueStore,
 } from './storage.ts'
@@ -40,8 +41,29 @@ export function useAppState(seedLocale: Locale) {
     loadAppState(store, { locale: seedLocale, newId: () => crypto.randomUUID() }),
   )
 
-  // Save on every change so a killed tab or locked phone loses nothing.
-  useEffect(() => saveAppState(store, state), [store, state])
+  /** True once a save failed (storage blocked or full): the app says so once, rather than silently not saving. */
+  const [saveFailed, setSaveFailed] = useState(false)
+
+  // Save on every change so a killed tab or locked phone loses nothing. The Round changes on every tap; the rest
+  // only when something in it changes, so a tap never rewrites the Catalog or History. The saves are synchronous;
+  // only reporting a failure is deferred, so an effect never sets state while rendering.
+  useEffect(() => {
+    if (!saveRound(store, state.round)) void Promise.resolve().then(() => setSaveFailed(true))
+  }, [store, state.round])
+  /** The slow-changing state as one value: the effect below runs only when one of its parts changes. */
+  const data = useMemo(
+    () => ({
+      catalog: state.catalog,
+      history: state.history,
+      settings: state.settings,
+      pins: state.pins,
+      showOrder: state.showOrder,
+    }),
+    [state.catalog, state.history, state.settings, state.pins, state.showOrder],
+  )
+  useEffect(() => {
+    if (!saveData(store, data)) void Promise.resolve().then(() => setSaveFailed(true))
+  }, [store, data])
 
   /**
    * Goes up on every place and undo-place, and when a Shared Catalog replaces the Catalog: the moments the tile
@@ -135,16 +157,22 @@ export function useAppState(seedLocale: Locale) {
   /** Places the composing Round and returns a function that undoes exactly that placement. */
   const placeRound = (sections: Sections) => {
     const meta = { id: crypto.randomUUID(), placedAt: new Date().toISOString() }
-    const { next, undo } = markOrdered(state, sections, meta)
-    setState({ ...state, ...next })
+    // Set inside the updater, which has run by the time anyone can tap Undo (the toast appears after the next render).
+    let undo: ReturnType<typeof markOrdered>['undo'] | undefined
+    // Functional update: a second activation can never compute from a stale state.
+    setState((s) => {
+      const placed = markOrdered(s, sections, meta)
+      undo = placed.undo
+      return { ...s, ...placed.next }
+    })
     setPlacements((n) => n + 1)
     return () => {
-      setState((s) => ({ ...s, ...undo(s) }))
+      setState((s) => (undo ? { ...s, ...undo(s) } : s))
       setPlacements((n) => n + 1)
     }
   }
 
-  return { state, firstLaunch, placements, actions, placeRound }
+  return { state, firstLaunch, placements, actions, placeRound, saveFailed }
 }
 
 export type AppActions = ReturnType<typeof useAppState>['actions']

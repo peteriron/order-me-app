@@ -35,6 +35,8 @@ interface InstallPromptEvent extends Event {
 
 let deferred: InstallPromptEvent | null = null
 let installed = false
+/** Chrome's prompt can be opened only once per event; a double tap must not call prompt() twice. */
+let prompting = false
 const listeners = new Set<() => void>()
 const changed = () => listeners.forEach((l) => l())
 
@@ -74,11 +76,18 @@ export function useInstall() {
   const mode = useSyncExternalStore(subscribe, currentMode)
   const prompt = async () => {
     const event = deferred
-    if (!event) return
-    await event.prompt()
-    // The prompt can be shown only once; Chrome offers a new one later if it was dismissed.
-    deferred = null
-    changed()
+    if (!event || prompting) return
+    prompting = true
+    try {
+      await event.prompt()
+    } catch {
+      // Refused (e.g. a second prompt): the button hides itself below.
+    } finally {
+      prompting = false
+      // The prompt can be shown only once; Chrome offers a new one later if it was dismissed.
+      deferred = null
+      changed()
+    }
   }
   return { mode, prompt }
 }

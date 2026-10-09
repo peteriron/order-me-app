@@ -1,21 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-
-/** Writes placed Rounds (each a list of catalog Item names, placed `daysAgo`) into the saved app state, then reloads. */
-async function seedHistory(page: Page, rounds: { daysAgo: number; items: string[] }[]) {
-  await page.evaluate((rounds) => {
-    const state = JSON.parse(localStorage.getItem('order-me')!)
-    state.history = rounds.map((r, n) => ({
-      id: `seed-${n}`,
-      placedAt: new Date(Date.now() - r.daysAgo * 86_400_000).toISOString(),
-      lines: r.items.map((name) => {
-        const item = state.catalog.find((i: { name: string }) => i.name === name)
-        return { itemId: item.id, name: item.name, category: item.category, emoji: item.emoji, count: 1 }
-      }),
-    }))
-    localStorage.setItem('order-me', JSON.stringify(state))
-  }, rounds)
-  await page.reload()
-}
+import { seedHistory } from './helpers.ts'
 
 const firstDrinks = (page: Page) =>
   page
@@ -33,11 +17,11 @@ test.beforeEach(async ({ page }) => {
 
 test('most ordered first; tiles hold still while composing, and reorder on place and on Undo', async ({ page }) => {
   await seedHistory(page, [
-    { daysAgo: 1, items: ['Rosé wine'] },
-    { daysAgo: 2, items: ['Rosé wine'] },
-    { daysAgo: 3, items: ['Mint tea'] },
+    { daysAgo: 1, lines: [['Rosé wine', 1]] },
+    { daysAgo: 2, lines: [['Rosé wine', 1]] },
+    { daysAgo: 3, lines: [['Mint tea', 1]] },
     // Too old to count.
-    { daysAgo: 120, items: ['Red wine', 'Red wine'] },
+    { daysAgo: 120, lines: [['Red wine', 1], ['Red wine', 1]] },
   ])
   expect(await firstDrinks(page)).toEqual(['Rosé wine', 'Mint tea', 'Cola', 'Cola Zero'])
 

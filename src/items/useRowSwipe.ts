@@ -79,11 +79,18 @@ export function useRowSwipe() {
       setDragging(null)
     },
     onClickCapture: (e: MouseEvent) => {
-      // After a swipe, or a tap on an open row (which only closes it): no edit sheet.
-      if (e.timeStamp < swallowClicksUntil.current || openId === itemId) {
+      // The click a swipe itself ends with (touch usually has none; a mouse always does): swallow it, but don't
+      // treat it as a tap on the open row, or the row would close again the moment it opens.
+      if (e.timeStamp < swallowClicksUntil.current) {
         e.preventDefault()
         e.stopPropagation()
-        if (openId === itemId) setOpenId(null)
+        return
+      }
+      // A tap on an open row only closes it: no edit sheet.
+      if (openId === itemId) {
+        e.preventDefault()
+        e.stopPropagation()
+        setOpenId(null)
       }
     },
   })

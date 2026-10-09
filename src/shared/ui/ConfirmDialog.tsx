@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react'
+import { useFocusTrap } from './useFocusTrap.ts'
 
 export interface Confirmation {
   text: string
   confirmLabel: string
-  onConfirm: () => void
+  /** May be async: the dialog does not await it, and the action reports its own outcome (e.g. the offline toast). */
+  onConfirm: () => void | Promise<void>
 }
 
 interface ConfirmDialogProps extends Confirmation {
@@ -19,9 +21,11 @@ interface ConfirmDialogProps extends Confirmation {
  */
 export function ConfirmDialog({ text, confirmLabel, cancelLabel, tone = 'danger', onConfirm, onClose }: ConfirmDialogProps) {
   const cancelRef = useRef<HTMLButtonElement>(null)
+  const boxRef = useRef<HTMLDivElement>(null)
+  // Cancel is focused first (and Tab stays inside), so an accidental Enter never deletes.
+  useFocusTrap(boxRef, cancelRef)
 
   useEffect(() => {
-    cancelRef.current?.focus()
     // Capture phase + stopPropagation: Escape closes only this dialog, not a sheet it was opened over.
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
@@ -34,7 +38,7 @@ export function ConfirmDialog({ text, confirmLabel, cancelLabel, tone = 'danger'
 
   return (
     <div className="scrim" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirm-text">
+      <div ref={boxRef} className="dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirm-text" tabIndex={-1}>
         <p id="confirm-text">{text}</p>
         <div className="dialog-actions">
           <button ref={cancelRef} type="button" className="btn btn-quiet" onClick={onClose}>
@@ -44,7 +48,8 @@ export function ConfirmDialog({ text, confirmLabel, cancelLabel, tone = 'danger'
             type="button"
             className={tone === 'danger' ? 'btn btn-danger' : 'btn btn-primary'}
             onClick={() => {
-              onConfirm()
+              // Not awaited: the dialog closes now, and the action reports its own outcome (see Confirmation).
+              void onConfirm()
               onClose()
             }}
           >

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { waitForServiceWorker } from './helpers.ts'
 
 const itemsPage = (page: Page) => page.getByRole('region', { name: 'Items' })
 const choice = (page: Page, group: string, option: string) =>
@@ -6,15 +7,6 @@ const choice = (page: Page, group: string, option: string) =>
 
 async function goTo(page: Page, name: 'History' | 'Round' | 'Settings') {
   await page.getByRole('navigation', { name: 'Pages' }).getByRole('button', { name }).tap()
-}
-
-async function waitForServiceWorker(page: Page) {
-  await page.evaluate(async () => {
-    await navigator.serviceWorker.ready
-    if (!navigator.serviceWorker.controller) {
-      await new Promise((resolve) => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }))
-    }
-  })
 }
 
 /** Uses the app for a while: places a Round, starts another, pins an Item, deletes one and picks the light theme. */

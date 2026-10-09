@@ -2,7 +2,8 @@ import type { Item, Sections } from '../items/catalog.ts'
 
 /** Lower case without accents, for matching as a reader expects: "rose" finds "Rosé". */
 function fold(text: string): string {
-  return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLocaleLowerCase()
+  // toLowerCase, not toLocaleLowerCase: folding must not follow the device's locale (Turkish 'I' would fold to 'ı').
+  return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 }
 
 /**

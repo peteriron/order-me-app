@@ -5,7 +5,7 @@ An app used by one person in a group of friends (the Operator) to collect everyo
 ## Language
 
 **Round**:
-A batch of drink/snack requests composed together in the app for a single trip to the counter. There is at most one `composing` Round at a time; it is saved on every change and survives the app being closed. While `composing`, Items can be added, removed, or have their count adjusted, and the whole Round can be cleared; "mark as ordered" moves it to `placed`, after which it is immutable and joins history. "Order again" on a past Round replaces the composing Round with a snapshot copy of it rather than reopening the original, and that snapshot doesn't change if the source Items are later renamed or deleted from the Catalog.
+A batch of drink/snack requests composed together in the app for a single trip to the counter. There is at most one `composing` Round at a time; it is saved on every change and survives the app being closed. While `composing`, Items can be added, removed, or have their count adjusted, and the whole Round can be cleared; "mark as ordered" moves it to `placed`, after which it is immutable and joins history. "Order again" on a past Round replaces the composing Round with a snapshot copy of it rather than reopening the original, and that snapshot doesn't change if the source Items are later renamed or deleted from the Catalog. Clear empties the composing Round; its 5-second Undo restores exactly what the Round held, so a tap made after the Clear is replaced by that Undo, not merged with it.
 A Round can carry a **table** (the table number, short text such as "12" or "Terras 3") and a free **remark**, entered on the Show page. They're saved with the Round in History, sent with its text and QR shares, and emptied by Clear and by placing it.
 _Avoid_: Order, tab, cart
 
@@ -38,7 +38,7 @@ The line order of the last Shared Round a phone received, which it keeps for goo
 _Avoid_: Custom order, sort order
 
 **Counter view**:
-The large-type presentation of the composing Round that the Operator reads from or shows to the bartender, shown on the **Show** page (a swipe page between Round and Items, ADR-0005); the screen stays awake while that page is on screen, and it is where a Round is marked as ordered.
+The large-type presentation of the composing Round that the Operator reads from or shows to the bartender, shown on the **Show** page (a swipe page between Round and Settings, ADR-0005); the screen stays awake while that page is on screen, and it is where a Round is marked as ordered.
 _Avoid_: Summary, review screen, receipt
 
 **Operator**:

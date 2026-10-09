@@ -5,7 +5,9 @@
  */
 
 /** Far beyond any real Catalog; guards against a crafted link that inflates into something huge. */
-const MAX_TEXT_BYTES = 64 * 1024
+export const MAX_TEXT_BYTES = 64 * 1024
+/** The encoded payload before inflation: base64 of deflate that could inflate to MAX_TEXT_BYTES fits well within this. */
+export const MAX_PAYLOAD_LENGTH = 96 * 1024
 /** Limits on what a link may bring, far beyond any real Catalog or Round, so a crafted link can't flood the app. */
 export const MAX_LINK_ITEMS = 200
 
@@ -17,6 +19,9 @@ export async function pack(text: string): Promise<string> {
 
 /** The text of a link payload. Throws when it isn't valid base64url, deflate or UTF-8, or inflates too large. */
 export async function unpack(payload: string): Promise<string> {
+  // 64 KB inflated is the real limit; base64 of a deflate stream that could reach it stays well under 96 KB.
+  // Refuse a bigger payload before atob() allocates it.
+  if (payload.length > MAX_PAYLOAD_LENGTH) throw new Error('Shared link too large')
   return inflate(fromBase64Url(payload))
 }
 
