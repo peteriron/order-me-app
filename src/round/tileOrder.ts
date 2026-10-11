@@ -4,7 +4,7 @@ import { pinnedFirst, type Pins } from '../items/pins.ts'
 
 /**
  * Tiles on the Round page: Pinned Items first in the Operator's order, then the rest in an order frozen by
- * `popularityOrder`. Pins apply at once (a deliberate choice made on the Items page). Edits never move an unpinned
+ * `tileOrder` (Catalog order, or Popularity when the Operator turned it on). Pins apply at once (a deliberate choice made on the Items page). Edits never move an unpinned
  * tile until the next recompute: renamed Items keep their place, and Items not in the order yet (just added) go
  * last, as added.
  */
@@ -45,4 +45,12 @@ export function popularityOrder(catalog: Catalog, history: PlacedRound[], now: D
   const score = (item: Item) => scores[item.id] ?? 0
   // Array.prototype.sort is stable, so equal scores stay in Catalog order.
   return [...catalog].sort((a, b) => score(b) - score(a)).map((item) => item.id)
+}
+
+/**
+ * The order unpinned tiles follow: Popularity when the Operator turned on "Order by popularity", otherwise Catalog
+ * order (the starter list's order, then Items as they were added), the default since v6.
+ */
+export function tileOrder(catalog: Catalog, history: PlacedRound[], now: Date, byPopularity: boolean): string[] {
+  return byPopularity ? popularityOrder(catalog, history, now) : catalog.map((item) => item.id)
 }

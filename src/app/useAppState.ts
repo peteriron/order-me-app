@@ -115,6 +115,9 @@ export function useAppState(seedLocale: Locale) {
       },
       setLanguage: (language: LanguageSetting) => update((s) => ({ settings: { ...s.settings, language } })),
       setTheme: (theme: ThemeSetting) => update((s) => ({ settings: { ...s.settings, theme } })),
+      /** Turns Popularity ordering on or off; the grid reorders at once (useTileOrder). */
+      setOrderByPopularity: (orderByPopularity: boolean) =>
+        update((s) => ({ settings: { ...s.settings, orderByPopularity } })),
       /** Back to a first install, with the newest version (see resetApp). Resolves 'offline' when it couldn't. */
       resetApp: () => {
         const appUrl = new URL(import.meta.env.BASE_URL, location.href).href

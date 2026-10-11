@@ -8,7 +8,7 @@ export interface GeneralSectionProps {
   settings: Settings
   hasHistory: boolean
   t: Messages
-  actions: Pick<AppActions, 'setLanguage' | 'setTheme' | 'clearHistory' | 'resetApp'>
+  actions: Pick<AppActions, 'setLanguage' | 'setTheme' | 'setOrderByPopularity' | 'clearHistory' | 'resetApp'>
   overlays: Overlays
   /** Opens the Add to Home Screen guide (iPhone and iPad). */
   onInstallGuide: () => void
@@ -77,6 +77,21 @@ export function GeneralSection({ settings, hasHistory, t, actions, overlays, onI
           ))}
         </div>
       </fieldset>
+
+      {/* A switch: off is Catalog order (the default), on is Popularity. The grid follows at once. */}
+      <label className="switch-row">
+        <span className="switch-text">
+          <span className="switch-label">{t.orderByPopularity}</span>
+          <span className="switch-hint">{t.orderByPopularityHint}</span>
+        </span>
+        <input
+          type="checkbox"
+          role="switch"
+          className="switch"
+          checked={settings.orderByPopularity}
+          onChange={(e) => actions.setOrderByPopularity(e.target.checked)}
+        />
+      </label>
 
       {/* Only where the app can be installed and isn't yet: Chrome's own prompt, or the guide on an iPhone. */}
       {install.mode !== 'none' && (

@@ -27,8 +27,39 @@ const firstDrinks = (page: Page) =>
 
 const showPage = (page: Page) => page.getByRole('region', { name: 'Round for the counter' })
 
+const popularitySwitch = (page: Page) => page.getByRole('switch', { name: /Order by popularity/ })
+
+async function turnOnPopularity(page: Page) {
+  await page.getByRole('navigation').getByRole('button', { name: 'Settings' }).tap()
+  await popularitySwitch(page).check()
+  await page.getByRole('navigation').getByRole('button', { name: 'Round' }).tap()
+}
+
 test.beforeEach(async ({ page }) => {
   await page.goto('./')
+})
+
+test('Catalog order by default; turning on Order by popularity reorders the grid at once, mid-Round too', async ({ page }) => {
+  await seedHistory(page, [
+    { daysAgo: 1, items: ['Rosé wine'] },
+    { daysAgo: 2, items: ['Rosé wine', 'Mint tea'] },
+  ])
+  expect(await firstDrinks(page)).toEqual(['Cola', 'Cola Zero', 'Still water', 'Sparkling water'])
+  await page.getByRole('navigation').getByRole('button', { name: 'Settings' }).tap()
+  await expect(popularitySwitch(page)).not.toBeChecked()
+
+  // A Round being composed doesn't hold the order back: flipping the setting is a deliberate choice, like a pin.
+  await page.getByRole('navigation').getByRole('button', { name: 'Round' }).tap()
+  await page.getByRole('button', { name: /^Cola(,|$)/ }).tap()
+  await turnOnPopularity(page)
+  expect(await firstDrinks(page)).toEqual(['Rosé wine', 'Mint tea', 'Cola', 'Cola Zero'])
+
+  await page.reload()
+  expect(await firstDrinks(page)).toEqual(['Rosé wine', 'Mint tea', 'Cola', 'Cola Zero'])
+  await page.getByRole('navigation').getByRole('button', { name: 'Settings' }).tap()
+  await popularitySwitch(page).uncheck()
+  await page.getByRole('navigation').getByRole('button', { name: 'Round' }).tap()
+  expect(await firstDrinks(page)).toEqual(['Cola', 'Cola Zero', 'Still water', 'Sparkling water'])
 })
 
 test('most ordered first; tiles hold still while composing, and reorder on place and on Undo', async ({ page }) => {
@@ -39,6 +70,7 @@ test('most ordered first; tiles hold still while composing, and reorder on place
     // Too old to count.
     { daysAgo: 120, items: ['Red wine', 'Red wine'] },
   ])
+  await turnOnPopularity(page)
   expect(await firstDrinks(page)).toEqual(['Rosé wine', 'Mint tea', 'Cola', 'Cola Zero'])
 
   for (let n = 0; n < 3; n++) await page.getByRole('button', { name: /^Mint tea(,|$)/ }).tap()

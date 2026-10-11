@@ -118,6 +118,8 @@ export interface Messages {
   system: string
   dark: string
   light: string
+  orderByPopularity: string
+  orderByPopularityHint: string
   addToHome: string
   updateAvailable: string
   update: string
@@ -231,6 +233,8 @@ export const messages: Record<Locale, Messages> = {
     system: 'System',
     dark: 'Dark',
     light: 'Light',
+    orderByPopularity: 'Order by popularity',
+    orderByPopularityHint: 'Most ordered drinks first. Off: the order of your Items.',
     addToHome: 'Add to Home Screen',
     updateAvailable: 'A new version of OrderMe is available.',
     update: 'Update',
@@ -348,6 +352,8 @@ export const messages: Record<Locale, Messages> = {
     system: 'Systeem',
     dark: 'Donker',
     light: 'Licht',
+    orderByPopularity: 'Sorteren op populariteit',
+    orderByPopularityHint: 'Vaakst bestelde drankjes eerst. Uit: de volgorde van je items.',
     addToHome: 'Zet op beginscherm',
     updateAvailable: 'Er is een nieuwe versie van OrderMe beschikbaar.',
     update: 'Bijwerken',

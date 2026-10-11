@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { PlacedRound } from '../history/history.ts'
 import { addToCatalog, catalogSections, deleteItem, editItem, type Item } from '../items/catalog.ts'
 import { emptyRound } from './round.ts'
-import { gridSections, popularity, popularityOrder } from './tileOrder.ts'
+import { gridSections, popularity, popularityOrder, tileOrder } from './tileOrder.ts'
 
 describe('Popularity', () => {
   const now = new Date('2026-09-29T20:00:00.000Z')
@@ -125,5 +125,24 @@ describe('tile order on the Round page', () => {
       const moved = editItem(catalog, 'tea', { name: 'Tea', category: 'snack', emoji: '🍵' })
       expect(names(gridSections(moved, order).snack)).toEqual(['Tea', 'Nuts', 'Chips'])
     })
+  })
+})
+
+describe('Order by popularity setting', () => {
+  const now = new Date('2026-09-29T20:00:00.000Z')
+  const catalog: Item[] = [
+    { id: 'cola', name: 'Cola', category: 'drink', emoji: '🥤' },
+    { id: 'duvel', name: 'Duvel', category: 'drink', emoji: '🍺' },
+  ]
+  const history: PlacedRound[] = [
+    { id: 'r1', placedAt: now.toISOString(), lines: [{ itemId: 'duvel', name: 'Duvel', category: 'drink', emoji: '🍺', count: 1 }] },
+  ]
+
+  it('off: Catalog order, whatever was ordered', () => {
+    expect(tileOrder(catalog, history, now, false)).toEqual(['cola', 'duvel'])
+  })
+
+  it('on: most ordered first', () => {
+    expect(tileOrder(catalog, history, now, true)).toEqual(['duvel', 'cola'])
   })
 })

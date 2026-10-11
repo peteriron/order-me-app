@@ -18,7 +18,7 @@ The Operator's persistent, editable list of Items, independent of any Round. See
 _Avoid_: Menu, drink list
 
 **Popularity**:
-How often an Item appeared in `placed` Rounds over roughly the last 90 days. It orders the unpinned tiles within each category and is recomputed only when a Round is placed, never while a Round is being composed.
+How often an Item appeared in `placed` Rounds over roughly the last 90 days. Only when the Operator turns on **Order by popularity** in Settings (v6; off by default) does it order the unpinned tiles; it is then recomputed only when a Round is placed, never while a Round is being composed. With the setting off, unpinned tiles follow Catalog order. Flipping the setting reorders the grid at once, even mid-Round. The setting belongs to the device and is never part of a Shared Catalog.
 _Avoid_: Favourites, ranking
 
 **Pinned Item** (v2):

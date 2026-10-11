@@ -4,7 +4,7 @@ import type { Pins } from '../items/pins.ts'
 import { recognizeStarters } from '../items/starter.ts'
 import type { ShowOrder } from '../show/showOrder.ts'
 import { emptyRound, type ComposingRound } from '../round/round.ts'
-import { DEFAULT_SETTINGS, type Settings } from '../settings/settings.ts'
+import { DEFAULT_SETTINGS, withDefaults, type Settings } from '../settings/settings.ts'
 import type { Locale } from '../shared/i18n.ts'
 
 /** The slice of the Web Storage API this module needs; window.localStorage satisfies it. */
@@ -112,8 +112,9 @@ export function saveAppState(store: KeyValueStore, state: AppState): void {
 }
 
 function upgrade(saved: Stored): AppState {
-  if (saved.version === 6) return withoutVersion(saved)
-  return { ...upgradeToV5(saved), showOrder: [] }
+  const state = saved.version === 6 ? withoutVersion(saved) : { ...upgradeToV5(saved), showOrder: [] }
+  // Settings added since the save (orderByPopularity, v6 of the app) start at their default.
+  return { ...state, settings: withDefaults(state.settings) }
 }
 
 function upgradeToV5(saved: Exclude<Stored, StoredV6>): Omit<AppState, 'showOrder'> {

@@ -26,7 +26,7 @@ describe('app state storage', () => {
     expect(state.history).toEqual([])
     expect(state.pins).toEqual([])
     // Language follows the phone; dark theme.
-    expect(state.settings).toEqual({ language: 'system', theme: 'dark' })
+    expect(state.settings).toEqual({ language: 'system', theme: 'dark', orderByPopularity: false })
   })
 
   it('knows a first launch: nothing saved yet', () => {
@@ -118,11 +118,12 @@ describe('app state storage', () => {
     expect(state.history).toEqual([])
   })
 
-  it('remembers the chosen language and theme after a restart', () => {
+  it('remembers the chosen language, theme and ordering after a restart', () => {
     const store = memoryStore()
     const first = loadAppState(store, { locale: 'en', newId: ids() })
-    saveAppState(store, { ...first, settings: { language: 'nl', theme: 'light' } })
-    expect(loadAppState(store, { locale: 'en', newId: ids() }).settings).toEqual({ language: 'nl', theme: 'light' })
+    const settings = { language: 'nl', theme: 'light', orderByPopularity: true } as const
+    saveAppState(store, { ...first, settings })
+    expect(loadAppState(store, { locale: 'en', newId: ids() }).settings).toEqual(settings)
   })
 
   it('remembers Pinned Items and their order after a restart', () => {
@@ -145,7 +146,21 @@ describe('app state storage', () => {
     const catalog = [{ id: 'k', name: 'Kriek', category: 'drink', emoji: '🍒' }]
     const settings = { language: 'en', theme: 'dark' }
     store.setItem('order-me', JSON.stringify({ version: 5, catalog, round: { counts: {} }, history: [], settings, pins: [] }))
-    expect(loadAppState(store, { locale: 'en', newId: ids() })).toEqual({ catalog, round: { counts: {} }, history: [], settings, pins: [], showOrder: [] })
+    expect(loadAppState(store, { locale: 'en', newId: ids() })).toEqual({
+      catalog,
+      round: { counts: {} },
+      history: [],
+      settings: { ...settings, orderByPopularity: false },
+      pins: [],
+      showOrder: [],
+    })
+  })
+
+  it('starts a v5 save in Catalog order: Popularity ordering is off until turned on', () => {
+    const store = memoryStore()
+    const state = { catalog: [], round: { counts: {} }, history: [], settings: { language: 'en', theme: 'dark' }, pins: [], showOrder: [] }
+    store.setItem('order-me', JSON.stringify({ version: 6, ...state }))
+    expect(loadAppState(store, { locale: 'en', newId: ids() }).settings.orderByPopularity).toBe(false)
   })
 
   it('upgrades a save from before starter Items were marked: recognises them, keeps everything else', () => {
@@ -160,7 +175,7 @@ describe('app state storage', () => {
 
     const state = loadAppState(store, { locale: 'en', newId: ids() })
     expect(state.catalog).toEqual([{ ...catalog[0], starter: 'still-water-v1' }, catalog[1]])
-    expect(state).toMatchObject({ round: { counts: { a: 2 } }, history, settings, pins: ['b'] })
+    expect(state).toMatchObject({ round: { counts: { a: 2 } }, history, settings: { ...settings, orderByPopularity: false }, pins: ['b'] })
   })
 
   it('upgrades the oldest saves too, recognising their starter Items', () => {
@@ -178,7 +193,14 @@ describe('app state storage', () => {
     store.setItem('order-me', JSON.stringify({ version: 3, catalog, round: { counts: { d: 1 } }, history, settings }))
 
     const state = loadAppState(store, { locale: 'en', newId: ids() })
-    expect(state).toEqual({ catalog: [{ ...catalog[0], starter: 'duvel' }], round: { counts: { d: 1 } }, history, settings, pins: [], showOrder: [] })
+    expect(state).toEqual({
+      catalog: [{ ...catalog[0], starter: 'duvel' }],
+      round: { counts: { d: 1 } },
+      history,
+      settings: { ...settings, orderByPopularity: false },
+      pins: [],
+      showOrder: [],
+    })
   })
 
   it('upgrades a save from before settings existed, keeping history', () => {
@@ -189,6 +211,6 @@ describe('app state storage', () => {
 
     const state = loadAppState(store, { locale: 'en', newId: ids() })
     expect(state.history).toEqual(history)
-    expect(state.settings).toEqual({ language: 'system', theme: 'dark' })
+    expect(state.settings).toEqual({ language: 'system', theme: 'dark', orderByPopularity: false })
   })
 })

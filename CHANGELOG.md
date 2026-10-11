@@ -2,6 +2,14 @@
 
 All notable changes to OrderMe ("This round is on me" / "Dit rondje is van mij"). Versions follow [semantic versioning](https://semver.org/): the version is shown at the bottom of the Settings page, with the build number and date.
 
+## Unreleased (6.0.0)
+
+### Order by popularity is now a setting
+
+- A new **Order by popularity** switch in Settings. It's **off** by default, also after updating: the tiles follow the order of your Items (the starter list, then Items as you added them). Pinned Items still come first.
+- Turn it on to get the most ordered drinks first, as before. Flipping it reorders the grid right away, even mid-Round.
+- The setting stays on your phone; it isn't part of shared Items.
+
 ## 5.1.0 (2026-10-04)
 
 ### Coloured tiles (#83)

@@ -35,7 +35,7 @@ export function App() {
   useTheme(state.settings.theme)
   /** The Catalog as shown: starter Items named in the app's language. Everything on screen, placed or shared uses it. */
   const catalog = useMemo(() => localizeCatalog(state.catalog, locale), [state.catalog, locale])
-  const sections = useTileOrder(catalog, state.pins, state.history, placements)
+  const sections = useTileOrder(catalog, state.pins, state.history, placements, state.settings.orderByPopularity)
   /** The grid in the Show tab's order: a received Show order first (#49). Share and History follow it too. */
   const show = useMemo(() => showSections(sections, state.showOrder), [sections, state.showOrder])
   /** The Round as the Show tab lists it: what Share Round sends. */
