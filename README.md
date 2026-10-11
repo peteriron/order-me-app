@@ -4,7 +4,7 @@ A phone app for the person getting the round. Friends call out what they want, y
 
 **Open it:** <https://peteriron.github.io/order-me-app/>
 
-**Latest release:** [5.1.0](https://github.com/peteriron/order-me-app/releases/tag/v5.1.0): tiles tinted in their emoji's colour. What changed in each version: [CHANGELOG.md](CHANGELOG.md).
+**Latest release:** [6.0.0](https://github.com/peteriron/order-me-app/releases/tag/v6.0.0): your Items in groups you can edit, drawn as boxes, popularity order as a setting, and six languages. What changed in each version: [CHANGELOG.md](CHANGELOG.md).
 
 It's a web app you install on your home screen. It works offline, so bad bar Wi-Fi doesn't matter, and everything stays on your phone: no account, no server, no prices or payments. Sharing a Round or your Items puts them in the link itself, so they never pass through a server either. It speaks Dutch, English, French, German, Italian and Spanish.
 
@@ -118,7 +118,7 @@ npm run build && npm run preview   # the production build, as deployed
 
 ### Versions and releases
 
-- The version shown at the bottom of Settings is `version` in `package.json` (semantic: currently 5.1.0). Every release is in [CHANGELOG.md](CHANGELOG.md) and on [GitHub Releases](https://github.com/peteriron/order-me-app/releases).
+- The version shown at the bottom of Settings is `version` in `package.json` (semantic: currently 6.0.0). Every release is in [CHANGELOG.md](CHANGELOG.md) and on [GitHub Releases](https://github.com/peteriron/order-me-app/releases).
 - Bump it in every PR that changes the app: minor for a feature, patch for a fix, major for a big milestone. Docs- or CI-only changes don't bump it. Always bump with `npm version`, which changes only the app's own version in `package.json` and `package-lock.json` (a text replace can also hit a dependency that happens to have the same version, and CI's `npm ci` then refuses the lock file):
 
   ```sh

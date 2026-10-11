@@ -2,7 +2,7 @@
 
 All notable changes to OrderMe ("This round is on me" / "Dit rondje is van mij"). Versions follow [semantic versioning](https://semver.org/): the version is shown at the bottom of the Settings page, with the build number and date.
 
-## Unreleased (6.0.0)
+## 6.0.0 (2026-10-11)
 
 ### Groups, drawn as boxes
 
