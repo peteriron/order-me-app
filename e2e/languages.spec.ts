@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test'
 
 // Every shipped language on a Pixel 7: the tab labels fit, and starter Item names don't break inside a word.
-// Word length is font-dependent (CI's fallback font is wider than a phone's), so a word too wide for its tile on
-// this machine's font is skipped here; starter.test.ts caps word length so they fit a phone.
+// Widths depend on the font: CI installs Roboto, as on a Pixel. A word too wide for its tile even on a line of its
+// own is skipped here, in case a machine lacks it; starter.test.ts also caps word length.
 for (const locale of ['nl-BE', 'en-GB', 'fr-BE', 'de-DE', 'it-IT', 'es-ES']) {
   test.describe(`on a ${locale} phone`, () => {
     test.use({ locale })
