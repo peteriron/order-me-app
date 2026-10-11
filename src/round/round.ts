@@ -1,4 +1,4 @@
-import type { Item, Sections } from '../items/catalog.ts'
+import { itemsOf, type Item, type Sections } from '../items/catalog.ts'
 
 /** The table number and a free remark the Operator can add to a Round on the Show page. */
 export interface RoundNote {
@@ -56,9 +56,9 @@ export interface RoundLine {
   count: number
 }
 
-/** The composing Round as lines, in the same order as the grid: Drinks, then Snacks. */
+/** The composing Round as lines, in the same order as the grid: group by group. */
 export function roundLines(round: ComposingRound, sections: Sections): RoundLine[] {
-  return [...sections.drink, ...sections.snack]
+  return itemsOf(sections)
     .map((item) => ({ item, count: countOf(round, item.id) }))
     .filter((line) => line.count > 0)
 }

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { deletePlacedRound, markOrdered } from '../history/history.ts'
 import { addToCatalog, deleteWithUndo, editItem, type ItemDraft, type Sections } from '../items/catalog.ts'
 import { movePin, pinsAfterEdit, togglePin } from '../items/pins.ts'
-import { replaceCatalog, type SharedItem } from '../items/sharedCatalog.ts'
+import { replaceCatalog, type SharedGroup } from '../items/sharedCatalog.ts'
 import { receiveRound, type SharedRound } from '../show/sharedRound.ts'
 import { add, clearWithUndo, remove, withNote, type ComposingRound, type RoundNote } from '../round/round.ts'
 import type { ThemeSetting } from '../settings/settings.ts'
@@ -107,10 +107,10 @@ export function useAppState(seedLocale: Locale) {
         // The updater has run by the time anyone can tap Undo (the toast appears after the next render).
         return () => update((s) => undo?.(s) ?? {})
       },
-      /** Replaces the Catalog with a Shared Catalog: fresh ids, empty Round, no pins, History kept. */
-      replaceCatalog: (items: SharedItem[]) => {
+      /** Replaces the Catalog and groups with a Shared Catalog: fresh ids, empty Round, no pins, History kept. */
+      replaceCatalog: (shared: SharedGroup[]) => {
         // New ids: a Show order from before points at nothing any more.
-        update(() => ({ ...replaceCatalog(items, () => crypto.randomUUID()), showOrder: [] }))
+        update(() => ({ ...replaceCatalog(shared, () => crypto.randomUUID()), showOrder: [] }))
         setPlacements((n) => n + 1)
       },
       setLanguage: (language: LanguageSetting) => update((s) => ({ settings: { ...s.settings, language } })),

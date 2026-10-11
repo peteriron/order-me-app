@@ -10,12 +10,16 @@ A Round can carry a **table** (the table number, short text such as "12" or "Ter
 _Avoid_: Order, tab, cart
 
 **Item**:
-A drink or snack in the Catalog, described by a name, a category (`drink` or `snack`) and an emoji. Tapping an Item's tile adds one to the composing Round; edits to an Item never retroactively change a Round that has already been `placed`.
+A drink or snack in the Catalog, described by a name, the Group it's in and an emoji (until v6: a category, `drink` or `snack`). Tapping an Item's tile adds one to the composing Round; edits to an Item never retroactively change a Round that has already been `placed`.
 _Avoid_: Product, button, drink (as a generic term)
 
 **Catalog**:
 The Operator's persistent, editable list of Items, independent of any Round. Seeded once on first launch with the **starter Items**, which show in the app's current language (English or Dutch) until the Operator renames them; Items the Operator added or renamed keep the name as typed. Past Rounds keep the names they had when placed (ADR-0001).
 _Avoid_: Menu, drink list
+
+**Group** (v6):
+A named set of Items, drawn as a box (an outline, a faint background colour of its own and a very small label) on the Round and Items pages. Groups replace v5's drink and snack categories. The Operator names them and orders them; the app picks each Group's colour from a fixed palette. A first launch starts with Soda, Beer, Hot, Wine, Strong and Snacks (**starter groups**, whose names follow the app's language until renamed). Updating from v5 puts starter Items in their starter Group, the Operator's own drinks in "Other drinks" (made only when needed) and their own snacks in Snacks (ADR-0006).
+_Avoid_: Category, section, folder
 
 **Popularity**:
 How often an Item appeared in `placed` Rounds over roughly the last 90 days. Only when the Operator turns on **Order by popularity** in Settings (v6; off by default) does it order the unpinned tiles; it is then recomputed only when a Round is placed, never while a Round is being composed. With the setting off, unpinned tiles follow Catalog order. Flipping the setting reorders the grid at once, even mid-Round. The setting belongs to the device and is never part of a Shared Catalog.
@@ -26,7 +30,7 @@ An Item the Operator has pinned in the Items section of the Settings page. Pinne
 _Avoid_: Favourite, starred
 
 **Shared Catalog** (v2):
-A copy of the Catalog (each Item's name, category and emoji, nothing else: no History, Round, settings or pins) carried in a link or QR code so a friend can start with the same Items. Opening one replaces the recipient's Catalog: straight away on a first launch, otherwise after a confirm. The replaced Catalog's Items get fresh ids, the composing Round is emptied and History is kept (ADR-0004).
+A copy of the Catalog (the Groups in order, and each Item's name, Group and emoji, nothing else: no colours, History, Round, settings or pins; v5 phones can't open a v6 link) carried in a link or QR code so a friend can start with the same Items. Opening one replaces the recipient's Catalog: straight away on a first launch, otherwise after a confirm. The replaced Catalog's Items get fresh ids, the composing Round is emptied and History is kept (ADR-0004).
 _Avoid_: Menu export, sync
 
 **Shared Round** (v3):
@@ -34,7 +38,7 @@ A one-time copy of the composing Round as the sender's Show tab lists it (each l
 _Avoid_: Round sync, live order
 
 **Show order** (v3):
-The line order of the last Shared Round a phone received, which it keeps for good so it lists Rounds the way the sender did. The Show page lists the Items in the Show order first, then the rest in grid order (drinks before snacks); Share as text and History follow it. It never changes the grid, pins or Popularity. The next Shared Round replaces it, deleting an Item drops it from it, and Reset app (or importing a Shared Catalog) clears it. A phone that never received a Round has none.
+The line order of the last Shared Round a phone received, which it keeps for good so it lists Rounds the way the sender did. The Show page lists the Items in the Show order first, then the rest in grid order (Group by Group); Share as text and History follow it. It never changes the grid, pins or Popularity. The next Shared Round replaces it, deleting an Item drops it from it, and Reset app (or importing a Shared Catalog) clears it. A phone that never received a Round has none.
 _Avoid_: Custom order, sort order
 
 **Counter view**:

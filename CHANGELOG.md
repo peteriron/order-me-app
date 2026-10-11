@@ -4,6 +4,16 @@ All notable changes to OrderMe ("This round is on me" / "Dit rondje is van mij")
 
 ## Unreleased (6.0.0)
 
+### Groups, drawn as boxes
+
+- Your drinks and snacks are now in **groups** instead of the two Drinks and Snacks sections. A fresh install starts with **Soda, Beer, Hot, Wine** (white, red, rosé, cava), **Strong** (Aperol Spritz, gin & tonic, mocktail) and **Snacks**.
+- Each group is a box on the Round page and in your Items, with a very small label and its own subtle background colour, picked by the app and readable in dark and light.
+- Pinned Items come first inside their own group.
+- The Item sheet picks a group instead of Drink or Snack.
+- The Show page stays a plain large-type list, in group order.
+- **Updating from 5.x**: the starter drinks go to their group; drinks you added go to a new **Other drinks** group, snacks you added to **Snacks**. Your Round, pins and History are kept.
+- Shared Items now carry the groups, so a friend gets the same boxes. Phones still on 5.x can't open a 6.0 Items link; 6.0 still opens links from 5.x.
+
 ### Order by popularity is now a setting
 
 - A new **Order by popularity** switch in Settings. It's **off** by default, also after updating: the tiles follow the order of your Items (the starter list, then Items as you added them). Pinned Items still come first.

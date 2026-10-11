@@ -45,9 +45,9 @@ test('starter Items follow the language on the Round page; an added or renamed I
 
   await setting(page, 'Language', 'Nederlands').check()
   await page.getByRole('navigation').getByRole('button', { name: 'Rondje' }).tap()
-  const drinks = page.getByRole('region', { name: 'Dranken' })
+  const drinks = page.getByRole('region', { name: 'Frisdrank' })
   await expect(drinks.getByRole('button', { name: 'Water plat', exact: true })).toBeVisible()
-  await expect(drinks.getByRole('button', { name: 'Pils', exact: true })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Bier' }).getByRole('button', { name: 'Pils', exact: true })).toBeVisible()
   await expect(drinks.getByRole('button', { name: 'Coke Zero', exact: true })).toBeVisible()
   await expect(drinks.getByRole('button', { name: 'Kriek', exact: true })).toBeVisible()
 })

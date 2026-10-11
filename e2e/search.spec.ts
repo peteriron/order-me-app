@@ -5,7 +5,7 @@ const searchField = (page: Page) => page.getByRole('searchbox', { name: 'Search'
 const closeSearch = (page: Page) => page.getByRole('button', { name: 'Close search' })
 /** The names of the tiles on the Round page, in order (the + New tile last). */
 const tileNames = (page: Page) =>
-  page.locator('section[aria-labelledby^="round-heading"] .tile-name, .page .grid .tile-new .tile-name').allTextContents()
+  page.locator('section[aria-labelledby^="round-group"] .tile-name, .page .grid .tile-new .tile-name').allTextContents()
 
 test.beforeEach(async ({ page }) => {
   await page.goto('./')

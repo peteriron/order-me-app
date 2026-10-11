@@ -1,17 +1,18 @@
+import { TEST_GROUPS } from '../testGroups.ts'
 import { describe, expect, it } from 'vitest'
 import { catalogSections, type Item } from '../items/catalog.ts'
 import { add, emptyRound, totalOf, withNote } from '../round/round.ts'
 import { deletePlacedRound, groupByDay, markOrdered, msUntilNextDay, orderAgain, placedTotal } from './history.ts'
 
 describe('marking a Round as ordered', () => {
-  const duvel: Item = { id: 'duvel', name: 'Duvel', category: 'drink', emoji: '🍺' }
-  const chips: Item = { id: 'chips', name: 'Chips', category: 'snack', emoji: '🥔' }
+  const duvel: Item = { id: 'duvel', name: 'Duvel', group: 'drink', emoji: '🍺' }
+  const chips: Item = { id: 'chips', name: 'Chips', group: 'snack', emoji: '🥔' }
   const catalog = [duvel, chips]
   const meta = { id: 'round-1', placedAt: '2026-09-22T21:14:00.000Z' }
   const composed = add(add(add(emptyRound(), 'duvel'), 'duvel'), 'chips')
 
   it('adds a placed Round to history with a snapshot of each line, and empties the composing Round', () => {
-    const { next } = markOrdered({ round: composed, history: [] }, catalogSections(catalog), meta)
+    const { next } = markOrdered({ round: composed, history: [] }, catalogSections(catalog, TEST_GROUPS), meta)
 
     expect(totalOf(next.round)).toBe(0)
     expect(next.history).toEqual([
@@ -19,8 +20,8 @@ describe('marking a Round as ordered', () => {
         id: 'round-1',
         placedAt: '2026-09-22T21:14:00.000Z',
         lines: [
-          { itemId: 'duvel', name: 'Duvel', category: 'drink', emoji: '🍺', count: 2 },
-          { itemId: 'chips', name: 'Chips', category: 'snack', emoji: '🥔', count: 1 },
+          { itemId: 'duvel', name: 'Duvel', emoji: '🍺', count: 2 },
+          { itemId: 'chips', name: 'Chips', emoji: '🥔', count: 1 },
         ],
       },
     ])
@@ -28,13 +29,13 @@ describe('marking a Round as ordered', () => {
 
   it('puts the newest placed Round first', () => {
     const older = { id: 'round-0', placedAt: '2026-09-21T20:00:00.000Z', lines: [] }
-    const { next } = markOrdered({ round: composed, history: [older] }, catalogSections(catalog), meta)
+    const { next } = markOrdered({ round: composed, history: [older] }, catalogSections(catalog, TEST_GROUPS), meta)
     expect(next.history.map((r) => r.id)).toEqual(['round-1', 'round-0'])
   })
 
   it('keeps what was ordered even when the Item is edited in place afterwards', () => {
     const editable: Item = { ...duvel }
-    const { next } = markOrdered({ round: composed, history: [] }, catalogSections([editable, chips]), meta)
+    const { next } = markOrdered({ round: composed, history: [] }, catalogSections([editable, chips], TEST_GROUPS), meta)
     editable.name = 'Duvel Tripel Hop'
     editable.emoji = '🍻'
     expect(next.history[0].lines[0]).toMatchObject({ itemId: 'duvel', name: 'Duvel', emoji: '🍺' })
@@ -42,7 +43,7 @@ describe('marking a Round as ordered', () => {
 
   it('undo takes the Round back out of history and restores what was being composed', () => {
     const before = { round: composed, history: [] }
-    const { next, undo } = markOrdered(before, catalogSections(catalog), meta)
+    const { next, undo } = markOrdered(before, catalogSections(catalog, TEST_GROUPS), meta)
     expect(undo(next)).toEqual(before)
   })
 })
@@ -93,7 +94,7 @@ describe('when "Today" moves on', () => {
 })
 
 describe('placed Rounds in history', () => {
-  const line = (itemId: string, name: string, count: number) => ({ itemId, name, category: 'drink' as const, emoji: '🍺', count })
+  const line = (itemId: string, name: string, count: number) => ({ itemId, name, emoji: '🍺', count })
   const r1 = { id: 'r1', placedAt: '2026-09-23T19:00:00.000Z', lines: [line('d', 'Duvel', 3), line('c', 'Cola', 2)] }
   const r2 = { id: 'r2', placedAt: '2026-09-22T19:00:00.000Z', lines: [line('d', 'Duvel', 1)] }
 
@@ -108,12 +109,12 @@ describe('placed Rounds in history', () => {
 })
 
 describe('order again', () => {
-  const duvel: Item = { id: 'duvel', name: 'Duvel', category: 'drink', emoji: '🍺' }
-  const chips: Item = { id: 'chips', name: 'Chips', category: 'snack', emoji: '🥔' }
+  const duvel: Item = { id: 'duvel', name: 'Duvel', group: 'drink', emoji: '🍺' }
+  const chips: Item = { id: 'chips', name: 'Chips', group: 'snack', emoji: '🥔' }
   const line = (item: Item, count: number, nameThen = item.name) => ({
     itemId: item.id,
     name: nameThen,
-    category: item.category,
+    group: item.group,
     emoji: item.emoji,
     count,
   })
@@ -146,8 +147,8 @@ describe('order again', () => {
 })
 
 describe('the table and remark in History', () => {
-  const duvel: Item = { id: 'duvel', name: 'Duvel', category: 'drink', emoji: '🍺' }
-  const sections = catalogSections([duvel])
+  const duvel: Item = { id: 'duvel', name: 'Duvel', group: 'drink', emoji: '🍺' }
+  const sections = catalogSections([duvel], TEST_GROUPS)
   const meta = { id: 'r1', placedAt: '2026-10-04T20:00:00.000Z' }
 
   it('are saved with the placed Round, tidied, and the next Round starts without them', () => {

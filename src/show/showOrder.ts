@@ -8,10 +8,10 @@ import { pinnedFirst } from '../items/pins.ts'
 export type ShowOrder = string[]
 
 /**
- * The Round's sections as the Show tab lists them: per category, the Items in the Show order first, in that order,
+ * The Round's sections as the Show tab lists them: group by group, the Items in the Show order first, in that order,
  * then the rest in grid order. Share as text, Share Round and History read the Round in this order too.
  */
 export function showSections(grid: Sections, showOrder: ShowOrder): Sections {
   if (showOrder.length === 0) return grid
-  return { drink: pinnedFirst(grid.drink, showOrder), snack: pinnedFirst(grid.snack, showOrder) }
+  return grid.map((s) => ({ ...s, items: pinnedFirst(s.items, showOrder) }))
 }

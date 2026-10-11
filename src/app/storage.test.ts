@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { add, countOf } from '../round/round.ts'
-import { forgetAppState, isFirstLaunch, loadAppState, saveAppState, type KeyValueStore } from './storage.ts'
+import { forgetAppState, isFirstLaunch, loadAppState, saveAppState, type AppState, type KeyValueStore } from './storage.ts'
 
 /** In-memory stand-in for window.localStorage. */
 function memoryStore(): KeyValueStore & { data: Map<string, string> } {
@@ -18,10 +18,16 @@ const ids = () => {
   return () => `id-${++n}`
 }
 
+/** A v5 Item as v7 saves it: in the group with starter key `group`, without its category. */
+function upgraded(state: AppState, { category: _category, ...item }: { category: string; [k: string]: unknown }, group: string) {
+  return { ...item, group: state.groups.find((g) => g.starter === group)!.id }
+}
+
 describe('app state storage', () => {
   it('first launch: the starter Catalog, an empty Round, no history, default settings', () => {
     const state = loadAppState(memoryStore(), { locale: 'en', newId: ids() })
     expect(state.catalog).toHaveLength(28)
+    expect(state.groups.map((g) => g.name)).toEqual(['Soda', 'Beer', 'Hot', 'Wine', 'Strong', 'Snacks'])
     expect(state.round.counts).toEqual({})
     expect(state.history).toEqual([])
     expect(state.pins).toEqual([])
@@ -99,7 +105,7 @@ describe('app state storage', () => {
     const placed = {
       id: 'r1',
       placedAt: '2026-09-22T21:14:00.000Z',
-      lines: [{ itemId: 'x', name: 'Duvel', category: 'drink' as const, emoji: '🍺', count: 3 }],
+      lines: [{ itemId: 'x', name: 'Duvel', emoji: '🍺', count: 3 }],
     }
     saveAppState(store, { ...first, history: [placed] })
 
@@ -112,8 +118,8 @@ describe('app state storage', () => {
     store.setItem('order-me', JSON.stringify({ version: 1, catalog, round: { counts: { d: 2 } } }))
 
     const state = loadAppState(store, { locale: 'en', newId: ids() })
-    // Duvel is a starter name, so the upgrade marks it.
-    expect(state.catalog).toEqual([{ ...catalog[0], starter: 'duvel' }])
+    // Duvel is a starter name, so the upgrade marks it, and puts it in Beer.
+    expect(state.catalog).toEqual([upgraded(state, { ...catalog[0]!, starter: 'duvel' }, 'beer')])
     expect(countOf(state.round, 'd')).toBe(2)
     expect(state.history).toEqual([])
   })
@@ -146,8 +152,10 @@ describe('app state storage', () => {
     const catalog = [{ id: 'k', name: 'Kriek', category: 'drink', emoji: '🍒' }]
     const settings = { language: 'en', theme: 'dark' }
     store.setItem('order-me', JSON.stringify({ version: 5, catalog, round: { counts: {} }, history: [], settings, pins: [] }))
-    expect(loadAppState(store, { locale: 'en', newId: ids() })).toEqual({
-      catalog,
+    const state = loadAppState(store, { locale: 'en', newId: ids() })
+    expect(state).toEqual({
+      catalog: [upgraded(state, catalog[0]!, 'other-drinks')],
+      groups: state.groups,
       round: { counts: {} },
       history: [],
       settings: { ...settings, orderByPopularity: false },
@@ -174,7 +182,10 @@ describe('app state storage', () => {
     store.setItem('order-me', JSON.stringify({ version: 4, catalog, round: { counts: { a: 2 } }, history, settings, pins: ['b'] }))
 
     const state = loadAppState(store, { locale: 'en', newId: ids() })
-    expect(state.catalog).toEqual([{ ...catalog[0], starter: 'still-water-v1' }, catalog[1]])
+    expect(state.catalog).toEqual([
+      upgraded(state, { ...catalog[0]!, starter: 'still-water-v1' }, 'soda'),
+      upgraded(state, catalog[1]!, 'other-drinks'),
+    ])
     expect(state).toMatchObject({ round: { counts: { a: 2 } }, history, settings: { ...settings, orderByPopularity: false }, pins: ['b'] })
   })
 
@@ -182,7 +193,8 @@ describe('app state storage', () => {
     const store = memoryStore()
     const catalog = [{ id: 'd', name: 'Bier', category: 'drink', emoji: '🍺' }]
     store.setItem('order-me', JSON.stringify({ version: 1, catalog, round: { counts: {} } }))
-    expect(loadAppState(store, { locale: 'en', newId: ids() }).catalog).toEqual([{ ...catalog[0], starter: 'beer' }])
+    const state = loadAppState(store, { locale: 'en', newId: ids() })
+    expect(state.catalog).toEqual([upgraded(state, { ...catalog[0]!, starter: 'beer' }, 'beer')])
   })
 
   it('upgrades a save from before pins existed: everything kept, nothing pinned', () => {
@@ -194,13 +206,44 @@ describe('app state storage', () => {
 
     const state = loadAppState(store, { locale: 'en', newId: ids() })
     expect(state).toEqual({
-      catalog: [{ ...catalog[0], starter: 'duvel' }],
+      catalog: [upgraded(state, { ...catalog[0]!, starter: 'duvel' }, 'beer')],
+      groups: state.groups,
       round: { counts: { d: 1 } },
       history,
       settings: { ...settings, orderByPopularity: false },
       pins: [],
       showOrder: [],
     })
+  })
+
+  it('upgrades a v5 save to groups: starter Items to their group, own drinks to Other drinks, own snacks to Snacks', () => {
+    const store = memoryStore()
+    const catalog = [
+      { id: 'c', name: 'Cava', category: 'drink', emoji: '🍾', starter: 'cava' },
+      { id: 'k', name: 'Kriek', category: 'drink', emoji: '🍒' },
+      { id: 'p', name: 'Pretzel', category: 'snack', emoji: '🥨' },
+    ]
+    const v6 = { version: 6, catalog, round: { counts: { k: 2 } }, history: [], settings: { language: 'nl', theme: 'dark' }, pins: ['k'], showOrder: ['p'] }
+    store.setItem('order-me', JSON.stringify(v6))
+
+    const state = loadAppState(store, { locale: 'nl', newId: ids() })
+    expect(state.groups.map((g) => g.name)).toEqual(['Frisdrank', 'Bier', 'Warm', 'Wijn', 'Sterk', 'Andere dranken', 'Snacks'])
+    expect(state.catalog).toEqual([
+      upgraded(state, catalog[0]!, 'wine'),
+      upgraded(state, catalog[1]!, 'other-drinks'),
+      upgraded(state, catalog[2]!, 'snacks'),
+    ])
+    expect(state).toMatchObject({ round: { counts: { k: 2 } }, pins: ['k'], showOrder: ['p'] })
+    // Saved as v7 from then on, groups and all.
+    saveAppState(store, state)
+    expect(JSON.parse(store.getItem('order-me')!)).toMatchObject({ version: 7, groups: state.groups })
+    expect(loadAppState(store, { locale: 'nl', newId: ids() })).toEqual(state)
+  })
+
+  it('starts afresh rather than failing on a v7 save without groups', () => {
+    const store = memoryStore()
+    store.setItem('order-me', JSON.stringify({ version: 7, catalog: [], round: { counts: {} } }))
+    expect(loadAppState(store, { locale: 'en', newId: ids() }).groups).toHaveLength(6)
   })
 
   it('upgrades a save from before settings existed, keeping history', () => {

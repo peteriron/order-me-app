@@ -2,14 +2,17 @@ import { useEffect, useState, type FormEvent } from 'react'
 import type { Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
 import type { AppActions } from '../app/useAppState.ts'
-import { checkDraft, type Category, type DraftProblem, type Item, type ItemDraft } from './catalog.ts'
+import { checkDraft, type DraftProblem, type Item, type ItemDraft } from './catalog.ts'
 import { EMOJI_CHOICES } from './emoji.ts'
+import type { Groups } from './groups.ts'
 
 interface ItemSheetProps {
   /** The Item being edited, or undefined when adding a new one. */
   item?: Item
   /** Opened from the "+ New" tile: the new Item also goes straight into the Round. */
   forRound?: boolean
+  /** The groups to pick from, as shown (named in the app's language), in their order. */
+  groups: Groups
   t: Messages
   actions: Pick<AppActions, 'createItem' | 'updateItem' | 'removeFromCatalog'>
   overlays: Overlays
@@ -22,9 +25,10 @@ const isChoice = (emoji: string) => (EMOJI_CHOICES as readonly string[]).include
  * Bottom sheet to add or edit an Item. It works on its own copy of the Item, so Cancel (or tapping outside)
  * throws every change away; only Save touches the Catalog.
  */
-export function ItemSheet({ item, forRound, t, actions, overlays, onClose }: ItemSheetProps) {
+export function ItemSheet({ item, forRound, groups, t, actions, overlays, onClose }: ItemSheetProps) {
   const [name, setName] = useState(item?.name ?? '')
-  const [category, setCategory] = useState<Category>(item?.category ?? 'drink')
+  // A new Item starts in the first group.
+  const [group, setGroup] = useState(item?.group ?? groups[0]?.id ?? '')
   const [picked, setPicked] = useState(item && isChoice(item.emoji) ? item.emoji : item ? '' : EMOJI_CHOICES[0])
   const [typed, setTyped] = useState(item && !isChoice(item.emoji) ? item.emoji : '')
   const [problem, setProblem] = useState<DraftProblem | null>(null)
@@ -49,7 +53,7 @@ export function ItemSheet({ item, forRound, t, actions, overlays, onClose }: Ite
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
-    const checked = checkDraft({ name, category, emoji: typed || picked })
+    const checked = checkDraft({ name, group, emoji: typed || picked })
     if (checked.ok) save(checked.value)
     else setProblem(checked.problem)
   }
@@ -89,12 +93,12 @@ export function ItemSheet({ item, forRound, t, actions, overlays, onClose }: Ite
         </div>
 
         <fieldset className="field">
-          <legend>{t.category}</legend>
-          <div className="segmented">
-            {(['drink', 'snack'] as const).map((c) => (
-              <label key={c} className="choice">
-                <input type="radio" name="category" value={c} checked={category === c} onChange={() => setCategory(c)} />
-                {t[c]}
+          <legend>{t.group}</legend>
+          <div className="chips">
+            {groups.map((g) => (
+              <label key={g.id} className="choice chip">
+                <input type="radio" name="group" value={g.id} checked={group === g.id} onChange={() => setGroup(g.id)} />
+                {g.name}
               </label>
             ))}
           </div>

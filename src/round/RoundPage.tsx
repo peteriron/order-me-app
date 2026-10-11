@@ -1,8 +1,8 @@
 import { useState, type KeyboardEvent } from 'react'
-import type { Sections } from '../items/catalog.ts'
+import type { Section, Sections } from '../items/catalog.ts'
 import type { Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
-import { CategorySection } from '../shared/ui/CategorySection.tsx'
+import { GroupBox } from '../shared/ui/GroupBox.tsx'
 import type { AppActions } from '../app/useAppState.ts'
 import { RoundBar } from './RoundBar.tsx'
 import { Tile } from './Tile.tsx'
@@ -35,7 +35,7 @@ export function RoundPage({ sections, round, t, actions, onShow, onNew, overlays
   }
 
   const newTile = (
-    // Last tile of the grid: add something that isn't in the Catalog yet, straight into the Round.
+    // After the last box: add something that isn't in the Catalog yet, straight into the Round.
     <div className="tile tile-new">
       <button type="button" className="tile-add" aria-label={t.newItem} onClick={onNew}>
         <span className="tile-emoji" aria-hidden="true">
@@ -46,10 +46,10 @@ export function RoundPage({ sections, round, t, actions, onShow, onNew, overlays
     </div>
   )
 
-  const section = (category: keyof Sections, heading: string) => (
-    <CategorySection category={category} heading={heading} idPrefix="round">
+  const box = ({ group, items }: Section) => (
+    <GroupBox key={group.id} group={group} idPrefix="round">
       <div className="grid">
-        {shown[category].map((item) => {
+        {items.map((item) => {
           const count = countOf(round, item.id)
           return (
             <Tile
@@ -63,10 +63,11 @@ export function RoundPage({ sections, round, t, actions, onShow, onNew, overlays
             />
           )
         })}
-        {category === 'snack' && newTile}
       </div>
-    </CategorySection>
+    </GroupBox>
   )
+  // A group without Items has no box here; the Items page still shows it, to fill or delete.
+  const boxes = shown.filter((s) => s.items.length > 0)
 
   return (
     <>
@@ -102,13 +103,10 @@ export function RoundPage({ sections, round, t, actions, onShow, onNew, overlays
             </div>
           )}
         </header>
-        {(!searching || shown.drink.length > 0) && section('drink', t.drinks)}
-        {(!searching || shown.snack.length > 0) && section('snack', t.snacks)}
-        {searching && shown.drink.length + shown.snack.length === 0 && (
-          <p className="search-empty">{t.noMatch(query.trim())}</p>
-        )}
-        {/* + New stays at the end of the grid even when no snack matches. */}
-        {searching && shown.snack.length === 0 && <div className="grid">{newTile}</div>}
+        {boxes.map(box)}
+        {searching && boxes.length === 0 && <p className="search-empty">{t.noMatch(query.trim())}</p>}
+        {/* + New stays at the end, after the boxes, searching or not. */}
+        <div className="grid grid-new">{newTile}</div>
       </div>
       <RoundBar total={totalOf(round)} t={t} onClear={clear}>
         <button type="button" className="btn btn-primary" onClick={onShow}>

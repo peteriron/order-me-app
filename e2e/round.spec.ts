@@ -20,10 +20,10 @@ test('tapping tiles builds a Round that survives a reload', async ({ page }) => 
 test.describe('on a Dutch phone', () => {
   test.use({ locale: 'nl-BE' })
 
-  test('the starter Catalog and headings are in Dutch', async ({ page }) => {
+  test('the starter Catalog and group names are in Dutch', async ({ page }) => {
     await page.goto('./')
     await expect(page.getByRole('heading', { name: 'Dit rondje is van mij' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Dranken' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Frisdrank' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Water plat' })).toBeVisible()
   })
 })

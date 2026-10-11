@@ -23,8 +23,6 @@ export function formattingLocale(appLocale: Locale, deviceLanguage: string | und
 
 export interface Messages {
   appName: string
-  drinks: string
-  snacks: string
   tileLabel: (name: string, count: number) => string
   removeOne: (name: string) => string
   roundTotal: string
@@ -97,9 +95,8 @@ export interface Messages {
   moveDown: (name: string) => string
   name: string
   namePlaceholder: string
-  category: string
-  drink: string
-  snack: string
+  group: string
+  groupEmpty: string
   emoji: string
   typeYourOwn: string
   add: string
@@ -138,8 +135,6 @@ export interface Messages {
 export const messages: Record<Locale, Messages> = {
   en: {
     appName: 'This round is on me',
-    drinks: 'Drinks',
-    snacks: 'Snacks',
     tileLabel: (name, count) => (count ? `${name}, ${count} in round` : name),
     removeOne: (name) => `Remove one ${name}`,
     roundTotal: 'Round total',
@@ -213,9 +208,8 @@ export const messages: Record<Locale, Messages> = {
     moveDown: (name) => `Move ${name} down`,
     name: 'Name',
     namePlaceholder: 'e.g. Kriek',
-    category: 'Category',
-    drink: 'Drink',
-    snack: 'Snack',
+    group: 'Group',
+    groupEmpty: 'No Items in this group yet',
     emoji: 'Emoji',
     typeYourOwn: 'Or type your own',
     add: 'Add',
@@ -256,8 +250,6 @@ export const messages: Record<Locale, Messages> = {
   },
   nl: {
     appName: 'Dit rondje is van mij',
-    drinks: 'Dranken',
-    snacks: 'Snacks',
     tileLabel: (name, count) => (count ? `${name}, ${count} in rondje` : name),
     removeOne: (name) => `Eén ${name} minder`,
     roundTotal: 'Totaal van het rondje',
@@ -332,9 +324,8 @@ export const messages: Record<Locale, Messages> = {
     moveDown: (name) => `${name} omlaag`,
     name: 'Naam',
     namePlaceholder: 'bv. Kriek',
-    category: 'Categorie',
-    drink: 'Drank',
-    snack: 'Snack',
+    group: 'Groep',
+    groupEmpty: 'Nog geen items in deze groep',
     emoji: 'Emoji',
     typeYourOwn: 'Of typ er zelf een',
     add: 'Toevoegen',

@@ -75,33 +75,31 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
     overlays.notify(t.roundPlaced, { label: t.undo, run: undo })
   }
 
-  const list = (category: 'drink' | 'snack') => (
+  // A plain list, in group order: no boxes here, the bartender only needs the lines.
+  const list = (
     <ul className="show-lines">
-      {lines
-        .filter((l) => l.item.category === category)
-        .map(({ item, count }) => (
-          <li key={item.id} className="show-line">
-            <span className="show-count">{count}</span>
-            <span className="show-times">×</span>
-            <span className="show-what">
-              {/* Non-breaking space keeps the emoji on the name's line; long names hyphenate instead. */}
-              <span aria-hidden="true">{item.emoji}</span>
-              {' '}
-              {item.name}
-            </span>
-            <span className="show-controls">
-              <button type="button" aria-label={t.removeOne(item.name)} onClick={() => actions.removeFromRound(item.id)}>
-                −
-              </button>
-              <button type="button" aria-label={t.addOne(item.name)} onClick={() => actions.addToRound(item.id)}>
-                +
-              </button>
-            </span>
-          </li>
-        ))}
+      {lines.map(({ item, count }) => (
+        <li key={item.id} className="show-line">
+          <span className="show-count">{count}</span>
+          <span className="show-times">×</span>
+          <span className="show-what">
+            {/* Non-breaking space keeps the emoji on the name's line; long names hyphenate instead. */}
+            <span aria-hidden="true">{item.emoji}</span>
+            {' '}
+            {item.name}
+          </span>
+          <span className="show-controls">
+            <button type="button" aria-label={t.removeOne(item.name)} onClick={() => actions.removeFromRound(item.id)}>
+              −
+            </button>
+            <button type="button" aria-label={t.addOne(item.name)} onClick={() => actions.addToRound(item.id)}>
+              +
+            </button>
+          </span>
+        </li>
+      ))}
     </ul>
   )
-  const hasSnacks = lines.some((l) => l.item.category === 'snack')
 
   return (
     <section className="page show-page" aria-labelledby="show-title">
@@ -159,16 +157,7 @@ export function ShowPage({ round, sections, active, t, actions, onPlace, overlay
       ) : (
         <>
           <div className="show-body" ref={bodyRef}>
-            {list('drink')}
-            {hasSnacks && (
-              <>
-                <h2 className="section-label show-divider">
-                  <span className="dot dot-snack" aria-hidden="true" />
-                  {t.snacks}
-                </h2>
-                {list('snack')}
-              </>
-            )}
+            {list}
             <p className="show-total">
               <span>{t.total}</span>
               <span data-testid="show-total">{total}</span>

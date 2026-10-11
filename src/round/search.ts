@@ -6,12 +6,13 @@ function fold(text: string): string {
 }
 
 /**
- * The Round page's tiles for a search: in each section, the Items whose shown name contains the text (ignoring case,
- * accents and surrounding spaces), in grid order. A blank search shows everything.
+ * The Round page's tiles for a search: in each group, the Items whose shown name contains the text (ignoring case,
+ * accents and surrounding spaces), in grid order; groups without a match are left out. A blank search shows
+ * everything.
  */
 export function searchSections(sections: Sections, query: string): Sections {
   const wanted = fold(query.trim())
   if (!wanted) return sections
   const matches = (item: Item) => fold(item.name).includes(wanted)
-  return { drink: sections.drink.filter(matches), snack: sections.snack.filter(matches) }
+  return sections.map((s) => ({ ...s, items: s.items.filter(matches) })).filter((s) => s.items.length > 0)
 }

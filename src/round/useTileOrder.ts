@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { PlacedRound } from '../history/history.ts'
 import type { Catalog, Sections } from '../items/catalog.ts'
+import type { Groups } from '../items/groups.ts'
 import type { Pins } from '../items/pins.ts'
 import { gridSections, tileOrder } from './tileOrder.ts'
 
@@ -12,6 +13,7 @@ import { gridSections, tileOrder } from './tileOrder.ts'
  */
 export function useTileOrder(
   catalog: Catalog,
+  groups: Groups,
   pins: Pins,
   history: PlacedRound[],
   placements: number,
@@ -21,5 +23,5 @@ export function useTileOrder(
   const [ranked, setRanked] = useState(rank)
   // Recompute during render rather than in an effect, so the old order is never painted after a placement.
   if (ranked.placements !== placements || ranked.byPopularity !== byPopularity) setRanked(rank())
-  return useMemo(() => gridSections(catalog, ranked.order, pins), [catalog, ranked.order, pins])
+  return useMemo(() => gridSections(catalog, groups, ranked.order, pins), [catalog, groups, ranked.order, pins])
 }

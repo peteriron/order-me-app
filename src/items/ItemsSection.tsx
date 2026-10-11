@@ -1,14 +1,14 @@
 import { useState, type CSSProperties, type PointerEvent } from 'react'
 import type { Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
-import { CategorySection } from '../shared/ui/CategorySection.tsx'
+import { GroupBox } from '../shared/ui/GroupBox.tsx'
 import type { AppActions } from '../app/useAppState.ts'
-import type { Category, Item, Sections } from './catalog.ts'
+import type { Item, Section, Sections } from './catalog.ts'
 import type { Pins } from './pins.ts'
 import { useRowSwipe } from './useRowSwipe.ts'
 
 export interface ItemsSectionProps {
-  /** The Catalog per category, Pinned Items first, then A–Z (catalogSections), independent of the grid's order. */
+  /** The Catalog per group, Pinned Items first, then Catalog order (catalogSections), independent of the grid's order. */
   sections: Sections
   pins: Pins
   count: number
@@ -23,7 +23,8 @@ export interface ItemsSectionProps {
 /** A pinned row being dragged by its handle. */
 interface Drag {
   itemId: string
-  category: Category
+  /** The group it's in: pins are reordered within their group. */
+  group: string
   pointerId: number
   startY: number
   /** Where the row started and where it would land now, among its section's pinned rows. */
@@ -37,7 +38,7 @@ interface Drag {
 }
 
 /**
- * The Items section of the Settings page: the Operator's Catalog, every Item by category, each row opening the edit
+ * The Items section of the Settings page: the Operator's Catalog, a box per group, each row opening the edit
  * sheet and pinning the Item. Pinned Items come first and are reordered by dragging their handle, or with Move up /
  * Move down for keyboard and screen readers.
  */
@@ -61,7 +62,7 @@ export function ItemsSection({ sections, pins, count, t, actions, overlays, onAd
     const rects = rows.map((row) => row.getBoundingClientRect())
     setDrag({
       itemId: item.id,
-      category: item.category,
+      group: item.group,
       pointerId: e.pointerId,
       startY: e.clientY,
       from: index,
@@ -92,7 +93,7 @@ export function ItemsSection({ sections, pins, count, t, actions, overlays, onAd
 
   /** How far a pinned row is shifted while another row is dragged past it, or the dragged row itself follows. */
   const dragShift = (item: Item, index: number): CSSProperties | undefined => {
-    if (!drag || drag.category !== item.category) return undefined
+    if (!drag || drag.group !== item.group) return undefined
     if (item.id === drag.itemId) return { transform: `translateY(${drag.dy}px)` }
     if (drag.from < index && index <= drag.to) return { transform: `translateY(${-drag.height}px)` }
     if (drag.to <= index && index < drag.from) return { transform: `translateY(${drag.height}px)` }
@@ -186,18 +187,21 @@ export function ItemsSection({ sections, pins, count, t, actions, overlays, onAd
     )
   }
 
-  const section = (category: Category, heading: string) => {
-    const items = sections[category]
+  const box = ({ group, items }: Section) => {
     const pinnedCount = items.filter((i) => pinned.has(i.id)).length
     return (
-      <CategorySection category={category} heading={heading} idPrefix="items">
-        <div
-          className={drag?.category === category ? 'item-rows reordering' : 'item-rows'}
-          onPointerDownCapture={rows.onListPointerDownCapture}
-        >
-          {items.map((item, index) => row(item, index, pinnedCount))}
-        </div>
-      </CategorySection>
+      <GroupBox key={group.id} group={group} idPrefix="items">
+        {items.length === 0 ? (
+          <p className="group-empty">{t.groupEmpty}</p>
+        ) : (
+          <div
+            className={drag?.group === group.id ? 'item-rows reordering' : 'item-rows'}
+            onPointerDownCapture={rows.onListPointerDownCapture}
+          >
+            {items.map((item, index) => row(item, index, pinnedCount))}
+          </div>
+        )}
+      </GroupBox>
     )
   }
 
@@ -223,8 +227,7 @@ export function ItemsSection({ sections, pins, count, t, actions, overlays, onAd
           {t.shareItems}
         </button>
       </div>
-      {section('drink', t.drinks)}
-      {section('snack', t.snacks)}
+      {sections.map(box)}
     </section>
   )
 }
