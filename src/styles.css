@@ -255,6 +255,7 @@ button {
 /* ---------- group boxes (v6) ---------- */
 /* A group drawn as a box: outline, its own faint tint (--group-tint, set per box) and a very small label. */
 .group-box {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.375rem;
@@ -293,6 +294,73 @@ button {
   padding: 0.5rem 0.25rem;
   font-size: 0.875rem;
   color: var(--text-muted);
+}
+
+/* The Items page's box buttons, beside the label: rename, delete and a drag handle. */
+.group-tools {
+  display: flex;
+  align-items: center;
+  margin: -0.25rem -0.25rem -0.25rem 0;
+}
+
+.group-tool,
+.group-handle {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+}
+
+.group-tool:disabled {
+  opacity: 0.4;
+}
+
+.group-tool .btn-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.group-handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+.group-handle .grip {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.group-boxes {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* While a box is dragged, the boxes it passes slide out of its way; the dragged box follows the finger. */
+.group-boxes.reordering .group-box {
+  transition: transform 150ms var(--ease-out);
+}
+
+.group-boxes.reordering .group-box.dragging {
+  transition: none;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.3);
+}
+
+.group-box.dragging .group-handle {
+  color: var(--accent);
+  cursor: grabbing;
+}
+
+.add-group {
+  align-self: flex-start;
 }
 
 /* + New sits after the boxes, lined up with the tiles inside them. */

@@ -68,5 +68,5 @@ test('a pinned row’s drag handle still reorders and never reveals delete', asy
   // Up to the first pinned row, drifting left on the way.
   await touchDrag(page, { x: from.x + from.width / 2, y: from.y + from.height / 2 }, { x: from.x - 30, y: top.y + 8 }, { steps: 16, durationMs: 400 })
   await expect(listedDrinks(page).nth(0)).toHaveText(/Fanta/)
-  await expect(drinks(page).getByRole('button', { name: /^Delete / })).toHaveCount(0)
+  await expect(drinks(page).getByRole('button', { name: /^Delete (?!group )/ })).toHaveCount(0)
 })

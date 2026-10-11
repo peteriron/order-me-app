@@ -67,7 +67,7 @@ All sizes are in `rem` so OS text scaling works. The grid tolerates names wrappi
 ### Group box (v6)
 - Each Group is a box: 1px `--border` outline, 20px radius, its own faint `--group-N` background, 6/8px padding around the tiles.
 - A very small label at the top left: the Group's name, 11px / 600, uppercase, 0.06em tracking, `--text-muted`, one line with an ellipsis. Smaller than the 13px section label it replaces.
-- Boxes appear on the Round page (only Groups with Items) and the Items section (every Group). The Show page stays a plain large-type list, in Group order.
+- Boxes appear on the Round page (only Groups with Items) and the Items section (every Group). In the Items section each box's head also has, on the right: a pencil (rename, in a small sheet with the name only), a trash can (delete the Group and its Items at once, with an Undo toast; disabled for the last Group) and a grip to drag the box into a new place. Keyboard and screen readers get Move up / Move down buttons, shown on focus. "+ Add group" sits below the last box. The Show page stays a plain large-type list, in Group order.
 
 ### Tile
 ```

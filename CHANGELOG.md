@@ -14,6 +14,14 @@ All notable changes to OrderMe ("This round is on me" / "Dit rondje is van mij")
 - **Updating from 5.x**: the starter drinks go to their group; drinks you added go to a new **Other drinks** group, snacks you added to **Snacks**. Your Round, pins and History are kept.
 - Shared Items now carry the groups, so a friend gets the same boxes. Phones still on 5.x can't open a 6.0 Items link; 6.0 still opens links from 5.x.
 
+### Edit your groups
+
+- In Settings, under your Items: **Add group** (it goes last), and on each box a pencil to **rename** it and a bin to **delete** it.
+- Deleting a group deletes its Items too, at once, with **Undo** for 5 seconds that brings back the group, its Items, their counts in the Round and their pins. History keeps what was ordered.
+- **Drag** a box by its handle to change the group order; the Round page follows.
+- A group has just a name: its colour is picked for you.
+- A renamed starter group keeps your name in every language.
+
 ### Order by popularity is now a setting
 
 - A new **Order by popularity** switch in Settings. It's **off** by default, also after updating: the tiles follow the order of your Items (the starter list, then Items as you added them). Pinned Items still come first.

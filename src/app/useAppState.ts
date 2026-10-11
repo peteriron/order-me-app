@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { deletePlacedRound, markOrdered } from '../history/history.ts'
-import { addToCatalog, deleteWithUndo, editItem, type ItemDraft, type Sections } from '../items/catalog.ts'
+import { addToCatalog, deleteGroupWithUndo, deleteWithUndo, editItem, type ItemDraft, type Sections } from '../items/catalog.ts'
+import { addGroup, moveGroup, renameGroup } from '../items/groups.ts'
 import { movePin, pinsAfterEdit, togglePin } from '../items/pins.ts'
 import { replaceCatalog, type SharedGroup } from '../items/sharedCatalog.ts'
 import { receiveRound, type SharedRound } from '../show/sharedRound.ts'
@@ -84,6 +85,21 @@ export function useAppState(seedLocale: Locale) {
         let undo: ((s: AppState) => Partial<AppState>) | undefined
         update((s) => {
           const deleted = deleteWithUndo(s, itemId)
+          undo = deleted.undo
+          return deleted.next
+        })
+        return () => update((s) => undo?.(s) ?? {})
+      },
+      /** Adds a group, last, with the next colour. */
+      createGroup: (name: string) => update((s) => ({ groups: addGroup(s.groups, name, crypto.randomUUID()) })),
+      renameGroup: (groupId: string, name: string) => update((s) => ({ groups: renameGroup(s.groups, groupId, name) })),
+      /** Moves a group to position `to`: the order of the boxes. */
+      moveGroup: (groupId: string, to: number) => update((s) => ({ groups: moveGroup(s.groups, groupId, to) })),
+      /** Deletes a group and its Items at once, and returns its Undo (see deleteGroupWithUndo). */
+      removeGroup: (groupId: string) => {
+        let undo: ((s: AppState) => Partial<AppState>) | undefined
+        update((s) => {
+          const deleted = deleteGroupWithUndo(s, groupId)
           undo = deleted.undo
           return deleted.next
         })

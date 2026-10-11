@@ -1,6 +1,6 @@
 import type { Locale } from '../shared/i18n.ts'
 import type { Catalog, Item } from './catalog.ts'
-import { legacyGroupKey, OTHER_DRINKS, STARTER_GROUPS, type LegacyItem } from './starter.ts'
+import { isStarterGroupName, legacyGroupKey, OTHER_DRINKS, STARTER_GROUPS, type LegacyItem } from './starter.ts'
 
 /**
  * A group of Items, drawn as a box on the Round and Items pages (v6). Groups replace v5's drink and snack categories.
@@ -64,4 +64,36 @@ export function fromCategories(
     group: starterGroup(groups, keys[n]!)!.id,
   }))
   return { catalog, groups }
+}
+
+export type GroupNameProblem = 'groupNameRequired'
+
+/** Longest group name the sheet takes: it has to fit a tiny label. */
+export const MAX_GROUP_NAME = 30
+
+/** Tidies a typed group name (trimmed, single spaces) or says it's missing. */
+export function checkGroupName(name: string): { ok: true; value: string } | { ok: false; problem: GroupNameProblem } {
+  const tidy = name.trim().replace(/\s+/g, ' ').slice(0, MAX_GROUP_NAME)
+  return tidy ? { ok: true, value: tidy } : { ok: false, problem: 'groupNameRequired' }
+}
+
+/**
+ * Renames a group. A starter group stays one only when the name is what it's called in some language (saving the
+ * name the sheet showed isn't a rename); otherwise the name is the Operator's and no longer follows the language.
+ */
+export function renameGroup(groups: Groups, groupId: string, name: string): Groups {
+  return groups.map((group): Group => {
+    if (group.id !== groupId) return group
+    const { starter, ...rest } = group
+    return starter && isStarterGroupName(starter, name) ? { ...rest, name, starter } : { ...rest, name }
+  })
+}
+
+/** Moves a group to position `to` (clamped): the order of the boxes. */
+export function moveGroup(groups: Groups, groupId: string, to: number): Groups {
+  const group = groups.find((g) => g.id === groupId)
+  if (!group) return groups
+  const rest = groups.filter((g) => g.id !== groupId)
+  const at = Math.min(Math.max(to, 0), rest.length)
+  return [...rest.slice(0, at), group, ...rest.slice(at)]
 }

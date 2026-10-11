@@ -18,7 +18,7 @@ The Operator's persistent, editable list of Items, independent of any Round. See
 _Avoid_: Menu, drink list
 
 **Group** (v6):
-A named set of Items, drawn as a box (an outline, a faint background colour of its own and a very small label) on the Round and Items pages. Groups replace v5's drink and snack categories. The Operator names them and orders them; the app picks each Group's colour from a fixed palette. A first launch starts with Soda, Beer, Hot, Wine, Strong and Snacks (**starter groups**, whose names follow the app's language until renamed). Updating from v5 puts starter Items in their starter Group, the Operator's own drinks in "Other drinks" (made only when needed) and their own snacks in Snacks (ADR-0006).
+A named set of Items, drawn as a box (an outline, a faint background colour of its own and a very small label) on the Round and Items pages. Groups replace v5's drink and snack categories. A Group has a name only: the Operator adds, renames, deletes and drags Groups into order on the Items page (new ones go last), and the app picks each Group's colour from a fixed palette. Deleting a Group deletes its Items too, with Undo for 5 seconds (as for an Item: Round counts, pins and Show order come back; History keeps its snapshots). The last Group can't be deleted. A first launch starts with Soda, Beer, Hot, Wine, Strong and Snacks (**starter groups**, whose names follow the app's language until renamed). Updating from v5 puts starter Items in their starter Group, the Operator's own drinks in "Other drinks" (made only when needed) and their own snacks in Snacks (ADR-0006).
 _Avoid_: Category, section, folder
 
 **Popularity**:

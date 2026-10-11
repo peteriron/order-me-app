@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { HistoryPage } from '../history/HistoryPage.tsx'
 import { catalogSections, type Item } from '../items/catalog.ts'
+import { GroupSheet } from '../items/GroupSheet.tsx'
+import type { Group } from '../items/groups.ts'
 import { ItemSheet } from '../items/ItemSheet.tsx'
 import { ShareItemsSheet } from '../items/ShareItemsSheet.tsx'
 import { localizeCatalog, localizeGroups } from '../items/starter.ts'
@@ -48,6 +50,8 @@ export function App() {
   const [page, setPage] = useState(ROUND_PAGE)
   /** The Item sheet: `{}` to add a new Item, `{ item }` to edit one, `{ forRound }` from the + New tile. */
   const [sheet, setSheet] = useState<{ item?: Item; forRound?: boolean } | null>(null)
+  /** The group sheet: `{}` to add a group, `{ group }` to rename one (Items page). */
+  const [groupSheet, setGroupSheet] = useState<{ group?: Group } | null>(null)
   /** Which share sheet is open: the Catalog (Settings page) or the Round (Show page). */
   const [sharing, setSharing] = useState<'items' | 'round' | null>(null)
   /** The Add to Home Screen guide (Settings page, iPhone and iPad). */
@@ -61,7 +65,7 @@ export function App() {
   const { ready: updateReady, update } = useUpdate()
   /** After Later the pop-up stays away; Settings then offers the update next to the version. */
   const [updateLater, setUpdateLater] = useState(false)
-  const overlayOpen = sheet !== null || sharing !== null || installGuide || confirmation !== null
+  const overlayOpen = sheet !== null || groupSheet !== null || sharing !== null || installGuide || confirmation !== null
   /** The update pop-up, never over an open sheet or dialog: it waits until the Operator is done there. */
   const offerUpdate = updateReady && !updateLater && !overlayOpen
 
@@ -80,6 +84,7 @@ export function App() {
   }, [locale, t])
 
   const closeSheet = useCallback(() => setSheet(null), [])
+  const closeGroupSheet = useCallback(() => setGroupSheet(null), [])
   const closeSharing = useCallback(() => setSharing(null), [])
   const closeInstallGuide = useCallback(() => setInstallGuide(false), [])
   const closeToast = useCallback(() => setToast(null), [])
@@ -130,6 +135,7 @@ export function App() {
         onAdd: () => setSheet({}),
         onShare: () => setSharing('items'),
         onEdit: (item) => setSheet({ item }),
+        onEditGroup: setGroupSheet,
       }}
       general={{
         settings: state.settings,
@@ -165,6 +171,8 @@ export function App() {
           <ItemSheet {...sheet} groups={groups} t={t} actions={actions} overlays={overlays} onClose={closeSheet} />
         </div>
       )}
+
+      {groupSheet && <GroupSheet {...groupSheet} t={t} actions={actions} onClose={closeGroupSheet} />}
 
       {sharing && (
         <div inert={confirmation !== null}>

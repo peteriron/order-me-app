@@ -97,6 +97,16 @@ export interface Messages {
   namePlaceholder: string
   group: string
   groupEmpty: string
+  addGroup: string
+  editGroup: string
+  groupName: string
+  groupNamePlaceholder: string
+  groupNameRequired: string
+  editGroupNamed: (name: string) => string
+  deleteGroupNamed: (name: string) => string
+  groupDeleted: (name: string, items: number) => string
+  moveGroupUp: (name: string) => string
+  moveGroupDown: (name: string) => string
   emoji: string
   typeYourOwn: string
   add: string
@@ -210,6 +220,17 @@ export const messages: Record<Locale, Messages> = {
     namePlaceholder: 'e.g. Kriek',
     group: 'Group',
     groupEmpty: 'No Items in this group yet',
+    addGroup: 'Add group',
+    editGroup: 'Rename group',
+    groupName: 'Group name',
+    groupNamePlaceholder: 'e.g. Cocktails',
+    groupNameRequired: 'Give the group a name',
+    editGroupNamed: (name) => `Rename group ${name}`,
+    deleteGroupNamed: (name) => `Delete group ${name}`,
+    groupDeleted: (name, items) =>
+      items === 0 ? `${name} deleted` : `${name} deleted, with ${items} ${items === 1 ? 'Item' : 'Items'}`,
+    moveGroupUp: (name) => `Move group ${name} up`,
+    moveGroupDown: (name) => `Move group ${name} down`,
     emoji: 'Emoji',
     typeYourOwn: 'Or type your own',
     add: 'Add',
@@ -326,6 +347,17 @@ export const messages: Record<Locale, Messages> = {
     namePlaceholder: 'bv. Kriek',
     group: 'Groep',
     groupEmpty: 'Nog geen items in deze groep',
+    addGroup: 'Groep toevoegen',
+    editGroup: 'Groep hernoemen',
+    groupName: 'Naam van de groep',
+    groupNamePlaceholder: 'bv. Cocktails',
+    groupNameRequired: 'Geef de groep een naam',
+    editGroupNamed: (name) => `Groep ${name} hernoemen`,
+    deleteGroupNamed: (name) => `Groep ${name} verwijderen`,
+    groupDeleted: (name, items) =>
+      items === 0 ? `${name} verwijderd` : `${name} verwijderd, met ${items} ${items === 1 ? 'item' : 'items'}`,
+    moveGroupUp: (name) => `Groep ${name} omhoog`,
+    moveGroupDown: (name) => `Groep ${name} omlaag`,
     emoji: 'Emoji',
     typeYourOwn: 'Of typ er zelf een',
     add: 'Toevoegen',

@@ -148,3 +148,35 @@ export function deleteWithUndo(state: Deletable, itemId: string): { next: Deleta
     },
   }
 }
+
+type GroupDeletable = Deletable & { groups: Groups }
+
+/**
+ * Deletes a group and every Item in it at once (each as `deleteWithUndo` deletes an Item: Catalog, composing Round,
+ * pins and Show order; History keeps its snapshots), and returns `undo`, which puts the group back in its place and
+ * its Items back exactly where they were. Anything else changed in between is kept.
+ */
+export function deleteGroupWithUndo(
+  state: GroupDeletable,
+  groupId: string,
+): { next: GroupDeletable; undo: (current: GroupDeletable) => Partial<GroupDeletable> } {
+  const index = state.groups.findIndex((g) => g.id === groupId)
+  const group = state.groups[index]
+  const undos: ((current: Deletable) => Partial<Deletable>)[] = []
+  let next: Deletable = state
+  for (const item of state.catalog.filter((i) => i.group === groupId)) {
+    const deleted = deleteWithUndo(next, item.id)
+    next = deleted.next
+    undos.unshift(deleted.undo)
+  }
+  return {
+    next: { ...next, groups: state.groups.filter((g) => g.id !== groupId) },
+    undo: (current) => {
+      if (!group || current.groups.some((g) => g.id === groupId)) return {}
+      // Items back in reverse order of deleting, so each lands where it was.
+      const restored = undos.reduce<Deletable>((s, undo) => ({ ...s, ...undo(s) }), current)
+      const { catalog, round, pins, showOrder } = restored
+      return { catalog, round, pins, showOrder, groups: [...current.groups.slice(0, index), group, ...current.groups.slice(index)] }
+    },
+  }
+}
