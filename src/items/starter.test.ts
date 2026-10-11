@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { editItem, seedCatalog as seed, type Item } from './catalog.ts'
 import { fromCategories } from './groups.ts'
-import { legacyGroupKey, localizeCatalog, localizeGroups, recognizeStarters, type LegacyItem } from './starter.ts'
+import { LOCALES } from '../shared/i18n.ts'
+import { legacyGroupKey, STARTER, localizeCatalog, localizeGroups, recognizeStarters, type LegacyItem } from './starter.ts'
 
 const ids = () => {
   let n = 0
@@ -109,5 +110,14 @@ describe('groups for a Catalog saved or shared by v5 (categories)', () => {
 
     const onlyStarters = fromCategories(recognizeStarters([plain('Duvel')]), 'en', ids())
     expect(names(onlyStarters.groups)).toEqual(['Soda', 'Beer', 'Hot', 'Wine', 'Strong', 'Snacks'])
+  })
+})
+
+describe('starter names fit a tile', () => {
+  // 12 letters ("Tönissteiner", "Decaffeinato") is the longest word that fits a Round tile on a Pixel 7 without
+  // breaking; "Sprudelwasser" didn't. e2e/languages.spec.ts checks the tiles themselves.
+  it('has no word longer than 12 letters in any language', () => {
+    const long = STARTER.flatMap((row) => LOCALES.flatMap((l) => row.names[l].split(/\s+/))).filter((w) => [...w].length > 12)
+    expect(long).toEqual([])
   })
 })

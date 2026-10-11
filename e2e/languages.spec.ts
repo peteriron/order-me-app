@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test'
 
 // Every shipped language on a Pixel 7: the tab labels fit, and starter Item names don't break inside a word.
+// Word length is font-dependent (CI's fallback font is wider than a phone's), so a word too wide for its tile on
+// this machine's font is skipped here; starter.test.ts caps word length so they fit a phone.
 for (const locale of ['nl-BE', 'en-GB', 'fr-BE', 'de-DE', 'it-IT', 'es-ES']) {
   test.describe(`on a ${locale} phone`, () => {
     test.use({ locale })
@@ -22,6 +24,14 @@ for (const locale of ['nl-BE', 'en-GB', 'fr-BE', 'de-DE', 'it-IT', 'es-ES']) {
           const words = [...(text.textContent ?? '').matchAll(/\S+/g)]
           return words
             .filter((w) => {
+              // Too wide for the tile even on a line of its own, in this machine's font: nothing to prove.
+              const probe = document.createElement('span')
+              probe.style.whiteSpace = 'nowrap'
+              probe.textContent = w[0]
+              el.append(probe)
+              const width = probe.getBoundingClientRect().width
+              probe.remove()
+              if (width > el.clientWidth) return false
               const range = document.createRange()
               range.setStart(text, w.index)
               range.setEnd(text, w.index + w[0].length)

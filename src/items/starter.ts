@@ -77,7 +77,7 @@ export const STARTER: readonly StarterRow[] = [
   row('duvel', '🍺', 'beer', same('Duvel')),
   row('specialty-beer', '🍻', 'beer', ['Specialty beer', 'Speciaalbier', 'Bière spéciale', 'Spezialbier', 'Birra speciale', 'Cerveza especial']),
   row('coffee', '☕', 'hot', ['Coffee', 'Koffie', 'Café', 'Kaffee', 'Caffè', 'Café']),
-  row('decaf', '☕', 'hot', ['Decaf', 'Deca', 'Déca', 'Entkoffeiniert', 'Decaffeinato', 'Descafeinado']),
+  row('decaf', '☕', 'hot', ['Decaf', 'Deca', 'Déca', 'Koffeinfrei', 'Decaffeinato', 'Descafeinado']),
   row('mint-tea', '🍵', 'hot', ['Mint tea', 'Muntthee', 'Thé à la menthe', 'Minztee', 'Tè alla menta', 'Té de menta']),
   row('white-wine', '🥂', 'wine', ['White wine', 'Witte wijn', 'Vin blanc', 'Weißwein', 'Vino bianco', 'Vino blanco']),
   row('red-wine', '🍷', 'wine', ['Red wine', 'Rode wijn', 'Vin rouge', 'Rotwein', 'Vino rosso', 'Vino tinto']),
