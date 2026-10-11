@@ -72,7 +72,7 @@ A phone app, installed from the browser to the home screen, that works offline i
 40. As an Operator, I want deleting an Item that's in the composing Round to remove its line from the Round, so that the Round only holds Items that exist.
 41. As an Operator, I want the app to come with a sensible starter Catalog in my language on first launch, so that it's useful immediately.
 42. As an Operator, I want the general settings below my Items on the Settings page, so that the rarely used options stay out of the way.
-43. As an Operator, I want the app to follow my phone's language (Dutch or English) with a manual override in Settings, so that it speaks my language.
+43. As an Operator, I want the app to follow my phone's language (Dutch, English, French, German, Italian or Spanish; English for any other) with a manual override in Settings, so that it speaks my language.
 44. As an Operator, I want the app dark by default, with Light and System options in Settings, so that it's easy on the eyes in a dim bar and still readable on a sunny terrace.
 45. As an Operator, I want a "Clear history" action in Settings, with a confirmation, so that I can start fresh deliberately.
 45a. As an Operator, I want a "Reset app" action in Settings, with a confirmation, that puts the app back to a first install with the newest version, so that I can get the current starter Items and a clean slate in one go.
@@ -173,8 +173,8 @@ A phone app, installed from the browser to the home screen, that works offline i
 - **Delete Item** (#54): no confirm. It happens at once, by swiping a Settings row left and tapping the red ×, or with Delete in the edit sheet. It removes the Item from the Catalog, the composing Round, the pins and the Show order; History is untouched. A 5-second "{name} deleted · Undo" toast puts it back exactly: Catalog place, pin position, Round count and Show order position (`deleteWithUndo`). The row swipe uses the Pager's own gesture rules (`items/useRowSwipe.ts`): a row claims right-to-left swipes (and left-to-right ones on an open row), and a left-to-right swipe on a closed row still swipes the page.
 - **Counter view** (ADR-0005): the Show page, the third swipe page, reached by swiping or the Round bar's Show button. It uses the Screen Wake Lock API while it is the page on screen, re-acquired on `visibilitychange`, and does nothing if unsupported. Share uses the Web Share API with a clipboard fallback. Share text is plain, one line per Item as `"{count}× {name}"`, followed by `"Total: {n}"` / `"Totaal: {n}"` (no emoji, no timestamp).
 - **Navigation:** Three horizontally swipeable pages, History ← Round → Items (ADR-0003). The Round page is the default. Swipes need a threshold of about 25% of the width or a fling velocity, and a mostly-horizontal angle. The footer has a tappable page indicator.
-- **i18n:** NL and EN UI strings in a small message dictionary. The locale comes from `navigator.language` (`nl*` → NL, else EN), with an override stored in settings. The starter Catalog is seeded once on first launch. Each starter Item remembers its starter row (`Item.starter`, see `items/starter.ts`) and is shown in the app's current language until the Operator renames it (`localizeCatalog`); changing only its emoji or category keeps it a starter Item. Items saved before this (storage v4 and older) are recognised on upgrade to v5 by exact name and category, in either language, from the current or the first starter list. History keeps the names placed Rounds had.
-- **Starter Catalog:** The list below is seeded on first launch, in this order, which is also the order the grid and the Items page start with. EN names are shown first; the NL name is in brackets where it differs.
+- **i18n:** NL, EN, FR, DE, IT and ES UI strings in a small message dictionary (NL and EN in `shared/i18n.ts`, the others in `shared/locales/`). The locale comes from `navigator.language` by its language part (`fr-BE` → FR), and is EN for any language the app doesn't speak, with an override stored in settings. The starter Catalog is seeded once on first launch. Each starter Item remembers its starter row (`Item.starter`, see `items/starter.ts`) and is shown in the app's current language until the Operator renames it (`localizeCatalog`); changing only its emoji or category keeps it a starter Item. Items saved before this (storage v4 and older) are recognised on upgrade to v5 by exact name and category, in any language, from the current or the first starter list. History keeps the names placed Rounds had.
+- **Starter Catalog:** The list below is seeded on first launch, in this order, which is also the order the grid and the Items page start with. EN names are shown first; the NL name is in brackets where it differs. FR, DE, IT and ES names are in `items/starter.ts`.
   - **Drinks:**
     - soft drinks: 🥤 Cola, 🥤 Cola Zero, 💧 Still water (Water plat), 🫧 Sparkling water (Water bruis), 🍊 Fanta, 🍋 Sprite, 🧋 Ice Tea, 🧃 Juice (Fruitsap), 🍋 Gini, 🫧 Tönissteiner
     - beer: 🍺 Lager (Pils), 🍺 Lager 0.0 (Pils 0,0), 🍺 Duvel, 🍻 Specialty beer (Speciaalbier)
@@ -212,7 +212,7 @@ A phone app, installed from the browser to the home screen, that works offline i
 - Backup / restore of History. (Sharing the Catalog is in v2, and carries the Items only.)
 - Hiding/archiving Items (delete only).
 - Free manual ordering of every tile. v2 has Pinned Items instead.
-- Languages other than Dutch and English.
+- Languages other than the six shipped ones (NL, EN, FR, DE, IT, ES).
 - Native app-store distribution.
 
 ## Further Notes

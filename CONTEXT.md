@@ -14,7 +14,7 @@ A drink or snack in the Catalog, described by a name, the Group it's in and an e
 _Avoid_: Product, button, drink (as a generic term)
 
 **Catalog**:
-The Operator's persistent, editable list of Items, independent of any Round. Seeded once on first launch with the **starter Items**, which show in the app's current language (English or Dutch) until the Operator renames them; Items the Operator added or renamed keep the name as typed. Past Rounds keep the names they had when placed (ADR-0001).
+The Operator's persistent, editable list of Items, independent of any Round. Seeded once on first launch with the **starter Items**, which show in the app's current language (one of the six it speaks) until the Operator renames them; Items the Operator added or renamed keep the name as typed. Past Rounds keep the names they had when placed (ADR-0001).
 _Avoid_: Menu, drink list
 
 **Group** (v6):

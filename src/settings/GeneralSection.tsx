@@ -1,4 +1,4 @@
-import type { LanguageSetting, Messages } from '../shared/i18n.ts'
+import { LANGUAGE_NAMES, LOCALES, type LanguageSetting, type Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
 import type { AppActions } from '../app/useAppState.ts'
 import { useInstall } from './install.ts'
@@ -31,11 +31,7 @@ export function GeneralSection({ settings, hasHistory, t, actions, overlays, onI
     })
 
   // Each language is named in itself, so it can be found whatever the app is currently showing.
-  const languages: [LanguageSetting, string][] = [
-    ['system', t.system],
-    ['nl', 'Nederlands'],
-    ['en', 'English'],
-  ]
+  const languages: [LanguageSetting, string][] = [['system', t.system], ...LOCALES.map((l): [LanguageSetting, string] => [l, LANGUAGE_NAMES[l]])]
   const themes: [ThemeSetting, string][] = [
     ['dark', t.dark],
     ['light', t.light],
@@ -50,9 +46,10 @@ export function GeneralSection({ settings, hasHistory, t, actions, overlays, onI
 
       <fieldset className="field">
         <legend>{t.language}</legend>
-        <div className="segmented">
+        {/* Seven choices don't fit one row: chips that wrap, like the Item sheet's groups. */}
+        <div className="chips">
           {languages.map(([value, label]) => (
-            <label key={value} className="choice">
+            <label key={value} className="choice chip">
               <input
                 type="radio"
                 name="language"

@@ -157,7 +157,7 @@ The fourth page, titled "Settings". It holds two sections: **Items** (the Catalo
 - **Swipe to delete** (#54): swiping a row from right to left slides it with the finger and reveals a 72 px red button (`--danger`, with an `--on-danger` ×) on the right; past half its width, or with a quick flick, it snaps open, otherwise back. One row is open at a time. Swiping it back, or tapping anywhere else, closes it (that tap does nothing else). Tapping × deletes at once, with the "{name} deleted · Undo" toast. A left-to-right swipe on a closed row still goes back to Show, and a swipe on a pinned row's drag handle always reorders.
 - For keyboard and screen-reader users, each pinned row also has "Move up" / "Move down" buttons ("Move Duvel up" / "Duvel omhoog"). They are visually hidden until focused, then appear as a pill over the handle. At the ends of the list they are marked unavailable rather than removed, so focus stays put.
 - "Add Item" (accent-filled) and "Share" (outline, with a QR glyph) sit side by side at the top of the Items section.
-- Below the list is the **General** section: Language (System / Nederlands / English), Theme (Dark / Light / System) as segmented controls, then an outline **Add to Home Screen** button (phone-with-plus icon) and, side by side, two filled red buttons in the shape of Ordered: "Clear history" (disabled with no History) and "Reset app".
+- Below the list is the **General** section: Language (System / Nederlands / English / Français / Deutsch / Italiano / Español, as chips that wrap, each language named in itself), Theme (Dark / Light / System) as a segmented control, then an outline **Add to Home Screen** button (phone-with-plus icon) and, side by side, two filled red buttons in the shape of Ordered: "Clear history" (disabled with no History) and "Reset app".
 - **Add to Home Screen** shows only where the app can be installed and isn't yet; once it runs from the home screen it's gone. In Chrome on Android it appears when Chrome offers to install, and opens Chrome's own install prompt (Chrome's mini-bar is kept away). On an iPhone or iPad, which have no install prompt, it opens a bottom sheet with three numbered steps (step 1 with Safari's accent Share icon) and a Close button. Elsewhere (e.g. desktop Firefox) it isn't shown.
 - Reset app asks first, with "Reset" as the confirm button. With no connection it changes nothing and shows the "No connection" toast.
 - At the very bottom, centred, 12 px muted: "Version 4.2.0 · build 112 · 4 Oct 2026" (the date in the app's language). When a new version is ready and its pop-up got "Later", a second line reads "Update available · Update", with Update as an underlined accent link.
@@ -202,7 +202,7 @@ With `prefers-reduced-motion: reduce`, drop the scale, pop and slide effects and
 
 ## Voice & copy
 
-Short, friendly and practical, with no exclamation marks except in the empty state. The same keys exist in both languages.
+Short, friendly and practical, with no exclamation marks except in the empty state. The same keys exist in all six languages. The table gives EN and NL; FR, DE, IT and ES are in `src/shared/locales/`. Tab labels must fit a Pixel 7 without being cut off, and starter Item names must not break inside a word on a tile (`e2e/languages.spec.ts`).
 
 | Key | EN | NL |
 |---|---|---|

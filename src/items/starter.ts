@@ -23,60 +23,73 @@ interface StarterRow {
   names: Names
 }
 
-const names = (en: string, nl: string): Names => ({ en, nl })
+/** A name in each language, in the order en, nl, fr, de, it, es. */
+type Six = readonly [en: string, nl: string, fr: string, de: string, it: string, es: string]
 
-const groupRow = (key: string, en: string, nl: string): StarterGroupRow => ({ key, names: names(en, nl) })
+const names = ([en, nl, fr, de, it, es]: Six): Names => ({ en, nl, fr, de, it, es })
+
+/** A brand name: the same in every language. */
+const same = (name: string): Six => [name, name, name, name, name, name]
+
+const groupRow = (key: string, six: Six): StarterGroupRow => ({ key, names: names(six) })
 
 /** The starter groups, in the order a first launch shows them. */
 export const STARTER_GROUPS: readonly StarterGroupRow[] = [
-  groupRow('soda', 'Soda', 'Frisdrank'),
-  groupRow('beer', 'Beer', 'Bier'),
-  groupRow('hot', 'Hot', 'Warm'),
-  groupRow('wine', 'Wine', 'Wijn'),
-  groupRow('strong', 'Strong', 'Sterk'),
-  groupRow('snacks', 'Snacks', 'Snacks'),
+  groupRow('soda', ['Soda', 'Frisdrank', 'Sodas', 'Softdrinks', 'Bibite', 'Refrescos']),
+  groupRow('beer', ['Beer', 'Bier', 'Bières', 'Bier', 'Birre', 'Cervezas']),
+  groupRow('hot', ['Hot', 'Warm', 'Chaud', 'Heiß', 'Caldo', 'Caliente']),
+  groupRow('wine', ['Wine', 'Wijn', 'Vin', 'Wein', 'Vino', 'Vino']),
+  groupRow('strong', ['Strong', 'Sterk', 'Fort', 'Stark', 'Forte', 'Fuerte']),
+  groupRow('snacks', ['Snacks', 'Snacks', 'Snacks', 'Snacks', 'Snack', 'Picoteo']),
 ]
 
 /** Not seeded: made when a v5 save or link brings drinks of the Operator's own (see `fromCategories`). */
-export const OTHER_DRINKS: StarterGroupRow = groupRow('other-drinks', 'Other drinks', 'Andere dranken')
+export const OTHER_DRINKS: StarterGroupRow = groupRow('other-drinks', [
+  'Other drinks',
+  'Andere dranken',
+  'Autres boissons',
+  'Andere Getränke',
+  'Altre bevande',
+  'Otras bebidas',
+])
 
-const row = (key: string, emoji: string, group: string, en: string, nl: string): StarterRow => ({
+const row = (key: string, emoji: string, group: string, six: Six): StarterRow => ({
   key,
   emoji,
   group,
-  names: names(en, nl),
+  names: names(six),
 })
 
 /** The starter Catalog, group by group, in the order the grid starts with. */
 export const STARTER: readonly StarterRow[] = [
-  row('cola', '🥤', 'soda', 'Cola', 'Cola'),
-  row('cola-zero', '🥤', 'soda', 'Cola Zero', 'Cola Zero'),
-  row('still-water', '💧', 'soda', 'Still water', 'Water plat'),
-  row('sparkling-water', '🫧', 'soda', 'Sparkling water', 'Water bruis'),
-  row('fanta', '🍊', 'soda', 'Fanta', 'Fanta'),
-  row('sprite', '🍋', 'soda', 'Sprite', 'Sprite'),
-  row('ice-tea', '🧋', 'soda', 'Ice Tea', 'Ice Tea'),
-  row('juice', '🧃', 'soda', 'Juice', 'Fruitsap'),
-  row('gini', '🍋', 'soda', 'Gini', 'Gini'),
-  row('tonissteiner', '🫧', 'soda', 'Tönissteiner', 'Tönissteiner'),
-  row('lager', '🍺', 'beer', 'Lager', 'Pils'),
-  row('lager-0', '🍺', 'beer', 'Lager 0.0', 'Pils 0,0'),
-  row('duvel', '🍺', 'beer', 'Duvel', 'Duvel'),
-  row('specialty-beer', '🍻', 'beer', 'Specialty beer', 'Speciaalbier'),
-  row('coffee', '☕', 'hot', 'Coffee', 'Koffie'),
-  row('decaf', '☕', 'hot', 'Decaf', 'Deca'),
-  row('mint-tea', '🍵', 'hot', 'Mint tea', 'Muntthee'),
-  row('white-wine', '🥂', 'wine', 'White wine', 'Witte wijn'),
-  row('red-wine', '🍷', 'wine', 'Red wine', 'Rode wijn'),
-  row('rose-wine', '🍷', 'wine', 'Rosé wine', 'Rosé wijn'),
-  row('cava', '🍾', 'wine', 'Cava', 'Cava'),
-  row('aperol-spritz', '🍊', 'strong', 'Aperol Spritz', 'Aperol Spritz'),
-  row('gin-tonic', '🍸', 'strong', 'Gin & tonic', 'Gin-tonic'),
-  row('mocktail', '🍹', 'strong', 'Mocktail', 'Mocktail'),
-  row('chips', '🥔', 'snacks', 'Chips', 'Chips'),
-  row('nuts', '🥜', 'snacks', 'Nuts', 'Nootjes'),
-  row('cheese', '🧀', 'snacks', 'Cheese', 'Kaasblokjes'),
-  row('bitterballen', '🧆', 'snacks', 'Dutch meatballs', 'Bitterballen'),
+  row('cola', '🥤', 'soda', same('Cola')),
+  row('cola-zero', '🥤', 'soda', same('Cola Zero')),
+  row('still-water', '💧', 'soda', ['Still water', 'Water plat', 'Eau plate', 'Stilles Wasser', 'Acqua naturale', 'Agua sin gas']),
+  row('sparkling-water', '🫧', 'soda', ['Sparkling water', 'Water bruis', 'Eau pétillante', 'Sprudel', 'Acqua frizzante', 'Agua con gas']),
+  row('fanta', '🍊', 'soda', same('Fanta')),
+  row('sprite', '🍋', 'soda', same('Sprite')),
+  row('ice-tea', '🧋', 'soda', same('Ice Tea')),
+  row('juice', '🧃', 'soda', ['Juice', 'Fruitsap', 'Jus de fruits', 'Saft', 'Succo di frutta', 'Zumo']),
+  row('gini', '🍋', 'soda', same('Gini')),
+  row('tonissteiner', '🫧', 'soda', same('Tönissteiner')),
+  row('lager', '🍺', 'beer', ['Lager', 'Pils', 'Pils', 'Pils', 'Birra chiara', 'Cerveza rubia']),
+  row('lager-0', '🍺', 'beer', ['Lager 0.0', 'Pils 0,0', 'Pils 0,0', 'Pils 0,0', 'Birra 0,0', 'Cerveza 0,0']),
+  row('duvel', '🍺', 'beer', same('Duvel')),
+  row('specialty-beer', '🍻', 'beer', ['Specialty beer', 'Speciaalbier', 'Bière spéciale', 'Spezialbier', 'Birra speciale', 'Cerveza especial']),
+  row('coffee', '☕', 'hot', ['Coffee', 'Koffie', 'Café', 'Kaffee', 'Caffè', 'Café']),
+  row('decaf', '☕', 'hot', ['Decaf', 'Deca', 'Déca', 'Entkoffeiniert', 'Decaffeinato', 'Descafeinado']),
+  row('mint-tea', '🍵', 'hot', ['Mint tea', 'Muntthee', 'Thé à la menthe', 'Minztee', 'Tè alla menta', 'Té de menta']),
+  row('white-wine', '🥂', 'wine', ['White wine', 'Witte wijn', 'Vin blanc', 'Weißwein', 'Vino bianco', 'Vino blanco']),
+  row('red-wine', '🍷', 'wine', ['Red wine', 'Rode wijn', 'Vin rouge', 'Rotwein', 'Vino rosso', 'Vino tinto']),
+  row('rose-wine', '🍷', 'wine', ['Rosé wine', 'Rosé wijn', 'Vin rosé', 'Roséwein', 'Vino rosato', 'Vino rosado']),
+  row('cava', '🍾', 'wine', same('Cava')),
+  row('aperol-spritz', '🍊', 'strong', same('Aperol Spritz')),
+  row('gin-tonic', '🍸', 'strong', ['Gin & tonic', 'Gin-tonic', 'Gin tonic', 'Gin Tonic', 'Gin tonic', 'Gin-tonic']),
+  row('mocktail', '🍹', 'strong', same('Mocktail')),
+  row('chips', '🥔', 'snacks', ['Chips', 'Chips', 'Chips', 'Chips', 'Patatine', 'Patatas fritas']),
+  row('nuts', '🥜', 'snacks', ['Nuts', 'Nootjes', 'Noix', 'Nüsse', 'Frutta secca', 'Frutos secos']),
+  row('cheese', '🧀', 'snacks', ['Cheese', 'Kaasblokjes', 'Fromage', 'Käsewürfel', 'Formaggio', 'Queso']),
+  row('bitterballen', '🧆', 'snacks', ['Dutch meatballs', 'Bitterballen', 'Bitterballen', 'Bitterballen', 'Polpette olandesi', 'Croquetas holandesas']),
 ]
 
 /**
@@ -85,13 +98,13 @@ export const STARTER: readonly StarterRow[] = [
  * today's (Cola, Duvel, Coffee…) are recognised as today's rows.
  */
 const OLD_STARTER: readonly StarterRow[] = [
-  row('beer', '🍺', 'beer', 'Beer', 'Bier'),
-  row('beer-0', '🍺', 'beer', '0.0 Beer', '0.0 Bier'),
-  row('still-water-v1', '💧', 'soda', 'Still water', 'Plat water'),
-  row('sparkling-water-v1', '🫧', 'soda', 'Sparkling water', 'Bruiswater'),
-  row('tea', '🍵', 'hot', 'Tea', 'Thee'),
-  row('rose', '🍷', 'wine', 'Rosé', 'Rosé'),
-  row('liquor', '🥃', 'strong', 'Liquor', 'Sterke drank'),
+  row('beer', '🍺', 'beer', ['Beer', 'Bier', 'Bière', 'Bier', 'Birra', 'Cerveza']),
+  row('beer-0', '🍺', 'beer', ['0.0 Beer', '0.0 Bier', 'Bière 0.0', 'Bier 0.0', 'Birra 0.0', 'Cerveza 0.0']),
+  row('still-water-v1', '💧', 'soda', ['Still water', 'Plat water', 'Eau plate', 'Stilles Wasser', 'Acqua naturale', 'Agua sin gas']),
+  row('sparkling-water-v1', '🫧', 'soda', ['Sparkling water', 'Bruiswater', 'Eau pétillante', 'Sprudel', 'Acqua frizzante', 'Agua con gas']),
+  row('tea', '🍵', 'hot', ['Tea', 'Thee', 'Thé', 'Tee', 'Tè', 'Té']),
+  row('rose', '🍷', 'wine', ['Rosé', 'Rosé', 'Rosé', 'Rosé', 'Rosato', 'Rosado']),
+  row('liquor', '🥃', 'strong', ['Liquor', 'Sterke drank', 'Alcool fort', 'Spirituosen', 'Superalcolici', 'Licores']),
 ]
 
 // Current rows first: an old Item named like a current row ("Still water") becomes that current row.
@@ -146,7 +159,7 @@ export function localizeGroups(groups: Groups, locale: Locale): Groups {
 export type LegacyItem = Omit<Item, 'group'> & { category: LegacyCategory }
 
 /**
- * Marks Items that are starter Items but were saved before starter Items were marked: an exact name, in either
+ * Marks Items that are starter Items but were saved before starter Items were marked: an exact name, in any
  * language, of a current or old starter row, in the same category. A changed name is the Operator's own.
  */
 export function recognizeStarters(catalog: LegacyItem[]): LegacyItem[] {

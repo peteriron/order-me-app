@@ -1,10 +1,28 @@
-export type Locale = 'en' | 'nl'
+import { de } from './locales/de.ts'
+import { es } from './locales/es.ts'
+import { fr } from './locales/fr.ts'
+import { it } from './locales/it.ts'
+
+/** The languages the app ships in (v6). The Operator can't add one: their own Items keep the name as typed. */
+export const LOCALES = ['nl', 'en', 'fr', 'de', 'it', 'es'] as const
+export type Locale = (typeof LOCALES)[number]
 /** 'system' follows the phone's language. */
 export type LanguageSetting = 'system' | Locale
 
-/** Dutch when the device language is any flavour of Dutch, otherwise English. */
+/** Each language named in itself, so it can be found whatever the app is showing. */
+export const LANGUAGE_NAMES: Record<Locale, string> = {
+  nl: 'Nederlands',
+  en: 'English',
+  fr: 'Français',
+  de: 'Deutsch',
+  it: 'Italiano',
+  es: 'Español',
+}
+
+/** The phone's language when the app speaks it (any region: nl-BE, fr-CA…), otherwise English. */
 export function detectLocale(language: string | undefined): Locale {
-  return language?.toLowerCase().startsWith('nl') ? 'nl' : 'en'
+  const lang = language?.toLowerCase().split('-')[0]
+  return LOCALES.find((locale) => locale === lang) ?? 'en'
 }
 
 /** The language the app speaks: the Operator's choice, or the phone's language for 'system'. */
@@ -396,4 +414,8 @@ export const messages: Record<Locale, Messages> = {
     reset: 'Resetten',
     resetOffline: 'Geen verbinding. Om te resetten is internet nodig voor de nieuwste versie.',
   },
+  fr,
+  de,
+  it,
+  es,
 }

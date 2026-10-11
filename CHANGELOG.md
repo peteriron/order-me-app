@@ -22,6 +22,12 @@ All notable changes to OrderMe ("This round is on me" / "Dit rondje is van mij")
 - A group has just a name: its colour is picked for you.
 - A renamed starter group keeps your name in every language.
 
+### Six languages
+
+- OrderMe now speaks **French, German, Italian and Spanish** as well as Dutch and English: all the app's text, the starter Items and the starter groups.
+- **System** (the default) uses your phone's language when it's one of the six, and English otherwise. Settings shows the languages as chips, each named in its own language.
+- Items and groups you added or renamed keep the name you typed, in every language.
+
 ### Order by popularity is now a setting
 
 - A new **Order by popularity** switch in Settings. It's **off** by default, also after updating: the tiles follow the order of your Items (the starter list, then Items as you added them). Pinned Items still come first.
