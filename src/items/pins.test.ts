@@ -3,7 +3,7 @@ import { emptyRound } from '../round/round.ts'
 import { deleteItem, type Item } from './catalog.ts'
 import { movePin, pinnedFirst, pinsAfterEdit, togglePin } from './pins.ts'
 
-const item = (id: string, category: Item['category'] = 'drink'): Item => ({ id, name: id, category, emoji: '🍺' })
+const item = (id: string, group: string = 'drink'): Item => ({ id, name: id, group, emoji: '🍺' })
 const ids = (items: Item[]) => items.map((i) => i.id)
 
 const duvel = item('duvel')
@@ -62,19 +62,19 @@ describe('pins when the Catalog changes', () => {
     expect(next.pins).toEqual(['duvel'])
   })
 
-  it('a pinned Item that changes category stays pinned, last among the other section’s pins', () => {
+  it('a pinned Item that changes group stays pinned, last among the other section’s pins', () => {
     const pins = ['duvel', 'chips', 'cola', 'nuts']
-    const next = pinsAfterEdit(pins, catalog, 'duvel', { name: 'Duvel', category: 'snack', emoji: '🍺' })
-    expect(ids(pinnedFirst([chips, nuts, { ...duvel, category: 'snack' }], next))).toEqual(['chips', 'nuts', 'duvel'])
+    const next = pinsAfterEdit(pins, catalog, 'duvel', { name: 'Duvel', group: 'snack', emoji: '🍺' })
+    expect(ids(pinnedFirst([chips, nuts, { ...duvel, group: 'snack' }], next))).toEqual(['chips', 'nuts', 'duvel'])
   })
 
   it('renaming a pinned Item keeps its place', () => {
     const pins = ['duvel', 'cola']
-    expect(pinsAfterEdit(pins, catalog, 'duvel', { name: 'Duvel 666', category: 'drink', emoji: '🍺' })).toBe(pins)
+    expect(pinsAfterEdit(pins, catalog, 'duvel', { name: 'Duvel 666', group: 'drink', emoji: '🍺' })).toBe(pins)
   })
 
-  it('an unpinned Item that changes category stays unpinned', () => {
+  it('an unpinned Item that changes group stays unpinned', () => {
     const pins = ['duvel']
-    expect(pinsAfterEdit(pins, catalog, 'tea', { name: 'Tea', category: 'snack', emoji: '🍵' })).toBe(pins)
+    expect(pinsAfterEdit(pins, catalog, 'tea', { name: 'Tea', group: 'snack', emoji: '🍵' })).toBe(pins)
   })
 })

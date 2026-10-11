@@ -26,13 +26,14 @@ test.beforeEach(async ({ page }) => {
   await page.goto('./')
 })
 
-test('Show slides to the Show page: drinks then snacks in grid order, with the total', async ({ page }) => {
+test('Show slides to the Show page: a plain list in group order, with the total', async ({ page }) => {
   await tapTiles(page, 'Duvel', 'Duvel', 'Chips', 'Cola')
   await openShowPage(page)
 
   await expect(footerTab(page, 'Show')).toHaveAttribute('aria-current', 'page')
   await expect(showPage(page).getByRole('listitem')).toHaveText([/^1\s*×\s*🥤\s*Cola/, /^2\s*×\s*🍺\s*Duvel/, /^1\s*×\s*🥔\s*Chips/])
-  await expect(showPage(page).getByRole('heading', { name: 'Snacks' })).toBeVisible()
+  // No boxes or group headings here: just the lines.
+  await expect(showPage(page).getByRole('heading', { level: 2 })).toHaveCount(0)
   await expect(showPage(page).getByTestId('show-total')).toHaveText('4')
 })
 

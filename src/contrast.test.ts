@@ -1,9 +1,10 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
+import { GROUP_COLOURS } from './items/groups.ts'
 
 /**
  * WCAG AA for both themes, read straight from the tokens in styles.css so a palette tweak can't quietly
- * break legibility. 4.5:1 for text, 3:1 for non-text marks (the snack dot).
+ * break legibility. 4.5:1 for text.
  */
 const css = readFileSync(new URL('./styles.css', import.meta.url), 'utf8')
 
@@ -28,7 +29,6 @@ function contrast(a: string, b: string) {
 }
 
 const TEXT = 4.5
-const MARK = 3
 const pairs: [foreground: string, background: string, minimum: number][] = [
   ['text', 'bg', TEXT],
   ['text', 'surface', TEXT],
@@ -41,7 +41,9 @@ const pairs: [foreground: string, background: string, minimum: number][] = [
   ['on-accent', 'accent-fill', TEXT],
   ['danger', 'surface', TEXT],
   ['on-danger', 'danger', TEXT],
-  ['snack', 'bg', MARK],
+  // A group box's tiny label is muted text on the box's tint (v6); the Items page's empty-group line too.
+  ...Array.from({ length: GROUP_COLOURS }, (_, n): [string, string, number] => ['text-muted', `group-${n}`, TEXT]),
+  ...Array.from({ length: GROUP_COLOURS }, (_, n): [string, string, number] => ['text', `group-${n}`, TEXT]),
 ]
 
 /** `--name: rgb(r g b / a)` from a token block, laid over an opaque background: the colour the eye actually sees. */
@@ -110,5 +112,21 @@ describe.each([
 
   it('tints a counted tile more than a resting one', () => {
     expect(percent(selector, 'tint-counted')).toBeGreaterThan(percent(selector, 'tint-rest'))
+  })
+})
+
+describe.each([
+  ['dark', ':root'],
+  ['light', ":root[data-theme='light']"],
+])('%s theme: group boxes', (_theme, selector) => {
+  const palette = { ...tokens(':root'), ...tokens(selector) }
+  it('defines a tint for every group colour, each its own', () => {
+    const tints = Array.from({ length: GROUP_COLOURS }, (_, n) => palette[`group-${n}`])
+    expect(tints.every(Boolean)).toBe(true)
+    expect(new Set(tints).size).toBe(GROUP_COLOURS)
+  })
+
+  it('keeps the tints faint: close to the page background', () => {
+    for (let n = 0; n < GROUP_COLOURS; n++) expect(contrast(palette[`group-${n}`]!, palette.bg!)).toBeLessThan(1.5)
   })
 })

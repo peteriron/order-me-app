@@ -1,4 +1,4 @@
-import type { LanguageSetting, Messages } from '../shared/i18n.ts'
+import { LANGUAGE_NAMES, LOCALES, type LanguageSetting, type Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
 import type { AppActions } from '../app/useAppState.ts'
 import { useInstall } from './install.ts'
@@ -8,7 +8,7 @@ export interface GeneralSectionProps {
   settings: Settings
   hasHistory: boolean
   t: Messages
-  actions: Pick<AppActions, 'setLanguage' | 'setTheme' | 'clearHistory' | 'resetApp'>
+  actions: Pick<AppActions, 'setLanguage' | 'setTheme' | 'setOrderByPopularity' | 'clearHistory' | 'resetApp'>
   overlays: Overlays
   /** Opens the Add to Home Screen guide (iPhone and iPad). */
   onInstallGuide: () => void
@@ -31,11 +31,7 @@ export function GeneralSection({ settings, hasHistory, t, actions, overlays, onI
     })
 
   // Each language is named in itself, so it can be found whatever the app is currently showing.
-  const languages: [LanguageSetting, string][] = [
-    ['system', t.system],
-    ['nl', 'Nederlands'],
-    ['en', 'English'],
-  ]
+  const languages: [LanguageSetting, string][] = [['system', t.system], ...LOCALES.map((l): [LanguageSetting, string] => [l, LANGUAGE_NAMES[l]])]
   const themes: [ThemeSetting, string][] = [
     ['dark', t.dark],
     ['light', t.light],
@@ -50,9 +46,10 @@ export function GeneralSection({ settings, hasHistory, t, actions, overlays, onI
 
       <fieldset className="field">
         <legend>{t.language}</legend>
-        <div className="segmented">
+        {/* Seven choices don't fit one row: chips that wrap, like the Item sheet's groups. */}
+        <div className="chips">
           {languages.map(([value, label]) => (
-            <label key={value} className="choice">
+            <label key={value} className="choice chip">
               <input
                 type="radio"
                 name="language"
@@ -77,6 +74,21 @@ export function GeneralSection({ settings, hasHistory, t, actions, overlays, onI
           ))}
         </div>
       </fieldset>
+
+      {/* A switch: off is Catalog order (the default), on is Popularity. The grid follows at once. */}
+      <label className="switch-row">
+        <span className="switch-text">
+          <span className="switch-label">{t.orderByPopularity}</span>
+          <span className="switch-hint">{t.orderByPopularityHint}</span>
+        </span>
+        <input
+          type="checkbox"
+          role="switch"
+          className="switch"
+          checked={settings.orderByPopularity}
+          onChange={(e) => actions.setOrderByPopularity(e.target.checked)}
+        />
+      </label>
 
       {/* Only where the app can be installed and isn't yet: Chrome's own prompt, or the guide on an iPhone. */}
       {install.mode !== 'none' && (

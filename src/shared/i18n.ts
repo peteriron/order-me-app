@@ -1,10 +1,28 @@
-export type Locale = 'en' | 'nl'
+import { de } from './locales/de.ts'
+import { es } from './locales/es.ts'
+import { fr } from './locales/fr.ts'
+import { it } from './locales/it.ts'
+
+/** The languages the app ships in (v6). The Operator can't add one: their own Items keep the name as typed. */
+export const LOCALES = ['nl', 'en', 'fr', 'de', 'it', 'es'] as const
+export type Locale = (typeof LOCALES)[number]
 /** 'system' follows the phone's language. */
 export type LanguageSetting = 'system' | Locale
 
-/** Dutch when the device language is any flavour of Dutch, otherwise English. */
+/** Each language named in itself, so it can be found whatever the app is showing. */
+export const LANGUAGE_NAMES: Record<Locale, string> = {
+  nl: 'Nederlands',
+  en: 'English',
+  fr: 'Français',
+  de: 'Deutsch',
+  it: 'Italiano',
+  es: 'Español',
+}
+
+/** The phone's language when the app speaks it (any region: nl-BE, fr-CA…), otherwise English. */
 export function detectLocale(language: string | undefined): Locale {
-  return language?.toLowerCase().startsWith('nl') ? 'nl' : 'en'
+  const lang = language?.toLowerCase().split('-')[0]
+  return LOCALES.find((locale) => locale === lang) ?? 'en'
 }
 
 /** The language the app speaks: the Operator's choice, or the phone's language for 'system'. */
@@ -23,8 +41,6 @@ export function formattingLocale(appLocale: Locale, deviceLanguage: string | und
 
 export interface Messages {
   appName: string
-  drinks: string
-  snacks: string
   tileLabel: (name: string, count: number) => string
   removeOne: (name: string) => string
   roundTotal: string
@@ -97,9 +113,18 @@ export interface Messages {
   moveDown: (name: string) => string
   name: string
   namePlaceholder: string
-  category: string
-  drink: string
-  snack: string
+  group: string
+  groupEmpty: string
+  addGroup: string
+  editGroup: string
+  groupName: string
+  groupNamePlaceholder: string
+  groupNameRequired: string
+  editGroupNamed: (name: string) => string
+  deleteGroupNamed: (name: string) => string
+  groupDeleted: (name: string, items: number) => string
+  moveGroupUp: (name: string) => string
+  moveGroupDown: (name: string) => string
   emoji: string
   typeYourOwn: string
   add: string
@@ -118,6 +143,8 @@ export interface Messages {
   system: string
   dark: string
   light: string
+  orderByPopularity: string
+  orderByPopularityHint: string
   addToHome: string
   updateAvailable: string
   update: string
@@ -136,8 +163,6 @@ export interface Messages {
 export const messages: Record<Locale, Messages> = {
   en: {
     appName: 'This round is on me',
-    drinks: 'Drinks',
-    snacks: 'Snacks',
     tileLabel: (name, count) => (count ? `${name}, ${count} in round` : name),
     removeOne: (name) => `Remove one ${name}`,
     roundTotal: 'Round total',
@@ -211,9 +236,19 @@ export const messages: Record<Locale, Messages> = {
     moveDown: (name) => `Move ${name} down`,
     name: 'Name',
     namePlaceholder: 'e.g. Kriek',
-    category: 'Category',
-    drink: 'Drink',
-    snack: 'Snack',
+    group: 'Group',
+    groupEmpty: 'No Items in this group yet',
+    addGroup: 'Add group',
+    editGroup: 'Rename group',
+    groupName: 'Group name',
+    groupNamePlaceholder: 'e.g. Cocktails',
+    groupNameRequired: 'Give the group a name',
+    editGroupNamed: (name) => `Rename group ${name}`,
+    deleteGroupNamed: (name) => `Delete group ${name}`,
+    groupDeleted: (name, items) =>
+      items === 0 ? `${name} deleted` : `${name} deleted, with ${items} ${items === 1 ? 'Item' : 'Items'}`,
+    moveGroupUp: (name) => `Move group ${name} up`,
+    moveGroupDown: (name) => `Move group ${name} down`,
     emoji: 'Emoji',
     typeYourOwn: 'Or type your own',
     add: 'Add',
@@ -231,6 +266,8 @@ export const messages: Record<Locale, Messages> = {
     system: 'System',
     dark: 'Dark',
     light: 'Light',
+    orderByPopularity: 'Order by popularity',
+    orderByPopularityHint: 'Most ordered drinks first. Off: the order of your Items.',
     addToHome: 'Add to Home Screen',
     updateAvailable: 'A new version of OrderMe is available.',
     update: 'Update',
@@ -252,8 +289,6 @@ export const messages: Record<Locale, Messages> = {
   },
   nl: {
     appName: 'Dit rondje is van mij',
-    drinks: 'Dranken',
-    snacks: 'Snacks',
     tileLabel: (name, count) => (count ? `${name}, ${count} in rondje` : name),
     removeOne: (name) => `Eén ${name} minder`,
     roundTotal: 'Totaal van het rondje',
@@ -328,9 +363,19 @@ export const messages: Record<Locale, Messages> = {
     moveDown: (name) => `${name} omlaag`,
     name: 'Naam',
     namePlaceholder: 'bv. Kriek',
-    category: 'Categorie',
-    drink: 'Drank',
-    snack: 'Snack',
+    group: 'Groep',
+    groupEmpty: 'Nog geen items in deze groep',
+    addGroup: 'Groep toevoegen',
+    editGroup: 'Groep hernoemen',
+    groupName: 'Naam van de groep',
+    groupNamePlaceholder: 'bv. Cocktails',
+    groupNameRequired: 'Geef de groep een naam',
+    editGroupNamed: (name) => `Groep ${name} hernoemen`,
+    deleteGroupNamed: (name) => `Groep ${name} verwijderen`,
+    groupDeleted: (name, items) =>
+      items === 0 ? `${name} verwijderd` : `${name} verwijderd, met ${items} ${items === 1 ? 'item' : 'items'}`,
+    moveGroupUp: (name) => `Groep ${name} omhoog`,
+    moveGroupDown: (name) => `Groep ${name} omlaag`,
     emoji: 'Emoji',
     typeYourOwn: 'Of typ er zelf een',
     add: 'Toevoegen',
@@ -348,6 +393,8 @@ export const messages: Record<Locale, Messages> = {
     system: 'Systeem',
     dark: 'Donker',
     light: 'Licht',
+    orderByPopularity: 'Sorteren op populariteit',
+    orderByPopularityHint: 'Vaakst bestelde drankjes eerst. Uit: de volgorde van je items.',
     addToHome: 'Zet op beginscherm',
     updateAvailable: 'Er is een nieuwe versie van OrderMe beschikbaar.',
     update: 'Bijwerken',
@@ -367,4 +414,8 @@ export const messages: Record<Locale, Messages> = {
     reset: 'Resetten',
     resetOffline: 'Geen verbinding. Om te resetten is internet nodig voor de nieuwste versie.',
   },
+  fr,
+  de,
+  it,
+  es,
 }

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { deletePlacedRound, markOrdered } from '../history/history.ts'
-import { addToCatalog, deleteWithUndo, editItem, type ItemDraft, type Sections } from '../items/catalog.ts'
+import { addToCatalog, deleteGroupWithUndo, deleteWithUndo, editItem, type ItemDraft, type Sections } from '../items/catalog.ts'
+import { addGroup, moveGroup, renameGroup } from '../items/groups.ts'
 import { movePin, pinsAfterEdit, togglePin } from '../items/pins.ts'
-import { replaceCatalog, type SharedItem } from '../items/sharedCatalog.ts'
+import { replaceCatalog, type SharedGroup } from '../items/sharedCatalog.ts'
 import { receiveRound, type SharedRound } from '../show/sharedRound.ts'
 import { add, clearWithUndo, remove, withNote, type ComposingRound, type RoundNote } from '../round/round.ts'
 import type { ThemeSetting } from '../settings/settings.ts'
@@ -89,6 +90,21 @@ export function useAppState(seedLocale: Locale) {
         })
         return () => update((s) => undo?.(s) ?? {})
       },
+      /** Adds a group, last, with the next colour. */
+      createGroup: (name: string) => update((s) => ({ groups: addGroup(s.groups, name, crypto.randomUUID()) })),
+      renameGroup: (groupId: string, name: string) => update((s) => ({ groups: renameGroup(s.groups, groupId, name) })),
+      /** Moves a group to position `to`: the order of the boxes. */
+      moveGroup: (groupId: string, to: number) => update((s) => ({ groups: moveGroup(s.groups, groupId, to) })),
+      /** Deletes a group and its Items at once, and returns its Undo (see deleteGroupWithUndo). */
+      removeGroup: (groupId: string) => {
+        let undo: ((s: AppState) => Partial<AppState>) | undefined
+        update((s) => {
+          const deleted = deleteGroupWithUndo(s, groupId)
+          undo = deleted.undo
+          return deleted.next
+        })
+        return () => update((s) => undo?.(s) ?? {})
+      },
       togglePin: (itemId: string) => update((s) => ({ pins: togglePin(s.pins, itemId) })),
       /** Moves a pinned Item to position `to` among its section's pinned Items. */
       movePin: (itemId: string, to: number) => update((s) => ({ pins: movePin(s.pins, s.catalog, itemId, to) })),
@@ -107,14 +123,17 @@ export function useAppState(seedLocale: Locale) {
         // The updater has run by the time anyone can tap Undo (the toast appears after the next render).
         return () => update((s) => undo?.(s) ?? {})
       },
-      /** Replaces the Catalog with a Shared Catalog: fresh ids, empty Round, no pins, History kept. */
-      replaceCatalog: (items: SharedItem[]) => {
+      /** Replaces the Catalog and groups with a Shared Catalog: fresh ids, empty Round, no pins, History kept. */
+      replaceCatalog: (shared: SharedGroup[]) => {
         // New ids: a Show order from before points at nothing any more.
-        update(() => ({ ...replaceCatalog(items, () => crypto.randomUUID()), showOrder: [] }))
+        update(() => ({ ...replaceCatalog(shared, () => crypto.randomUUID()), showOrder: [] }))
         setPlacements((n) => n + 1)
       },
       setLanguage: (language: LanguageSetting) => update((s) => ({ settings: { ...s.settings, language } })),
       setTheme: (theme: ThemeSetting) => update((s) => ({ settings: { ...s.settings, theme } })),
+      /** Turns Popularity ordering on or off; the grid reorders at once (useTileOrder). */
+      setOrderByPopularity: (orderByPopularity: boolean) =>
+        update((s) => ({ settings: { ...s.settings, orderByPopularity } })),
       /** Back to a first install, with the newest version (see resetApp). Resolves 'offline' when it couldn't. */
       resetApp: () => {
         const appUrl = new URL(import.meta.env.BASE_URL, location.href).href

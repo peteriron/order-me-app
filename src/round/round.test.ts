@@ -1,3 +1,4 @@
+import { TEST_GROUPS } from '../testGroups.ts'
 import { describe, expect, it } from 'vitest'
 import { catalogSections, type Item } from '../items/catalog.ts'
 import { add, clearWithUndo, countOf, emptyRound, remove, roundLines, totalOf, withNote } from './round.ts'
@@ -43,10 +44,10 @@ describe('composing Round', () => {
 })
 
 describe('Round lines for the Counter view', () => {
-  const duvel: Item = { id: 'duvel', name: 'Duvel', category: 'drink', emoji: '🍺' }
-  const cola: Item = { id: 'cola', name: 'Cola', category: 'drink', emoji: '🥤' }
-  const chips: Item = { id: 'chips', name: 'Chips', category: 'snack', emoji: '🥔' }
-  const sections = catalogSections([chips, duvel, cola])
+  const duvel: Item = { id: 'duvel', name: 'Duvel', group: 'drink', emoji: '🍺' }
+  const cola: Item = { id: 'cola', name: 'Cola', group: 'drink', emoji: '🥤' }
+  const chips: Item = { id: 'chips', name: 'Chips', group: 'snack', emoji: '🥔' }
+  const sections = catalogSections([chips, duvel, cola], TEST_GROUPS)
 
   it('lists drinks then snacks, in grid order, with their counts', () => {
     const round = add(add(add(add(emptyRound(), 'chips'), 'duvel'), 'duvel'), 'cola')

@@ -1,29 +1,46 @@
 import { useState, type CSSProperties, type PointerEvent } from 'react'
 import type { Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
-import { CategorySection } from '../shared/ui/CategorySection.tsx'
+import { GroupBox } from '../shared/ui/GroupBox.tsx'
 import type { AppActions } from '../app/useAppState.ts'
-import type { Category, Item, Sections } from './catalog.ts'
+import type { Item, Section, Sections } from './catalog.ts'
+import type { Group } from './groups.ts'
 import type { Pins } from './pins.ts'
 import { useRowSwipe } from './useRowSwipe.ts'
 
 export interface ItemsSectionProps {
-  /** The Catalog per category, Pinned Items first, then A–Z (catalogSections), independent of the grid's order. */
+  /** The Catalog per group, Pinned Items first, then Catalog order (catalogSections), independent of the grid's order. */
   sections: Sections
   pins: Pins
   count: number
   t: Messages
-  actions: Pick<AppActions, 'togglePin' | 'movePin' | 'removeFromCatalog'>
+  actions: Pick<AppActions, 'togglePin' | 'movePin' | 'removeFromCatalog' | 'moveGroup' | 'removeGroup'>
   overlays: Overlays
   onAdd: () => void
   onShare: () => void
   onEdit: (item: Item) => void
+  /** Opens the group sheet: `{}` to add a group, `{ group }` to rename one. */
+  onEditGroup: (sheet: { group?: Group }) => void
+}
+
+/** A group's box being dragged by its handle into a new place. */
+interface GroupDrag {
+  groupId: string
+  pointerId: number
+  startY: number
+  from: number
+  to: number
+  dy: number
+  /** The boxes' vertical midpoints and the dragged box's height plus the gap, measured at the start. */
+  mids: number[]
+  height: number
 }
 
 /** A pinned row being dragged by its handle. */
 interface Drag {
   itemId: string
-  category: Category
+  /** The group it's in: pins are reordered within their group. */
+  group: string
   pointerId: number
   startY: number
   /** Where the row started and where it would land now, among its section's pinned rows. */
@@ -37,11 +54,22 @@ interface Drag {
 }
 
 /**
- * The Items section of the Settings page: the Operator's Catalog, every Item by category, each row opening the edit
+ * The Items section of the Settings page: the Operator's Catalog, a box per group, each row opening the edit
  * sheet and pinning the Item. Pinned Items come first and are reordered by dragging their handle, or with Move up /
  * Move down for keyboard and screen readers.
  */
-export function ItemsSection({ sections, pins, count, t, actions, overlays, onAdd, onShare, onEdit }: ItemsSectionProps) {
+export function ItemsSection({
+  sections,
+  pins,
+  count,
+  t,
+  actions,
+  overlays,
+  onAdd,
+  onShare,
+  onEdit,
+  onEditGroup,
+}: ItemsSectionProps) {
   const rows = useRowSwipe()
   /** Deletes at once; the toast's Undo puts it back where it was (#54). */
   const remove = (item: Item) => {
@@ -61,7 +89,7 @@ export function ItemsSection({ sections, pins, count, t, actions, overlays, onAd
     const rects = rows.map((row) => row.getBoundingClientRect())
     setDrag({
       itemId: item.id,
-      category: item.category,
+      group: item.group,
       pointerId: e.pointerId,
       startY: e.clientY,
       from: index,
@@ -92,7 +120,7 @@ export function ItemsSection({ sections, pins, count, t, actions, overlays, onAd
 
   /** How far a pinned row is shifted while another row is dragged past it, or the dragged row itself follows. */
   const dragShift = (item: Item, index: number): CSSProperties | undefined => {
-    if (!drag || drag.category !== item.category) return undefined
+    if (!drag || drag.group !== item.group) return undefined
     if (item.id === drag.itemId) return { transform: `translateY(${drag.dy}px)` }
     if (drag.from < index && index <= drag.to) return { transform: `translateY(${-drag.height}px)` }
     if (drag.to <= index && index < drag.from) return { transform: `translateY(${drag.height}px)` }
@@ -186,18 +214,141 @@ export function ItemsSection({ sections, pins, count, t, actions, overlays, onAd
     )
   }
 
-  const section = (category: Category, heading: string) => {
-    const items = sections[category]
+  /** Deletes a group and its Items at once; the toast's Undo puts them all back (as for an Item, #54). */
+  const removeGroup = ({ group, items }: Section) => {
+    const undo = actions.removeGroup(group.id)
+    overlays.notify(t.groupDeleted(group.name, items.length), { label: t.undo, run: undo })
+  }
+
+  const [groupDrag, setGroupDrag] = useState<GroupDrag | null>(null)
+
+  const startGroupDrag = (e: PointerEvent<HTMLElement>, group: Group, index: number) => {
+    if (groupDrag || drag || (e.pointerType === 'mouse' && e.button !== 0)) return
+    // Like a pinned row's handle: the drag is the list's, not a page swipe (ADR-0003).
+    e.stopPropagation()
+    e.currentTarget.setPointerCapture(e.pointerId)
+    const boxes = [...(e.currentTarget.closest('.group-boxes')?.querySelectorAll<HTMLElement>('[data-group-box]') ?? [])]
+    const rects = boxes.map((box) => box.getBoundingClientRect())
+    const gap = rects.length > 1 ? rects[1]!.top - rects[0]!.bottom : 0
+    setGroupDrag({
+      groupId: group.id,
+      pointerId: e.pointerId,
+      startY: e.clientY,
+      from: index,
+      to: index,
+      dy: 0,
+      mids: rects.map((rect) => rect.top + rect.height / 2),
+      height: (rects[index]?.height ?? 0) + gap,
+    })
+  }
+
+  /** The dragged box follows the finger and the boxes it passes slide out of its way; the order changes on lifting. */
+  const followGroupDrag = (e: PointerEvent<HTMLElement>) => {
+    if (groupDrag?.pointerId !== e.pointerId) return
+    const dy = e.clientY - groupDrag.startY
+    const centre = groupDrag.mids[groupDrag.from]! + dy
+    const to = groupDrag.mids.filter((mid, i) => i !== groupDrag.from && mid < centre).length
+    setGroupDrag({ ...groupDrag, dy, to })
+  }
+
+  const endGroupDrag = (e: PointerEvent<HTMLElement>) => {
+    if (groupDrag?.pointerId !== e.pointerId) return
+    setGroupDrag(null)
+    if (e.type === 'pointerup' && groupDrag.to !== groupDrag.from) actions.moveGroup(groupDrag.groupId, groupDrag.to)
+  }
+
+  const groupShift = (index: number): CSSProperties | undefined => {
+    if (!groupDrag) return undefined
+    if (index === groupDrag.from) return { transform: `translateY(${groupDrag.dy}px)` }
+    if (groupDrag.from < index && index <= groupDrag.to) return { transform: `translateY(${-groupDrag.height}px)` }
+    if (groupDrag.to <= index && index < groupDrag.from) return { transform: `translateY(${groupDrag.height}px)` }
+    return undefined
+  }
+
+  /** The box's own buttons: drag handle, rename and delete, plus Move up / down for keyboard and screen readers. */
+  const groupTools = (section: Section, index: number) => {
+    const { group } = section
+    return (
+      <span className="group-tools">
+        {/* aria-disabled rather than disabled at the ends, so focus stays on the button as the box moves. */}
+        <button
+          type="button"
+          className="item-row-move"
+          aria-disabled={index === 0}
+          onClick={() => index > 0 && actions.moveGroup(group.id, index - 1)}
+        >
+          {t.moveGroupUp(group.name)}
+        </button>
+        <button
+          type="button"
+          className="item-row-move"
+          aria-disabled={index === sections.length - 1}
+          onClick={() => index < sections.length - 1 && actions.moveGroup(group.id, index + 1)}
+        >
+          {t.moveGroupDown(group.name)}
+        </button>
+        <button
+          type="button"
+          className="group-tool"
+          aria-label={t.editGroupNamed(group.name)}
+          onClick={() => onEditGroup({ group })}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+            <path d="M4 20h4L19 9l-4-4L4 16z" />
+          </svg>
+        </button>
+        {/* The last group stays: an Item always needs a group to be in. */}
+        <button
+          type="button"
+          className="group-tool group-tool-delete"
+          aria-label={t.deleteGroupNamed(group.name)}
+          disabled={sections.length === 1}
+          onClick={() => removeGroup(section)}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+            <path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13" />
+          </svg>
+        </button>
+        {/* Pointer-only; the Move buttons are the keyboard and screen-reader way to reorder. */}
+        <span
+          className="group-handle"
+          aria-hidden="true"
+          onPointerDown={(e) => startGroupDrag(e, group, index)}
+          onPointerMove={followGroupDrag}
+          onPointerUp={endGroupDrag}
+          onPointerCancel={endGroupDrag}
+        >
+          <svg viewBox="0 0 24 24" className="grip">
+            {[6, 12, 18].flatMap((x) => [9, 15].map((y) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1.75" />))}
+          </svg>
+        </span>
+      </span>
+    )
+  }
+
+  const box = (section: Section, index: number) => {
+    const { group, items } = section
     const pinnedCount = items.filter((i) => pinned.has(i.id)).length
     return (
-      <CategorySection category={category} heading={heading} idPrefix="items">
-        <div
-          className={drag?.category === category ? 'item-rows reordering' : 'item-rows'}
-          onPointerDownCapture={rows.onListPointerDownCapture}
-        >
-          {items.map((item, index) => row(item, index, pinnedCount))}
-        </div>
-      </CategorySection>
+      <GroupBox
+        key={group.id}
+        group={group}
+        idPrefix="items"
+        tools={groupTools(section, index)}
+        style={groupShift(index)}
+        className={groupDrag?.groupId === group.id ? 'dragging' : undefined}
+      >
+        {items.length === 0 ? (
+          <p className="group-empty">{t.groupEmpty}</p>
+        ) : (
+          <div
+            className={drag?.group === group.id ? 'item-rows reordering' : 'item-rows'}
+            onPointerDownCapture={rows.onListPointerDownCapture}
+          >
+            {items.map((item, index) => row(item, index, pinnedCount))}
+          </div>
+        )}
+      </GroupBox>
     )
   }
 
@@ -223,8 +374,13 @@ export function ItemsSection({ sections, pins, count, t, actions, overlays, onAd
           {t.shareItems}
         </button>
       </div>
-      {section('drink', t.drinks)}
-      {section('snack', t.snacks)}
+      <div className={groupDrag ? 'group-boxes reordering' : 'group-boxes'}>{sections.map(box)}</div>
+      <button type="button" className="btn btn-outline add-group" onClick={() => onEditGroup({})}>
+        <svg viewBox="0 0 24 24" aria-hidden="true" className="btn-icon">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        {t.addGroup}
+      </button>
     </section>
   )
 }

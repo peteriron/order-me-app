@@ -16,7 +16,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto('./')
 })
 
-test('lists every Item in Catalog order under Drinks and Snacks, with Add Item at the top', async ({ page }) => {
+test('lists every Item in Catalog order in a box per group, with Add Item at the top', async ({ page }) => {
   await goTo(page, 'Settings')
   await expect(itemsPage(page).getByRole('heading', { name: 'Items', level: 2 })).toBeInViewport()
   await expect(itemsPage(page)).toContainText('28 in your Catalog')
@@ -24,7 +24,21 @@ test('lists every Item in Catalog order under Drinks and Snacks, with Add Item a
 
   const snacks = itemsPage(page).getByRole('region', { name: 'Snacks' }).getByRole('button', { name: /^Edit / })
   await expect(snacks).toHaveText([/Chips/, /Nuts/, /Cheese/, /Dutch meatballs/])
-  await expect(itemsPage(page).getByRole('region', { name: 'Drinks' }).getByRole('button', { name: /^Edit / })).toHaveCount(24)
+  await expect(itemsPage(page).getByRole('region', { name: 'Soda' }).getByRole('button', { name: /^Edit / })).toHaveCount(10)
+  await expect(itemsPage(page).getByRole('region', { name: 'Wine' }).getByRole('button', { name: /^Edit / })).toHaveText([
+    /White wine/,
+    /Red wine/,
+    /Rosé wine/,
+    /Cava/,
+  ])
+  await expect(itemsPage(page).getByRole('region').getByRole('heading', { level: 2 })).toHaveText([
+    'Soda',
+    'Beer',
+    'Hot',
+    'Wine',
+    'Strong',
+    'Snacks',
+  ])
 })
 
 test('adds an Item that appears in the Catalog and as a tile, and survives a reload', async ({ page }) => {
@@ -34,14 +48,17 @@ test('adds an Item that appears in the Catalog and as a tile, and survives a rel
   await expect(sheet(page)).toHaveAccessibleName('Add Item')
   await expect(sheet(page).getByLabel('Name')).toBeFocused()
   await sheet(page).getByLabel('Name').fill('Kriek')
+  // A new Item starts in the first group; the sheet lists every group to pick from.
+  await expect(sheet(page).getByRole('radio', { name: 'Soda' })).toBeChecked()
+  await sheet(page).getByRole('radio', { name: 'Beer' }).check()
   await sheet(page).getByRole('radio', { name: '🍒' }).check()
   await sheet(page).getByRole('button', { name: 'Add', exact: true }).tap()
 
   await expect(sheet(page)).toHaveCount(0)
-  await expect(itemsPage(page).getByRole('region', { name: 'Drinks' }).getByRole('button', { name: 'Edit Kriek' })).toBeVisible()
+  await expect(itemsPage(page).getByRole('region', { name: 'Beer' }).getByRole('button', { name: 'Edit Kriek' })).toBeVisible()
 
   await page.reload()
-  await expect(page.getByRole('region', { name: 'Drinks' }).first().getByRole('button', { name: 'Kriek' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Beer' }).first().getByRole('button', { name: 'Kriek' })).toBeVisible()
 })
 
 test('will not add an Item without a name', async ({ page }) => {
@@ -70,20 +87,20 @@ test('Cancel throws away every change made in the sheet', async ({ page }) => {
 
   await expect(sheet(page)).toHaveAccessibleName('Edit Item')
   await sheet(page).getByLabel('Name').fill('Something else')
-  await sheet(page).getByRole('radio', { name: 'Snack' }).check()
+  await sheet(page).getByRole('radio', { name: 'Snacks' }).check()
   await sheet(page).getByRole('button', { name: 'Cancel' }).tap()
 
   await expect(sheet(page)).toHaveCount(0)
-  await expect(itemsPage(page).getByRole('region', { name: 'Drinks' }).getByRole('button', { name: 'Edit Duvel' })).toBeVisible()
+  await expect(itemsPage(page).getByRole('region', { name: 'Beer' }).getByRole('button', { name: 'Edit Duvel' })).toBeVisible()
   await expect(itemsPage(page).getByRole('button', { name: 'Edit Something else' })).toHaveCount(0)
 })
 
-test('renaming an Item keeps its count, and a new category moves its tile', async ({ page }) => {
+test('renaming an Item keeps its count, and another group moves its tile to that box', async ({ page }) => {
   await tapTiles(page, 'Duvel', 'Duvel')
   await goTo(page, 'Settings')
   await itemsPage(page).getByRole('button', { name: 'Edit Duvel' }).tap()
   await sheet(page).getByLabel('Name').fill('Duvel 666')
-  await sheet(page).getByRole('radio', { name: 'Snack' }).check()
+  await sheet(page).getByRole('radio', { name: 'Snacks' }).check()
   await sheet(page).getByRole('button', { name: 'Save' }).tap()
 
   await goTo(page, 'Round')
@@ -123,9 +140,10 @@ test('Delete in the Item sheet needs no confirm, takes it out of the Round, leav
 test.describe('the + New tile on the Round page', () => {
   const newTile = (page: Page) => page.getByRole('button', { name: 'New Item' })
 
-  test('sits last in the grid, after the Snacks', async ({ page }) => {
-    const snackTiles = page.getByRole('region', { name: 'Snacks' }).first().getByRole('button')
-    await expect(snackTiles.last()).toHaveAccessibleName('New Item')
+  test('sits last, after the last box', async ({ page }) => {
+    const snacks = (await page.getByRole('region', { name: 'Snacks' }).first().boundingBox())!
+    const tile = (await newTile(page).boundingBox())!
+    expect(tile.y).toBeGreaterThan(snacks.y + snacks.height)
   })
 
   test('adds a new Item to the Catalog and to the Round with a count of 1', async ({ page }) => {

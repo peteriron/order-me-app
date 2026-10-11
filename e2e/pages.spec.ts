@@ -81,8 +81,8 @@ test('a slightly sideways tap on a tile adds it and stays on Round', async ({ pa
 test('scrolling the grid vertically never changes page', async ({ page }) => {
   const { x, y } = middle(page)
   await touchDrag(page, { x, y: y + 200 }, { x: x - 30, y: y - 200 }, { steps: 16, durationMs: 400 })
-  // The Round page scrolled down to Snacks (so its title is off the top) and no page change happened.
-  await expect(page.getByRole('heading', { name: 'Snacks' })).toBeInViewport()
+  // The Round page scrolled down (so its title is off the top) and no page change happened.
+  await expect(page.getByRole('heading', { name: 'This round is on me' })).not.toBeInViewport()
   await expect(page.getByRole('navigation', { name: 'Pages' }).getByRole('button', { name: 'Round' })).toHaveAttribute(
     'aria-current',
     'page',

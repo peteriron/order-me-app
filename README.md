@@ -4,9 +4,9 @@ A phone app for the person getting the round. Friends call out what they want, y
 
 **Open it:** <https://peteriron.github.io/order-me-app/>
 
-**Latest release:** [5.1.0](https://github.com/peteriron/order-me-app/releases/tag/v5.1.0): tiles tinted in their emoji's colour. What changed in each version: [CHANGELOG.md](CHANGELOG.md).
+**Latest release:** [6.0.0](https://github.com/peteriron/order-me-app/releases/tag/v6.0.0): your Items in groups you can edit, drawn as boxes, popularity order as a setting, and six languages. What changed in each version: [CHANGELOG.md](CHANGELOG.md).
 
-It's a web app you install on your home screen. It works offline, so bad bar Wi-Fi doesn't matter, and everything stays on your phone: no account, no server, no prices or payments. Sharing a Round or your Items puts them in the link itself, so they never pass through a server either. It speaks English and Dutch.
+It's a web app you install on your home screen. It works offline, so bad bar Wi-Fi doesn't matter, and everything stays on your phone: no account, no server, no prices or payments. Sharing a Round or your Items puts them in the link itself, so they never pass through a server either. It speaks Dutch, English, French, German, Italian and Spanish.
 
 ## What it does
 
@@ -15,12 +15,12 @@ It's a web app you install on your home screen. It works offline, so bad bar Wi-
 - **Show page.** One tap or swipe shows the whole Round in large type ("3 × 🍺 Duvel") with the total, and keeps the screen awake while you read it out. Counts can still be fixed there, a **Table** number (next to the table icon, under Text and QR) and a **Remark** (below the total) go along with the Round, and the bar at the bottom has **Clear**, the item count and **✓ Ordered**, like the Round page's.
 - **Pass the Round on.** Whoever goes to the counter can take over your Round: tap **QR** on the Show page, they scan it, and their app opens with the same drinks and counts, in your order. You can also copy the link, or tap **Text** to send the Round as plain text to a chat.
 - **History.** Placed Rounds are kept, grouped by day. "Order again" repeats last week's Round in one tap.
-- **Your own Items.** Add, rename or delete drinks and snacks, each with an emoji; swipe a row left to delete it. It starts with a list of common Belgian bar drinks, shown in the app's language: switch to Dutch and "Still water" becomes "Water plat". Drinks you add or rename keep the name you typed.
+- **Your own Items.** Add, rename or delete drinks and snacks, each with an emoji; swipe a row left to delete it. It starts with a list of common Belgian bar drinks, shown in the app's language: switch to Dutch and "Still water" becomes "Water plat", or "Eau plate" in French. Drinks you add or rename keep the name you typed.
 - **Order that suits you.** The drinks your group orders most move to the front over time, but never while you're tapping. Pin your favourites to keep them first, in the order you drag them into.
 - **Share your Items.** Show a QR code (or copy a link) and a friend opens the app with the same drinks and snacks.
 - **Undo for the quick actions.** Clearing the Round, deleting an Item, marking a Round as ordered and receiving a friend's Round all happen at once, with **Undo** for 5 seconds instead of an "Are you sure?".
 - **Always up to date.** When you're online the app checks for a new version, also while it stays open, and asks whether to update: one tap, and nothing is lost. The bottom of Settings shows which version you're running.
-- **Settings.** Language (follows the phone, or pick Nederlands or English), theme (dark by default, light, or follow the phone), an **Add to Home Screen** button, clear history, and reset the app to a fresh install.
+- **Settings.** Language (follows the phone when it's one of the six, English otherwise, or pick one), theme (dark by default, light, or follow the phone), an **Add to Home Screen** button, clear history, and reset the app to a fresh install.
 
 ## How to use it
 
@@ -118,7 +118,7 @@ npm run build && npm run preview   # the production build, as deployed
 
 ### Versions and releases
 
-- The version shown at the bottom of Settings is `version` in `package.json` (semantic: currently 5.1.0). Every release is in [CHANGELOG.md](CHANGELOG.md) and on [GitHub Releases](https://github.com/peteriron/order-me-app/releases).
+- The version shown at the bottom of Settings is `version` in `package.json` (semantic: currently 6.0.0). Every release is in [CHANGELOG.md](CHANGELOG.md) and on [GitHub Releases](https://github.com/peteriron/order-me-app/releases).
 - Bump it in every PR that changes the app: minor for a feature, patch for a fix, major for a big milestone. Docs- or CI-only changes don't bump it. Always bump with `npm version`, which changes only the app's own version in `package.json` and `package-lock.json` (a text replace can also hit a dependency that happens to have the same version, and CI's `npm ci` then refuses the lock file):
 
   ```sh

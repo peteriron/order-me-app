@@ -1,3 +1,4 @@
+import { sections } from '../testGroups.ts'
 import { describe, expect, it, vi } from 'vitest'
 import type { Item } from '../items/catalog.ts'
 import { add, emptyRound, roundLines } from '../round/round.ts'
@@ -42,18 +43,18 @@ describe('sharing the Round', () => {
 })
 
 describe('share text', () => {
-  const duvel: Item = { id: 'duvel', name: 'Duvel', category: 'drink', emoji: '🍺' }
-  const cola: Item = { id: 'cola', name: 'Cola', category: 'drink', emoji: '🥤' }
-  const chips: Item = { id: 'chips', name: 'Chips', category: 'snack', emoji: '🥔' }
-  const sections = { drink: [duvel, cola], snack: [chips] }
+  const duvel: Item = { id: 'duvel', name: 'Duvel', group: 'drink', emoji: '🍺' }
+  const cola: Item = { id: 'cola', name: 'Cola', group: 'drink', emoji: '🥤' }
+  const chips: Item = { id: 'chips', name: 'Chips', group: 'snack', emoji: '🥔' }
+  const grid = sections({ drink: [duvel, cola], snack: [chips] })
   const round = add(add(add(add(add(emptyRound(), 'chips'), 'cola'), 'duvel'), 'duvel'), 'duvel')
 
   it('lists one plain line per Item in grid order, drinks then snacks, then the total', () => {
-    expect(shareText(roundLines(round, sections), messages.en)).toBe('3× Duvel\n1× Cola\n1× Chips\nTotal: 5')
+    expect(shareText(roundLines(round, grid), messages.en)).toBe('3× Duvel\n1× Cola\n1× Chips\nTotal: 5')
   })
 
   it('puts the table first and the remark last; empty ones are left out', () => {
-    const lines = roundLines(round, sections)
+    const lines = roundLines(round, grid)
     expect(shareText(lines, messages.en, { table: ' 12 ', remark: 'No ice in the cola' })).toBe(
       'Table 12\n3× Duvel\n1× Cola\n1× Chips\nTotal: 5\nRemark: No ice in the cola',
     )
@@ -63,6 +64,6 @@ describe('share text', () => {
   })
 
   it('says Totaal in Dutch', () => {
-    expect(shareText(roundLines(round, sections), messages.nl)).toBe('3× Duvel\n1× Cola\n1× Chips\nTotaal: 5')
+    expect(shareText(roundLines(round, grid), messages.nl)).toBe('3× Duvel\n1× Cola\n1× Chips\nTotaal: 5')
   })
 })

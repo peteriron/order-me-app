@@ -1,22 +1,23 @@
 import type { PlacedRound } from '../history/history.ts'
-import type { Catalog, Category, Item, Sections } from '../items/catalog.ts'
+import { sectionsOf, type Catalog, type Item, type Sections } from '../items/catalog.ts'
+import type { Groups } from '../items/groups.ts'
 import { pinnedFirst, type Pins } from '../items/pins.ts'
 
 /**
- * Tiles on the Round page: Pinned Items first in the Operator's order, then the rest in an order frozen by
- * `popularityOrder`. Pins apply at once (a deliberate choice made on the Items page). Edits never move an unpinned
+ * Tiles on the Round page, box by box in group order: in each group, Pinned Items first in the Operator's order, then the rest in an order frozen by
+ * `tileOrder` (Catalog order, or Popularity when the Operator turned it on). Pins apply at once (a deliberate choice made on the Items page). Edits never move an unpinned
  * tile until the next recompute: renamed Items keep their place, and Items not in the order yet (just added) go
  * last, as added.
  */
-export function gridSections(catalog: Catalog, order: readonly string[], pins: Pins = []): Sections {
+export function gridSections(catalog: Catalog, groups: Groups, order: readonly string[], pins: Pins = []): Sections {
   const rank = new Map(order.map((id, n) => [id, n]))
   const position = (item: Item) => rank.get(item.id) ?? order.length + catalog.indexOf(item)
-  const section = (category: Category) =>
+  return sectionsOf(groups, catalog, (items) =>
     pinnedFirst(
-      catalog.filter((i) => i.category === category).sort((a, b) => position(a) - position(b)),
+      items.sort((a, b) => position(a) - position(b)),
       pins,
-    )
-  return { drink: section('drink'), snack: section('snack') }
+    ),
+  )
 }
 
 const POPULARITY_WINDOW_MS = 90 * 86_400_000
@@ -45,4 +46,12 @@ export function popularityOrder(catalog: Catalog, history: PlacedRound[], now: D
   const score = (item: Item) => scores[item.id] ?? 0
   // Array.prototype.sort is stable, so equal scores stay in Catalog order.
   return [...catalog].sort((a, b) => score(b) - score(a)).map((item) => item.id)
+}
+
+/**
+ * The order unpinned tiles follow: Popularity when the Operator turned on "Order by popularity", otherwise Catalog
+ * order (the starter list's order, then Items as they were added), the default since v6.
+ */
+export function tileOrder(catalog: Catalog, history: PlacedRound[], now: Date, byPopularity: boolean): string[] {
+  return byPopularity ? popularityOrder(catalog, history, now) : catalog.map((item) => item.id)
 }

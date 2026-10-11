@@ -2,6 +2,38 @@
 
 All notable changes to OrderMe ("This round is on me" / "Dit rondje is van mij"). Versions follow [semantic versioning](https://semver.org/): the version is shown at the bottom of the Settings page, with the build number and date.
 
+## 6.0.0 (2026-10-11)
+
+### Groups, drawn as boxes
+
+- Your drinks and snacks are now in **groups** instead of the two Drinks and Snacks sections. A fresh install starts with **Soda, Beer, Hot, Wine** (white, red, rosé, cava), **Strong** (Aperol Spritz, gin & tonic, mocktail) and **Snacks**.
+- Each group is a box on the Round page and in your Items, with a very small label and its own subtle background colour, picked by the app and readable in dark and light.
+- Pinned Items come first inside their own group.
+- The Item sheet picks a group instead of Drink or Snack.
+- The Show page stays a plain large-type list, in group order.
+- **Updating from 5.x**: the starter drinks go to their group; drinks you added go to a new **Other drinks** group, snacks you added to **Snacks**. Your Round, pins and History are kept.
+- Shared Items now carry the groups, so a friend gets the same boxes. Phones still on 5.x can't open a 6.0 Items link; 6.0 still opens links from 5.x.
+
+### Edit your groups
+
+- In Settings, under your Items: **Add group** (it goes last), and on each box a pencil to **rename** it and a bin to **delete** it.
+- Deleting a group deletes its Items too, at once, with **Undo** for 5 seconds that brings back the group, its Items, their counts in the Round and their pins. History keeps what was ordered.
+- **Drag** a box by its handle to change the group order; the Round page follows.
+- A group has just a name: its colour is picked for you.
+- A renamed starter group keeps your name in every language.
+
+### Six languages
+
+- OrderMe now speaks **French, German, Italian and Spanish** as well as Dutch and English: all the app's text, the starter Items and the starter groups.
+- **System** (the default) uses your phone's language when it's one of the six, and English otherwise. Settings shows the languages as chips, each named in its own language.
+- Items and groups you added or renamed keep the name you typed, in every language.
+
+### Order by popularity is now a setting
+
+- A new **Order by popularity** switch in Settings. It's **off** by default, also after updating: the tiles follow the order of your Items (the starter list, then Items as you added them). Pinned Items still come first.
+- Turn it on to get the most ordered drinks first, as before. Flipping it reorders the grid right away, even mid-Round.
+- The setting stays on your phone; it isn't part of shared Items.
+
 ## 5.1.0 (2026-10-04)
 
 ### Coloured tiles (#83)

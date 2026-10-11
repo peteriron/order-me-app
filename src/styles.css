@@ -13,7 +13,15 @@
   --on-accent: #1a1204;
   --accent-soft: rgb(245 165 36 / 0.14);
   --accent-line: rgb(245 165 36 / 0.45);
-  --snack: #2dd4bf;
+  /* Group box backgrounds (v6): faint tints, one per group, picked automatically. */
+  --group-0: #2a2012;
+  --group-1: #122625;
+  --group-2: #18202c;
+  --group-3: #201d2c;
+  --group-4: #2a1a1e;
+  --group-5: #15271d;
+  --group-6: #2a1e15;
+  --group-7: #10262b;
   --danger: #f87171;
   --on-danger: #1c0707;
   --scrim: rgb(0 0 0 / 0.6);
@@ -39,7 +47,14 @@
   --on-accent: #1a1204;
   --accent-soft: rgb(245 158 11 / 0.14);
   --accent-line: rgb(180 83 9 / 0.45);
-  --snack: #0f766e;
+  --group-0: #f7ede1;
+  --group-1: #e2f0ee;
+  --group-2: #e5ebf8;
+  --group-3: #ede7f8;
+  --group-4: #f8e4e7;
+  --group-5: #e3f1e8;
+  --group-6: #f8eae1;
+  --group-7: #e2f0f2;
   --danger: #b91c1c;
   --on-danger: #ffffff;
   --scrim: rgb(28 25 23 / 0.4);
@@ -237,15 +252,120 @@ button {
   color: var(--text-muted);
 }
 
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
+/* ---------- group boxes (v6) ---------- */
+/* A group drawn as a box: outline, its own faint tint (--group-tint, set per box) and a very small label. */
+.group-box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.375rem 0.5rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--group-tint, transparent);
 }
 
-.dot-snack {
-  background: var(--snack);
+.group-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1rem;
+  padding: 0 0.25rem;
+}
+
+/* Smaller than the 13px section label it replaces. */
+.group-label {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.group-empty {
+  margin: 0;
+  padding: 0.5rem 0.25rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+/* The Items page's box buttons, beside the label: rename, delete and a drag handle. */
+.group-tools {
+  display: flex;
+  align-items: center;
+  margin: -0.25rem -0.25rem -0.25rem 0;
+}
+
+.group-tool,
+.group-handle {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+}
+
+.group-tool:disabled {
+  opacity: 0.4;
+}
+
+.group-tool .btn-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.group-handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+.group-handle .grip {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.group-boxes {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* While a box is dragged, the boxes it passes slide out of its way; the dragged box follows the finger. */
+.group-boxes.reordering .group-box {
+  transition: transform 150ms var(--ease-out);
+}
+
+.group-boxes.reordering .group-box.dragging {
+  transition: none;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.3);
+}
+
+.group-box.dragging .group-handle {
+  color: var(--accent);
+  cursor: grabbing;
+}
+
+.add-group {
+  align-self: flex-start;
+}
+
+/* + New sits after the boxes, lined up with the tiles inside them. */
+.grid-new {
+  padding: 0 calc(0.5rem + 1px);
 }
 
 /* ---------- tiles ---------- */
@@ -743,10 +863,6 @@ button {
   touch-action: manipulation;
 }
 
-.show-divider {
-  margin: 1.25rem 0 0.25rem;
-}
-
 .show-total {
   margin: 0;
   padding: 0.75rem 0 0.25rem;
@@ -1207,6 +1323,73 @@ button {
   outline-offset: 2px;
 }
 
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.switch-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.switch-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.switch-hint {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* A plain checkbox drawn as a switch: track in --surface-2, amber when on. */
+.switch {
+  appearance: none;
+  flex: none;
+  position: relative;
+  width: 48px;
+  height: 28px;
+  margin: 0;
+  border-radius: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 160ms;
+}
+
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: transform 160ms;
+}
+
+.switch:checked {
+  background: var(--accent-fill);
+}
+
+.switch:checked::after {
+  transform: translateX(20px);
+  background: var(--on-accent);
+}
+
+.switch:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .segmented {
   display: flex;
   gap: 3px;
@@ -1227,6 +1410,28 @@ button {
   background: var(--surface);
   color: var(--text);
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  min-height: 40px;
+  padding: 0 0.875rem;
+  border: 1.5px solid transparent;
+  background: var(--surface-2);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.chip:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
 }
 
 .emoji-grid {

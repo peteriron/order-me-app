@@ -21,7 +21,7 @@ async function seedHistory(page: Page, rounds: SeedRound[]) {
         placedAt: placedAt.toISOString(),
         lines: r.lines.map(([name, count, nameThen]) => {
           const item = byName(name)
-          return { itemId: item.id, name: nameThen ?? item.name, category: item.category, emoji: item.emoji, count }
+          return { itemId: item.id, name: nameThen ?? item.name, emoji: item.emoji, count }
         }),
       }
     })

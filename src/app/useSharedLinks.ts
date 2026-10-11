@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { decodeRound, roundPayload } from '../show/sharedRound.ts'
-import { decodeCatalog, sharedPayload } from '../items/sharedCatalog.ts'
+import { decodeCatalog, sharedItemCount, sharedPayload } from '../items/sharedCatalog.ts'
 import type { Messages } from '../shared/i18n.ts'
 import type { Overlays } from '../shared/ui/overlays.ts'
 import type { AppActions } from './useAppState.ts'
@@ -33,15 +33,15 @@ export function useSharedLinks(options: SharedLinkOptions) {
 
   useEffect(() => {
     const receiveItems = (payload: string, allowSilent: boolean) =>
-      void decodeCatalog(payload).then((items) => {
+      void decodeCatalog(payload).then((groups) => {
         const { firstLaunch, catalogSize, t, actions, overlays } = latest.current
-        if (!items) overlays.notify(t.badShareLink)
-        else if (allowSilent && firstLaunch) actions.replaceCatalog(items)
+        if (!groups) overlays.notify(t.badShareLink)
+        else if (allowSilent && firstLaunch) actions.replaceCatalog(groups)
         else
           overlays.confirm({
-            text: t.replaceCatalogConfirm(catalogSize, items.length),
+            text: t.replaceCatalogConfirm(catalogSize, sharedItemCount(groups)),
             confirmLabel: t.replace,
-            onConfirm: () => actions.replaceCatalog(items),
+            onConfirm: () => actions.replaceCatalog(groups),
           })
       })
 

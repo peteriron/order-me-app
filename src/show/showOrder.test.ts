@@ -1,3 +1,4 @@
+import { sections } from '../testGroups.ts'
 import { describe, expect, it } from 'vitest'
 import { markOrdered } from '../history/history.ts'
 import type { Item, Sections } from '../items/catalog.ts'
@@ -6,10 +7,10 @@ import { messages } from '../shared/i18n.ts'
 import { shareText } from './share.ts'
 import { showSections } from './showOrder.ts'
 
-const item = (id: string, category: Item['category'] = 'drink'): Item => ({ id, name: id, category, emoji: '🍺' })
+const item = (id: string, group: string = 'drink'): Item => ({ id, name: id, group, emoji: '🍺' })
 /** The phone's own grid: Duvel, Cola, Water; then Chips, Nuts. */
-const grid: Sections = { drink: [item('Duvel'), item('Cola'), item('Water')], snack: [item('Chips', 'snack'), item('Nuts', 'snack')] }
-const names = (sections: Sections) => [...sections.drink, ...sections.snack].map((i) => i.id)
+const grid: Sections = sections({ drink: [item('Duvel'), item('Cola'), item('Water')], snack: [item('Chips', 'snack'), item('Nuts', 'snack')] })
+const names = (shown: Sections) => shown.flatMap((s) => s.items).map((i) => i.id)
 
 describe('the Show order from a shared Round', () => {
   it('without one, Show follows the grid', () => {

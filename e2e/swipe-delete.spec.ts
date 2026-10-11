@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { touchDrag } from './touch.ts'
 
 const items = (page: Page) => page.getByRole('region', { name: 'Items' })
-const drinks = (page: Page) => items(page).getByRole('region', { name: 'Drinks' })
+const drinks = (page: Page) => items(page).getByRole('region', { name: 'Soda' })
 const row = (page: Page, name: string) => drinks(page).locator('.item-row', { has: page.getByRole('button', { name: `Edit ${name}`, exact: true }) })
 const listedDrinks = (page: Page) => drinks(page).getByRole('button', { name: /^Edit / })
 const tab = (page: Page, name: string) => page.getByRole('navigation').getByRole('button', { name })
@@ -61,12 +61,12 @@ test('a left-to-right swipe on a closed row still goes back to Show', async ({ p
 })
 
 test('a pinned row’s drag handle still reorders and never reveals delete', async ({ page }) => {
-  for (const name of ['Lager', 'Duvel']) await drinks(page).getByRole('button', { name: `Pin ${name}`, exact: true }).tap()
-  const handle = row(page, 'Duvel').locator('.item-row-handle')
+  for (const name of ['Cola', 'Fanta']) await drinks(page).getByRole('button', { name: `Pin ${name}`, exact: true }).tap()
+  const handle = row(page, 'Fanta').locator('.item-row-handle')
   const from = (await handle.boundingBox())!
-  const top = (await row(page, 'Lager').boundingBox())!
+  const top = (await row(page, 'Cola').boundingBox())!
   // Up to the first pinned row, drifting left on the way.
   await touchDrag(page, { x: from.x + from.width / 2, y: from.y + from.height / 2 }, { x: from.x - 30, y: top.y + 8 }, { steps: 16, durationMs: 400 })
-  await expect(listedDrinks(page).nth(0)).toHaveText(/Duvel/)
-  await expect(drinks(page).getByRole('button', { name: /^Delete / })).toHaveCount(0)
+  await expect(listedDrinks(page).nth(0)).toHaveText(/Fanta/)
+  await expect(drinks(page).getByRole('button', { name: /^Delete (?!group )/ })).toHaveCount(0)
 })

@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { HistoryPage } from '../history/HistoryPage.tsx'
 import { catalogSections, type Item } from '../items/catalog.ts'
+import { GroupSheet } from '../items/GroupSheet.tsx'
+import type { Group } from '../items/groups.ts'
 import { ItemSheet } from '../items/ItemSheet.tsx'
 import { ShareItemsSheet } from '../items/ShareItemsSheet.tsx'
-import { localizeCatalog } from '../items/starter.ts'
+import { localizeCatalog, localizeGroups } from '../items/starter.ts'
 import { noteOf, roundLines } from '../round/round.ts'
 import { RoundPage } from '../round/RoundPage.tsx'
 import { useTileOrder } from '../round/useTileOrder.ts'
@@ -35,7 +37,9 @@ export function App() {
   useTheme(state.settings.theme)
   /** The Catalog as shown: starter Items named in the app's language. Everything on screen, placed or shared uses it. */
   const catalog = useMemo(() => localizeCatalog(state.catalog, locale), [state.catalog, locale])
-  const sections = useTileOrder(catalog, state.pins, state.history, placements)
+  /** The groups as shown: starter groups named in the app's language. */
+  const groups = useMemo(() => localizeGroups(state.groups, locale), [state.groups, locale])
+  const sections = useTileOrder(catalog, groups, state.pins, state.history, placements, state.settings.orderByPopularity)
   /** The grid in the Show tab's order: a received Show order first (#49). Share and History follow it too. */
   const show = useMemo(() => showSections(sections, state.showOrder), [sections, state.showOrder])
   /** The Round as the Show tab lists it: what Share Round sends. */
@@ -46,6 +50,8 @@ export function App() {
   const [page, setPage] = useState(ROUND_PAGE)
   /** The Item sheet: `{}` to add a new Item, `{ item }` to edit one, `{ forRound }` from the + New tile. */
   const [sheet, setSheet] = useState<{ item?: Item; forRound?: boolean } | null>(null)
+  /** The group sheet: `{}` to add a group, `{ group }` to rename one (Items page). */
+  const [groupSheet, setGroupSheet] = useState<{ group?: Group } | null>(null)
   /** Which share sheet is open: the Catalog (Settings page) or the Round (Show page). */
   const [sharing, setSharing] = useState<'items' | 'round' | null>(null)
   /** The Add to Home Screen guide (Settings page, iPhone and iPad). */
@@ -59,7 +65,7 @@ export function App() {
   const { ready: updateReady, update } = useUpdate()
   /** After Later the pop-up stays away; Settings then offers the update next to the version. */
   const [updateLater, setUpdateLater] = useState(false)
-  const overlayOpen = sheet !== null || sharing !== null || installGuide || confirmation !== null
+  const overlayOpen = sheet !== null || groupSheet !== null || sharing !== null || installGuide || confirmation !== null
   /** The update pop-up, never over an open sheet or dialog: it waits until the Operator is done there. */
   const offerUpdate = updateReady && !updateLater && !overlayOpen
 
@@ -78,6 +84,7 @@ export function App() {
   }, [locale, t])
 
   const closeSheet = useCallback(() => setSheet(null), [])
+  const closeGroupSheet = useCallback(() => setGroupSheet(null), [])
   const closeSharing = useCallback(() => setSharing(null), [])
   const closeInstallGuide = useCallback(() => setInstallGuide(false), [])
   const closeToast = useCallback(() => setToast(null), [])
@@ -120,7 +127,7 @@ export function App() {
       key="settings"
       t={t}
       items={{
-        sections: catalogSections(catalog, state.pins),
+        sections: catalogSections(catalog, groups, state.pins),
         pins: state.pins,
         count: catalog.length,
         actions,
@@ -128,6 +135,7 @@ export function App() {
         onAdd: () => setSheet({}),
         onShare: () => setSharing('items'),
         onEdit: (item) => setSheet({ item }),
+        onEditGroup: setGroupSheet,
       }}
       general={{
         settings: state.settings,
@@ -160,16 +168,18 @@ export function App() {
       {sheet && (
         // The sheet stays open under a delete confirmation, but must not take taps while it is.
         <div inert={confirmation !== null}>
-          <ItemSheet {...sheet} t={t} actions={actions} overlays={overlays} onClose={closeSheet} />
+          <ItemSheet {...sheet} groups={groups} t={t} actions={actions} overlays={overlays} onClose={closeSheet} />
         </div>
       )}
+
+      {groupSheet && <GroupSheet {...groupSheet} t={t} actions={actions} onClose={closeGroupSheet} />}
 
       {sharing && (
         <div inert={confirmation !== null}>
           {sharing === 'items' ? (
-            <ShareItemsSheet catalog={catalog} t={t} onClose={closeSharing} />
+            <ShareItemsSheet catalog={catalog} groups={groups} t={t} onClose={closeSharing} />
           ) : (
-            <ShareRoundSheet lines={showLines} note={roundNote} t={t} onClose={closeSharing} />
+            <ShareRoundSheet lines={showLines} groups={groups} note={roundNote} t={t} onClose={closeSharing} />
           )}
         </div>
       )}

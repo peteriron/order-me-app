@@ -1,11 +1,13 @@
-import type { Catalog, Category, Sections } from '../items/catalog.ts'
+import type { Catalog, Sections } from '../items/catalog.ts'
+import type { LegacyCategory } from '../items/starter.ts'
 import { emptyRound, noteOf, roundLines, type ComposingRound, type RoundNote } from '../round/round.ts'
 
 /** One line of a placed Round: a frozen copy of the Item as it was (ADR-0001) plus its id, for Popularity only (ADR-0002). */
 export interface PlacedLine {
   itemId: string
   name: string
-  category: Category
+  /** Only in Rounds placed before groups (v5); nothing reads it. */
+  category?: LegacyCategory
   emoji: string
   count: number
 }
@@ -38,7 +40,6 @@ export function markOrdered(
     lines: roundLines(state.round, sections).map(({ item, count }) => ({
       itemId: item.id,
       name: item.name,
-      category: item.category,
       emoji: item.emoji,
       count,
     })),

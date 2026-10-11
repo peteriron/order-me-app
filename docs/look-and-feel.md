@@ -27,7 +27,7 @@ Dark is the default; Light is available from Settings (and System follows the OS
 | `--on-accent` | `#1A1204` | `#1A1204` | Text on accent fill |
 | `--accent-soft` | `rgb(245 165 36 / .14)` | `rgb(245 158 11 / .14)` | Background of a counted tile whose emoji has no colour; active tab |
 | `--tint-rest` / `--tint-counted` | `14%` / `28%` | `12%` / `24%` | How much of the emoji's colour a coloured tile mixes in at its top edge, at rest / in the Round (#83) |
-| `--snack` | `#2DD4BF` | `#0F766E` | Snack section marker only |
+| `--group-0` … `--group-7` | faint tints over `--bg` (amber, teal, blue, violet, rose, green, orange, cyan) | the same hues, lighter | A Group box's background (v6), picked automatically; muted text stays ≥ 4.5:1 on each (`contrast.test.ts`) |
 | `--danger` | `#F87171` | `#B91C1C` | Delete actions |
 
 Contrast targets: body text ≥ 7:1 and muted text ≥ 4.5:1 on `--bg`, in both themes. Amber on near-black is about 10:1; `#B45309` on white is about 5:1. Category colour is never the only signal: sections also have text headers.
@@ -61,8 +61,13 @@ All sizes are in `rem` so OS text scaling works. The grid tolerates names wrappi
 
 ### Search (Round page)
 - A quiet search icon (magnifier, 44 px) sits on the right of the Round page's title line. Tapping it puts a search field in the title's place (the heading stays for screen readers), with the keyboard open and a × on its right.
-- Typing filters the tiles live: Items whose shown name contains the text, ignoring case, accents and surrounding spaces, in grid order. A section with no matches is hidden; "+ New" stays at the end. With no match at all: the muted line "No drinks or snacks match "{text}"".
+- Typing filters the tiles live: Items whose shown name contains the text, ignoring case, accents and surrounding spaces, in grid order. A Group box with no matches is hidden; "+ New" stays at the end. With no match at all: the muted line "No drinks or snacks match "{text}"".
 - Tapping a tile counts it as usual and keeps the search. The × (or Escape) closes the field and shows the whole grid again; Enter just puts the keyboard away.
+
+### Group box (v6)
+- Each Group is a box: 1px `--border` outline, 20px radius, its own faint `--group-N` background, 6/8px padding around the tiles.
+- A very small label at the top left: the Group's name, 11px / 600, uppercase, 0.06em tracking, `--text-muted`, one line with an ellipsis. Smaller than the 13px section label it replaces.
+- Boxes appear on the Round page (only Groups with Items) and the Items section (every Group). In the Items section each box's head also has, on the right: a pencil (rename, in a small sheet with the name only), a trash can (delete the Group and its Items at once, with an Undo toast; disabled for the last Group) and a grip to drag the box into a new place. Keyboard and screen readers get Move up / Move down buttons, shown on focus. "+ Add group" sits below the last box. The Show page stays a plain large-type list, in Group order.
 
 ### Tile
 ```
@@ -80,7 +85,7 @@ All sizes are in `rem` so OS text scaling works. The grid tolerates names wrappi
 - Accessible name: "Duvel, 3 in round". The − button: "Remove one Duvel".
 
 ### "+ New" tile
-Same size as other tiles, with a dashed `--border` outline, a large "+" and the label "New"/"Nieuw". It sits last in the Snacks section, which is the end of the grid.
+Same size as other tiles, with a dashed `--border` outline, a large "+" and the label "New"/"Nieuw". It sits after the last Group box, at the end of the grid.
 
 ### Bottom bar (Round page)
 ```
@@ -147,12 +152,12 @@ Same size as other tiles, with a dashed `--border` outline, a large "+" and the 
 ### Settings page
 The fourth page, titled "Settings". It holds two sections: **Items** (the Catalog, with its count beside the section title) and **General**.
 - A list row (56 px) per Item: emoji, name, a small category chip, a pencil icon and a pin toggle at the far right. Tapping the row opens the edit sheet; the pin toggle (48 px wide) pins or unpins the Item without opening it. The pin is a muted outline when off and an accent-filled pin when on.
-- Rows are grouped by category. In each section the **Pinned Items** come first, in the Operator's order, then the rest in Catalog order (the starter list's order, then Items as they were added). Popularity order applies only to the grid.
+- Rows are in a box per Group, like the grid, in Group order; an empty Group shows "No Items in this group yet". In each Group the **Pinned Items** come first, in the Operator's order, then the rest in Catalog order (the starter list's order, then Items as they were added). Popularity order applies only to the grid.
 - A pinned row starts with a drag handle: a 44 px wide column with a muted six-dot grip. Dragging the handle moves the row live among the section's pinned rows; while dragging, the row lifts onto `--surface-2` with a soft shadow and the grip turns `--accent`. The handle takes the whole gesture (`touch-action: none`), so it never scrolls the list or swipes the page.
 - **Swipe to delete** (#54): swiping a row from right to left slides it with the finger and reveals a 72 px red button (`--danger`, with an `--on-danger` ×) on the right; past half its width, or with a quick flick, it snaps open, otherwise back. One row is open at a time. Swiping it back, or tapping anywhere else, closes it (that tap does nothing else). Tapping × deletes at once, with the "{name} deleted · Undo" toast. A left-to-right swipe on a closed row still goes back to Show, and a swipe on a pinned row's drag handle always reorders.
 - For keyboard and screen-reader users, each pinned row also has "Move up" / "Move down" buttons ("Move Duvel up" / "Duvel omhoog"). They are visually hidden until focused, then appear as a pill over the handle. At the ends of the list they are marked unavailable rather than removed, so focus stays put.
 - "Add Item" (accent-filled) and "Share" (outline, with a QR glyph) sit side by side at the top of the Items section.
-- Below the list is the **General** section: Language (System / Nederlands / English), Theme (Dark / Light / System) as segmented controls, then an outline **Add to Home Screen** button (phone-with-plus icon) and, side by side, two filled red buttons in the shape of Ordered: "Clear history" (disabled with no History) and "Reset app".
+- Below the list is the **General** section: Language (System / Nederlands / English / Français / Deutsch / Italiano / Español, as chips that wrap, each language named in itself), Theme (Dark / Light / System) as a segmented control, then an outline **Add to Home Screen** button (phone-with-plus icon) and, side by side, two filled red buttons in the shape of Ordered: "Clear history" (disabled with no History) and "Reset app".
 - **Add to Home Screen** shows only where the app can be installed and isn't yet; once it runs from the home screen it's gone. In Chrome on Android it appears when Chrome offers to install, and opens Chrome's own install prompt (Chrome's mini-bar is kept away). On an iPhone or iPad, which have no install prompt, it opens a bottom sheet with three numbered steps (step 1 with Safari's accent Share icon) and a Close button. Elsewhere (e.g. desktop Firefox) it isn't shown.
 - Reset app asks first, with "Reset" as the confirm button. With no connection it changes nothing and shows the "No connection" toast.
 - At the very bottom, centred, 12 px muted: "Version 4.2.0 · build 112 · 4 Oct 2026" (the date in the app's language). When a new version is ready and its pop-up got "Later", a second line reads "Update available · Update", with Update as an underlined accent link.
@@ -197,7 +202,7 @@ With `prefers-reduced-motion: reduce`, drop the scale, pop and slide effects and
 
 ## Voice & copy
 
-Short, friendly and practical, with no exclamation marks except in the empty state. The same keys exist in both languages.
+Short, friendly and practical, with no exclamation marks except in the empty state. The same keys exist in all six languages. The table gives EN and NL; FR, DE, IT and ES are in `src/shared/locales/`. Tab labels must fit a Pixel 7 without being cut off, and starter Item names must not break inside a word on a tile (`e2e/languages.spec.ts`).
 
 | Key | EN | NL |
 |---|---|---|
@@ -223,7 +228,7 @@ Short, friendly and practical, with no exclamation marks except in the empty sta
 | Tabs (full names, screen readers) and page titles | History / Round / Show / Settings | Geschiedenis / Rondje / Toon / Instellingen |
 | Settings page sections | Items / General | Items / Algemeen |
 | New | New | Nieuw |
-| Drinks / Snacks | Drinks / Snacks | Dranken / Snacks |
+| Starter groups | Soda / Beer / Hot / Wine / Strong / Snacks (and Other drinks) | Frisdrank / Bier / Warm / Wijn / Sterk / Snacks (and Andere dranken) |
 | Item deleted toast | {name} deleted · Undo | {name} verwijderd · Ongedaan maken |
 | Delete button (screen readers) | Delete {name} | {name} verwijderen |
 | Add to Home Screen (button, guide title) | Add to Home Screen | Zet op beginscherm |

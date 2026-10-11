@@ -32,6 +32,47 @@ test('switching to Dutch changes the app text and the starter Items at once, and
   await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible()
 })
 
+test('French, German, Italian and Spanish name the app, the starter groups and the starter Items', async ({ page }) => {
+  const languages = [
+    { name: 'Français', round: 'Tournée', heading: 'Réglages', language: 'Langue', soda: 'Sodas', water: 'Eau plate' },
+    { name: 'Deutsch', round: 'Runde', heading: 'Einstellungen', language: 'Sprache', soda: 'Softdrinks', water: 'Stilles Wasser' },
+    { name: 'Italiano', round: 'Giro', heading: 'Impostazioni', language: 'Lingua', soda: 'Bibite', water: 'Acqua naturale' },
+    { name: 'Español', round: 'Ronda', heading: 'Ajustes', language: 'Idioma', soda: 'Refrescos', water: 'Agua sin gas' },
+  ]
+  let current = 'Language'
+  await openSettings(page)
+  for (const l of languages) {
+    await setting(page, current, l.name).check()
+    await expect(page.getByRole('heading', { name: l.heading, level: 2 }).or(page.getByRole('heading', { name: l.heading, level: 1 })).first()).toBeVisible()
+    await expect(page.getByRole('navigation').getByRole('button', { name: l.round })).toBeVisible()
+    await expect(page.getByRole('region', { name: l.soda }).getByText(l.water, { exact: true }).first()).toBeAttached()
+    current = l.language
+  }
+  // The choice sticks.
+  await page.reload()
+  await expect(page.getByRole('region', { name: 'Refrescos' }).getByRole('button', { name: 'Agua sin gas', exact: true })).toBeVisible()
+})
+
+test.describe('on a German phone', () => {
+  test.use({ locale: 'de-DE' })
+
+  test('System speaks German', async ({ page }) => {
+    await expect(page.getByRole('navigation').getByRole('button', { name: 'Runde' })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Bier' }).getByRole('button', { name: 'Pils', exact: true })).toBeVisible()
+    await page.getByRole('navigation').getByRole('button', { name: 'Einstellungen' }).tap()
+    await expect(setting(page, 'Sprache', 'System')).toBeChecked()
+  })
+})
+
+test.describe('on a Polish phone', () => {
+  test.use({ locale: 'pl-PL' })
+
+  test('System falls back to English', async ({ page }) => {
+    await expect(page.getByRole('navigation').getByRole('button', { name: 'Round' })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Soda' }).getByRole('button', { name: 'Still water', exact: true })).toBeVisible()
+  })
+})
+
 test('starter Items follow the language on the Round page; an added or renamed Item stays as typed', async ({ page }) => {
   await openSettings(page)
   const items = page.getByRole('region', { name: 'Items' })
@@ -45,9 +86,9 @@ test('starter Items follow the language on the Round page; an added or renamed I
 
   await setting(page, 'Language', 'Nederlands').check()
   await page.getByRole('navigation').getByRole('button', { name: 'Rondje' }).tap()
-  const drinks = page.getByRole('region', { name: 'Dranken' })
+  const drinks = page.getByRole('region', { name: 'Frisdrank' })
   await expect(drinks.getByRole('button', { name: 'Water plat', exact: true })).toBeVisible()
-  await expect(drinks.getByRole('button', { name: 'Pils', exact: true })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Bier' }).getByRole('button', { name: 'Pils', exact: true })).toBeVisible()
   await expect(drinks.getByRole('button', { name: 'Coke Zero', exact: true })).toBeVisible()
   await expect(drinks.getByRole('button', { name: 'Kriek', exact: true })).toBeVisible()
 })

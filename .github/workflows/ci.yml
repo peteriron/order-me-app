@@ -27,6 +27,9 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npx playwright install --with-deps chromium
+      # Roboto, as on an Android phone: e2e/languages.spec.ts checks that labels and names fit in the app's own font
+      # stack, and the runner's fallback font is much wider than any phone's.
+      - run: sudo apt-get install -y --no-install-recommends fonts-roboto
       - run: npm run test:e2e
 
   deploy:

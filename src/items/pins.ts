@@ -1,7 +1,7 @@
 import type { Catalog, Item, ItemDraft } from './catalog.ts'
 
 /**
- * Pinned Items: Item ids in the Operator's order. One list covers both sections; a section's pin order is this list
+ * Pinned Items: Item ids in the Operator's order. One list covers every group; a group's pin order is this list
  * filtered to its Items. Pins are the Operator's own and never part of a Shared Catalog.
  */
 export type Pins = string[]
@@ -18,11 +18,11 @@ export function pinnedFirst(items: Item[], pins: Pins): Item[] {
   return [...pinned, ...items.filter((i) => !rank.has(i.id))]
 }
 
-/** Moves a pinned Item to position `to` among its own section's pinned Items. The other section's pins stay put. */
+/** Moves a pinned Item to position `to` among its own group's pinned Items. Other groups' pins stay put. */
 export function movePin(pins: Pins, catalog: Catalog, itemId: string, to: number): Pins {
   if (!pins.includes(itemId)) return pins
-  const category = new Map(catalog.map((i) => [i.id, i.category]))
-  const inSection = (id: string) => category.get(id) === category.get(itemId)
+  const group = new Map(catalog.map((i) => [i.id, i.group]))
+  const inSection = (id: string) => group.get(id) === group.get(itemId)
 
   const section = pins.filter((id) => inSection(id) && id !== itemId)
   section.splice(Math.min(Math.max(to, 0), section.length), 0, itemId)
@@ -31,9 +31,9 @@ export function movePin(pins: Pins, catalog: Catalog, itemId: string, to: number
   return pins.map((id) => (inSection(id) ? section[next++]! : id))
 }
 
-/** After an edit: a pinned Item that changed category stays pinned, last among the other section's pins. */
+/** After an edit: a pinned Item that moved to another group stays pinned, last among that group's pins. */
 export function pinsAfterEdit(pins: Pins, catalog: Catalog, itemId: string, draft: ItemDraft): Pins {
   const before = catalog.find((i) => i.id === itemId)
-  if (!pins.includes(itemId) || before?.category === draft.category) return pins
+  if (!pins.includes(itemId) || before?.group === draft.group) return pins
   return [...pins.filter((id) => id !== itemId), itemId]
 }
